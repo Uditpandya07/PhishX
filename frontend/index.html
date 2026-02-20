@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PhishX</title>
+</head>
+<body>
+    <h1>PhishX - URL Scanner</h1>
+
+    <input type="text" id="urlInput" placeholder="Enter URL here" size="50">
+    <button onclick="scanURL()">Scan</button>
+
+    <h3 id="result"></h3>
+
+    <script>
+        async function scanURL() {
+            const url = document.getElementById("urlInput").value;
+
+            const response = await fetch("http://127.0.0.1:8000/predict", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ url: url })
+            });
+
+            const data = await response.json();
+
+            document.getElementById("result").innerText =
+                "Prediction: " + data.prediction +
+                " | Risk Score: " + data.risk_score + "%";
+        }
+    </script>
+</body>
+</html>

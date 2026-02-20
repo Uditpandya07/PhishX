@@ -1,16 +1,24 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import joblib
 import sys
 import os
 
-# Allow importing feature extractor
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from backend.feature_extractor import extract_features
 
 app = FastAPI()
 
-# Load trained model
+# 🔥 CORS MUST COME AFTER app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 model_path = os.path.join(os.path.dirname(__file__), '..', 'model', 'phishing_model.pkl')
 model = joblib.load(model_path)
 
