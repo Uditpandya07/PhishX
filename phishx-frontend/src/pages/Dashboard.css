@@ -1,114 +1,73 @@
-.dashboard-root {
-  position: relative;
-  height: 100vh;
-  width: 100%;
-  overflow: hidden;
-}
-
-/* Layout */
 .dashboard-layout {
-  position: relative;
-  z-index: 10;
   display: flex;
-  height: 100%;
-  width: 100%;
+  min-height: 100vh;
 }
 
-/* Sidebar */
+/* SIDEBAR */
 .sidebar {
-  width: 240px;
-  backdrop-filter: blur(20px);
-  background: rgba(15, 23, 42, 0.6);
-  border-right: 1px solid rgba(108, 77, 255, 0.2);
+  width: 220px;
   padding: 30px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 50px;
-  color: white;
-}
-
-/* Logo */
-.logo {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  background: rgba(10, 15, 35, 0.75);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .logo img {
-  width: 120px;
-  height: auto;
-  object-fit: contain;
-  filter: drop-shadow(0 0 15px rgba(108, 77, 255, 0.4));
-  transition: 0.3s ease;
+  width: 140px;
+  margin-bottom: 40px;
 }
 
-.logo img:hover {
-  filter: drop-shadow(0 0 25px rgba(108, 77, 255, 0.8));
-}
-
-/* Navigation */
 .nav {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 20px;
 }
 
 .nav-item {
-  padding: 12px 16px;
+  padding: 12px 15px;
   border-radius: 10px;
   cursor: pointer;
+  color: #cbd5e1;
   transition: 0.3s ease;
 }
 
 .nav-item:hover {
-  background: rgba(108, 77, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .nav-item.active {
-  background: rgba(108, 77, 255, 0.35);
+  background: linear-gradient(90deg, #6a5af9, #4d8dff);
+  color: white;
 }
 
-/* Main Area */
+/* MAIN AREA */
 .main-area {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 30px 40px;
-  gap: 30px;
+  padding: 40px;
 }
 
-/* Top Stats */
+/* TOP STATS */
 .topbar {
   display: flex;
-  gap: 20px;
+  gap: 30px;
+  margin-bottom: 40px;
 }
 
 .stat-card {
-  flex: 1;
-  padding: 20px;
-  border-radius: 16px;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(108, 77, 255, 0.2);
-  color: white;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  padding: 25px 35px;
+  border-radius: 18px;
+  background: rgba(15, 20, 40, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  min-width: 180px;
 }
 
 .stat-card span {
-  font-size: 13px;
-  opacity: 0.7;
+  color: #94a3b8;
+  font-size: 14px;
 }
 
 .stat-card strong {
-  font-size: 20px;
-}
-
-/* Main Content Area */
-.content {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
+  margin-top: 10px;
+  font-size: 28px;
+  color: white;
 }

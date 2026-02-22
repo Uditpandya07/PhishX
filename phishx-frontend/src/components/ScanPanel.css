@@ -1,86 +1,84 @@
 .scan-card {
-  width: 620px;
-  padding: 45px;
-  border-radius: 24px;
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(25px);
-  border: 1px solid rgba(108, 77, 255, 0.25);
-  box-shadow: 
-    0 0 60px rgba(108, 77, 255, 0.15),
-    inset 0 0 40px rgba(108, 77, 255, 0.05);
-  color: white;
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
+  background: rgba(15, 20, 40, 0.75);
+  padding: 40px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  width: 600px;
 }
 
 .scan-card h2 {
-  font-size: 24px;
-  font-weight: 600;
-  letter-spacing: 1px;
+  margin-bottom: 20px;
+  font-size: 26px;
+  color: #ffffff;
 }
 
 .scan-card input {
-  padding: 16px 20px;
-  border-radius: 14px;
-  border: 1px solid rgba(108, 77, 255, 0.3);
-  background: rgba(0, 0, 0, 0.6);
+  width: 70%;
+  padding: 12px 15px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
   color: white;
-  font-size: 15px;
+  margin-right: 10px;
   outline: none;
-  transition: 0.3s ease;
-}
-
-.scan-card input:focus {
-  border: 1px solid #6C4DFF;
-  box-shadow: 0 0 18px rgba(108, 77, 255, 0.35);
 }
 
 .scan-card button {
-  padding: 16px;
-  border-radius: 14px;
+  padding: 12px 22px;
+  border-radius: 10px;
   border: none;
-  font-size: 16px;
-  font-weight: 600;
+  background: linear-gradient(90deg, #6a5af9, #4d8dff);
   color: white;
   cursor: pointer;
-  background: linear-gradient(90deg, #6C4DFF, #4F9DFF);
-  box-shadow: 0 0 25px rgba(108, 77, 255, 0.5);
   transition: 0.3s ease;
 }
 
 .scan-card button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0 28px rgba(108, 77, 255, 0.6);
-}
-
-.scan-card button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  opacity: 0.9;
 }
 
 .result {
-  padding: 20px;
+  margin-top: 25px;
+  padding: 18px 22px;
   border-radius: 14px;
-  font-weight: 500;
-  text-align: center;
-  backdrop-filter: blur(10px);
-  animation: fadeIn 0.3s ease;
+  background: rgba(15, 20, 40, 0.65);
 }
 
 .result.safe {
-  background: rgba(0, 200, 120, 0.1);
-  border: 1px solid rgba(0, 255, 150, 0.4);
-  color: #00ff9d;
+  border: 1px solid #22c55e;
 }
 
 .result.danger {
-  background: rgba(255, 0, 60, 0.1);
-  border: 1px solid rgba(255, 0, 60, 0.5);
-  color: #ff4d6d;
+  border: 1px solid #ef4444;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
+.result h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.result p {
+  margin-bottom: 12px;
+  color: #cbd5e1;
+}
+
+.risk-bar {
+  height: 10px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.risk-fill {
+  height: 100%;
+  transition: width 0.8s ease;
+}
+
+.safe-fill {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+
+.danger-fill {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
 }

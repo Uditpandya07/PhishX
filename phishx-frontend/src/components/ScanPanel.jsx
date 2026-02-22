@@ -24,6 +24,9 @@ export default function ScanPanel() {
     }
   };
 
+  const risk = result ? Math.round(result.risk_score) : 0;
+  const isDanger = risk > 50;
+
   return (
     <motion.div
       className="scan-card"
@@ -46,14 +49,22 @@ export default function ScanPanel() {
 
       {result && (
         <motion.div
-          className={`result ${result.prediction === "Phishing" ? "danger" : "safe"}`}
+          className={`result ${isDanger ? "danger" : "safe"}`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
           <h3>
-            {result.prediction === "Phishing" ? "🚨 Phishing Detected" : "✅ Safe URL"}
+            {isDanger ? "🚨 High Risk URL" : "✅ Safe URL"}
           </h3>
-          <p>Risk Score: {result.risk_score}%</p>
+
+          <p>Risk Score: {risk}%</p>
+
+          <div className="risk-bar">
+            <div
+              className={`risk-fill ${isDanger ? "danger-fill" : "safe-fill"}`}
+              style={{ width: `${risk}%` }}
+            ></div>
+          </div>
         </motion.div>
       )}
     </motion.div>
