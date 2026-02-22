@@ -1,34 +1,165 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>PhishX</title>
+    <link rel="icon" type="image/png" href="../PhishX.png">
+
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-dark: rgba(255, 255, 255, 0.05);
+            --text-dark: #ffffff;
+            --accent: #22c55e;
+            --danger: #ef4444;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            transition: 0.3s;
+        }
+
+        .card {
+            backdrop-filter: blur(12px);
+            background: var(--card-dark);
+            padding: 40px;
+            border-radius: 20px;
+            width: 420px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(0,0,0,0.4);
+            transition: 0.3s;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            background: var(--accent);
+            color: #000;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--accent);
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        .bar-container {
+            width: 100%;
+            background: #334155;
+            border-radius: 10px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .bar {
+            height: 10px;
+            width: 0%;
+            background: var(--accent);
+            transition: width 0.5s ease;
+        }
+
+        .toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .light-mode {
+            background: #f1f5f9;
+            color: #000;
+        }
+
+        .light-mode .card {
+            background: rgba(0,0,0,0.05);
+        }
+
+    </style>
 </head>
 <body>
-    <h1>PhishX - URL Scanner</h1>
 
-    <input type="text" id="urlInput" placeholder="Enter URL here" size="50">
-    <button onclick="scanURL()">Scan</button>
+<div class="toggle" onclick="toggleMode()">🌙 Toggle Mode</div>
 
-    <h3 id="result"></h3>
+<div class="card">
+    <h1>PhishX</h1>
 
-    <script>
-        async function scanURL() {
-            const url = document.getElementById("urlInput").value;
+    <input type="text" id="urlInput" placeholder="Enter URL to scan">
 
-            const response = await fetch("http://127.0.0.1:8000/predict", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ url: url })
-            });
+    <button onclick="scanURL()">Scan URL</button>
 
-            const data = await response.json();
+    <div class="result" id="result"></div>
 
-            document.getElementById("result").innerText =
-                "Prediction: " + data.prediction +
-                " | Risk Score: " + data.risk_score + "%";
-        }
-    </script>
+    <div class="bar-container">
+        <div class="bar" id="riskBar"></div>
+    </div>
+</div>
+
+<script>
+async function scanURL() {
+    const url = document.getElementById("urlInput").value;
+
+    const response = await fetch("http://127.0.0.1:8000/predict", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ url: url })
+    });
+
+    const data = await response.json();
+
+    const resultText = document.getElementById("result");
+    const bar = document.getElementById("riskBar");
+
+    resultText.innerHTML =
+        `<strong>${data.prediction}</strong> | Risk Score: ${data.risk_score}%`;
+
+    bar.style.width = data.risk_score + "%";
+
+    if (data.prediction === "Phishing") {
+        bar.style.background = "#ef4444";
+    } else {
+        bar.style.background = "#22c55e";
+    }
+}
+
+function toggleMode() {
+    document.body.classList.toggle("light-mode");
+}
+</script>
+
 </body>
 </html>

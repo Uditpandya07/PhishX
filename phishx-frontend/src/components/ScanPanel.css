@@ -1,0 +1,86 @@
+.scan-card {
+  width: 620px;
+  padding: 45px;
+  border-radius: 24px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(108, 77, 255, 0.25);
+  box-shadow: 
+    0 0 60px rgba(108, 77, 255, 0.15),
+    inset 0 0 40px rgba(108, 77, 255, 0.05);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.scan-card h2 {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.scan-card input {
+  padding: 16px 20px;
+  border-radius: 14px;
+  border: 1px solid rgba(108, 77, 255, 0.3);
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  font-size: 15px;
+  outline: none;
+  transition: 0.3s ease;
+}
+
+.scan-card input:focus {
+  border: 1px solid #6C4DFF;
+  box-shadow: 0 0 18px rgba(108, 77, 255, 0.35);
+}
+
+.scan-card button {
+  padding: 16px;
+  border-radius: 14px;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  background: linear-gradient(90deg, #6C4DFF, #4F9DFF);
+  box-shadow: 0 0 25px rgba(108, 77, 255, 0.5);
+  transition: 0.3s ease;
+}
+
+.scan-card button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 28px rgba(108, 77, 255, 0.6);
+}
+
+.scan-card button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.result {
+  padding: 20px;
+  border-radius: 14px;
+  font-weight: 500;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.3s ease;
+}
+
+.result.safe {
+  background: rgba(0, 200, 120, 0.1);
+  border: 1px solid rgba(0, 255, 150, 0.4);
+  color: #00ff9d;
+}
+
+.result.danger {
+  background: rgba(255, 0, 60, 0.1);
+  border: 1px solid rgba(255, 0, 60, 0.5);
+  color: #ff4d6d;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
