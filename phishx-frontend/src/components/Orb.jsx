@@ -27,38 +27,11 @@ export default function Orb({
 
     uniform float iTime;
     uniform vec3 iResolution;
-    uniform float hue;
     uniform float hover;
     uniform float rot;
     uniform float hoverIntensity;
     uniform vec3 backgroundColor;
     varying vec2 vUv;
-
-    vec3 rgb2yiq(vec3 c) {
-      float y = dot(c, vec3(0.299, 0.587, 0.114));
-      float i = dot(c, vec3(0.596, -0.274, -0.322));
-      float q = dot(c, vec3(0.211, -0.523, 0.312));
-      return vec3(y, i, q);
-    }
-    
-    vec3 yiq2rgb(vec3 c) {
-      float r = c.x + 0.956 * c.y + 0.621 * c.z;
-      float g = c.x - 0.272 * c.y - 0.647 * c.z;
-      float b = c.x - 1.106 * c.y + 1.703 * c.z;
-      return vec3(r, g, b);
-    }
-    
-    vec3 adjustHue(vec3 color, float hueDeg) {
-      float hueRad = hueDeg * 3.14159265 / 180.0;
-      vec3 yiq = rgb2yiq(color);
-      float cosA = cos(hueRad);
-      float sinA = sin(hueRad);
-      float i = yiq.y * cosA - yiq.z * sinA;
-      float q = yiq.y * sinA + yiq.z * cosA;
-      yiq.y = i;
-      yiq.z = q;
-      return yiq2rgb(yiq);
-    }
 
     vec3 hash33(vec3 p3) {
       p3 = fract(p3 * vec3(0.1031, 0.11369, 0.13787));
@@ -101,9 +74,6 @@ export default function Orb({
       return vec4(colorIn.rgb / (a + 1e-5), a);
     }
 
-    const vec3 baseColor1 = vec3(0.611765, 0.262745, 0.996078);
-    const vec3 baseColor2 = vec3(0.298039, 0.760784, 0.913725);
-    const vec3 baseColor3 = vec3(0.062745, 0.078431, 0.600000);
     const float innerRadius = 0.6;
     const float noiseScale = 0.65;
 
@@ -115,9 +85,9 @@ export default function Orb({
     }
 
     vec4 draw(vec2 uv) {
-      vec3 color1 = adjustHue(baseColor1, hue);
-      vec3 color2 = adjustHue(baseColor2, hue);
-      vec3 color3 = adjustHue(baseColor3, hue);
+      vec3 color1 = vec3(0.36, 1.00, 0.13); 
+      vec3 color2 = vec3(0.13, 0.46, 1.00); 
+      vec3 color3 = vec3(0.02, 0.05, 0.15); 
       
       float ang = atan(uv.y, uv.x);
       float len = length(uv);
@@ -133,7 +103,9 @@ export default function Orb({
       v0 *= smoothstep(r0 * 1.05, r0, len);
       float innerFade = smoothstep(r0 * 0.8, r0 * 0.95, len);
       v0 *= mix(innerFade, 1.0, bgLuminance * 0.7);
-      float cl = cos(ang + iTime * 2.0) * 0.5 + 0.5;
+      
+      // FIXED: Swirl speed significantly slowed down to 0.5 instead of 2.0
+      float cl = cos(ang + iTime * 0.5) * 0.5 + 0.5;
       
       float a = iTime * -1.0;
       vec2 pos = vec2(cos(a), sin(a)) * r0;
@@ -146,13 +118,26 @@ export default function Orb({
       
       vec3 colBase = mix(color1, color2, cl);
       float fadeAmount = mix(1.0, 0.1, bgLuminance);
+
+      // 2. RINGS: 
+      // Fluid noise making the rings wobble organically
+      float fluidLen = len - (n0 * 0.08); 
+      
+      // Logic remains perfectly still until hovered
+      float phase = fluidLen * 35.0 - (rot * 12.0);
+      float rings = smoothstep(0.92, 1.0, sin(phase));
+      
+      rings *= smoothstep(0.7, 0.85, len); 
+      vec3 ringColor = colBase;
       
       vec3 darkCol = mix(color3, colBase, v0);
       darkCol = (darkCol + v1) * v2 * v3;
+      darkCol += ringColor * rings * 0.8; 
       darkCol = clamp(darkCol, 0.0, 1.0);
       
       vec3 lightCol = (colBase + v1) * mix(1.0, v2 * v3, fadeAmount);
       lightCol = mix(backgroundColor, lightCol, v0);
+      lightCol += ringColor * rings * 0.8; 
       lightCol = clamp(lightCol, 0.0, 1.0);
       
       vec3 finalCol = mix(darkCol, lightCol, bgLuminance);
