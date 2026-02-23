@@ -1,0 +1,68 @@
+.electric-border {
+  /* This variable now targets the brand blue for the static border */
+  --brand-blue: #3b82f6; 
+  --electric-light-color: oklch(from var(--brand-blue) l c h);
+  position: relative;
+  border-radius: inherit;
+  overflow: visible;
+  isolation: isolate;
+}
+
+.eb-canvas-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 2; /* Electric line stays on top */
+}
+
+.eb-canvas {
+  display: block;
+}
+
+.eb-content {
+  position: relative;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+.eb-layers {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Static Inner Borders changed to Blue */
+.eb-glow-1 {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  /* Fixed blue border with slight transparency */
+  border: 2px solid rgba(59, 130, 246, 0.5); 
+  filter: blur(1px);
+  z-index: -1;
+}
+
+.eb-glow-2 {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  /* Thicker blue glow layer */
+  border: 2px solid var(--brand-blue);
+  filter: blur(4px);
+  z-index: -1;
+}
+
+/* Background glow remains a blue/green blend for depth */
+.eb-background-glow {
+  position: absolute;
+  inset: -30px;
+  z-index: -2;
+  transform: scale(1.1);
+  filter: blur(32px);
+  opacity: 0.2;
+  background: linear-gradient(-30deg, var(--brand-blue), transparent, #4ade80);
+}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
+import ElectricBorder from "./ElectricBorder";
 import "./ScanPanel.css";
 
 export default function ScanPanel() {
@@ -10,7 +11,6 @@ export default function ScanPanel() {
 
   const scan = async () => {
     if (!url.trim()) return;
-
     setLoading(true);
     setResult(null);
 
@@ -28,45 +28,46 @@ export default function ScanPanel() {
   const isDanger = risk > 50;
 
   return (
-    <motion.div
-      className="scan-card"
-      initial={{ scale: 0.9, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <h2>Scan URL</h2>
+    <div className="scan-section-container">
+      {/* Increased chaos and changed color to match logo Green (#4ade80) */}
+      <ElectricBorder color="#4ade80" speed={2} chaos={0.25} borderRadius={24}>
+        <div className="scan-card large">
+          <h2>Scan URL</h2>
 
-      <input
-        type="text"
-        placeholder="https://example.com"
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-      />
+          <div className="input-group">
+            <input
+              className="large-input"
+              type="text"
+              placeholder="https://example.com"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+            />
 
-      <button onClick={scan} disabled={loading}>
-        {loading ? "Scanning..." : "Scan Now"}
-      </button>
-
-      {result && (
-        <motion.div
-          className={`result ${isDanger ? "danger" : "safe"}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
-          <h3>
-            {isDanger ? "🚨 High Risk URL" : "✅ Safe URL"}
-          </h3>
-
-          <p>Risk Score: {risk}%</p>
-
-          <div className="risk-bar">
-            <div
-              className={`risk-fill ${isDanger ? "danger-fill" : "safe-fill"}`}
-              style={{ width: `${risk}%` }}
-            ></div>
+            <button className="large-button" onClick={scan} disabled={loading}>
+              {loading ? "Scanning..." : "Scan Now"}
+            </button>
           </div>
-        </motion.div>
-      )}
-    </motion.div>
+
+          {result && (
+            <motion.div
+              className={`result ${isDanger ? "danger" : "safe"}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <h3 className="result-title">
+                {isDanger ? "🚨 High Risk URL" : "✅ Safe URL"}
+              </h3>
+              <p className="result-text">Risk Score: {risk}%</p>
+              <div className="risk-bar">
+                <div
+                  className={`risk-fill ${isDanger ? "danger-fill" : "safe-fill"}`}
+                  style={{ width: `${risk}%` }}
+                ></div>
+              </div>
+            </motion.div>
+          )}
+        </div>
+      </ElectricBorder>
+    </div>
   );
 }
