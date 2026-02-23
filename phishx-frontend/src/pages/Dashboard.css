@@ -46,9 +46,22 @@
   width: 100%;
 }
 
-.nav-brand img {
-  height: 50px;
-  object-fit: contain;
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Space between the logo and the text */
+}
+
+.brand-icon {
+  height: 45px; 
+  width: auto;
+  display: block;
+}
+
+.brand-text-img {
+  height: 35px; /* Adjust this value if the text looks too big or too small next to the icon */
+  width: auto;
+  display: block;
 }
 
 .nav-menu {
@@ -259,6 +272,10 @@
 .border-safe { border-bottom: 4px solid #4ade80; }
 .text-danger { color: #ef4444; }
 .text-safe { color: #4ade80; }
+
+.border-primary { 
+  border-bottom: 4px solid #3b82f6; 
+}
 
 .scan-wrapper {
   display: flex;

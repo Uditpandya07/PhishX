@@ -11,7 +11,8 @@ export default function Dashboard() {
       {/* Navigation with Auth */}
       <nav className="navbar">
         <div className="nav-brand">
-          <img src="/logo.png" alt="PhishX Logo" />
+          <img src="/logo-icon.png" alt="PhishX Icon" className="brand-icon" /> 
+          <img src="/brand-text.png" alt="PhishX" className="brand-text-img" />
         </div>
         <div className="nav-menu">
           <div className="nav-links">
@@ -56,7 +57,8 @@ export default function Dashboard() {
           <h2 className="section-title">Threat Detection Center</h2>
           
           <header className="topbar">
-            <div className="stat-card glass-panel">
+            {/* Added border-primary here */}
+            <div className="stat-card glass-panel border-primary">
               <span>Total Scans</span>
               <strong>124</strong>
             </div>
