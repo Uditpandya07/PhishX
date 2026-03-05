@@ -1,9 +1,28 @@
+import { useState } from "react";
 import { FaGithub, FaTwitter, FaLinkedin } from "react-icons/fa";
 import Background from "../components/Background";
 import ScanPanel from "../components/ScanPanel";
+import AuthModal from "../components/AuthModal.jsx"; // .jsx added to prevent Vite errors
 import "./Dashboard.css";
 
 export default function Dashboard() {
+  // --- NEW AUTHENTICATION STATE ---
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState("login");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const openModal = (mode, e) => {
+    if (e) e.preventDefault();
+    setAuthMode(mode);
+    setIsModalOpen(true);
+  };
+
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
+    setIsModalOpen(false);
+  };
+  // --------------------------------
+
   return (
     <div className="dashboard-root">
       <Background />
@@ -22,8 +41,15 @@ export default function Dashboard() {
             <a href="#history">History</a>
           </div>
           <div className="auth-links">
-            <a href="#login" className="login-btn">Log In</a>
-            <a href="#signup" className="nav-btn">Sign Up</a>
+            {/* --- UPDATED LOGIN/LOGOUT LOGIC --- */}
+            {isLoggedIn ? (
+              <button className="nav-btn" onClick={() => setIsLoggedIn(false)}>Log Out</button>
+            ) : (
+              <>
+                <a href="#login" className="login-btn" onClick={(e) => openModal("login", e)}>Log In</a>
+                <a href="#signup" className="nav-btn" onClick={(e) => openModal("signup", e)}>Sign Up</a>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -57,7 +83,6 @@ export default function Dashboard() {
           <h2 className="section-title">Threat Detection Center</h2>
           
           <header className="topbar">
-            {/* Added border-primary here */}
             <div className="stat-card glass-panel border-primary">
               <span>Total Scans</span>
               <strong>124</strong>
@@ -73,11 +98,12 @@ export default function Dashboard() {
           </header>
 
           <div className="scan-wrapper">
-             <ScanPanel />
+             {/* --- UPDATED TO PASS AUTH STATE --- */}
+             <ScanPanel isLoggedIn={isLoggedIn} onAuthRequired={() => openModal("login")} />
           </div>
         </section>
 
-        {/* NEW: RECENT HISTORY MOCKUP */}
+        {/* RECENT HISTORY MOCKUP */}
         <section id="history" className="history-section glass-panel">
           <div className="history-header">
             <h3>Recent Scans</h3>
@@ -149,7 +175,6 @@ export default function Dashboard() {
         </section>
         
         {/* FOOTER */}
-        {/* ENHANCED FOOTER */}
         <footer className="footer">
           <div className="footer-box">
             <div className="footer-top">
@@ -195,6 +220,14 @@ export default function Dashboard() {
           </div>
         </footer>
       </div>
+
+      {/* --- NEW MODAL INJECTION --- */}
+      <AuthModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        initialMode={authMode}
+        onLoginSuccess={handleLoginSuccess}
+      />
     </div>
   );
 }
