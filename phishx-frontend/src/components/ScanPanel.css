@@ -1,125 +1,189 @@
-.scan-card {
-  padding: 80px 100px; /* Increased internal padding */
-  width: 100%;
-  max-width: 1100px;   /* Much larger box width */
-  margin: 0 auto;
-  box-sizing: border-box;
-  position: relative;
-  z-index: 1;
-  background: rgba(15, 20, 40, 0.4); /* Subtle transparent background to let BG show */
-  border-radius: 24px;
+.scan-section-container {
+display: flex;
+justify-content: center;
+align-items: center;
+padding: 40px 20px;
 }
+
+/* Main Card */
+
+.scan-card {
+padding: 60px 120px;
+width: 100%;
+max-width: 1100px;
+margin: 0 auto;
+box-sizing: border-box;
+position: relative;
+z-index: 1;
+background: rgba(15, 20, 40, 0.45);
+border-radius: 24px;
+
+display: flex;
+flex-direction: column;
+align-items: center;
+}
+
+/* Title */
 
 .scan-card h2 {
-  margin-top: 0;
-  margin-bottom: 50px;
-  font-size: 52px;    /* Much larger heading */
-  font-weight: 800;
-  text-align: center;
-  background: linear-gradient(90deg, #3b82f6, #4ade80);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+margin-top: 0;
+margin-bottom: 60px;
+font-size: 56px;
+font-weight: 800;
+text-align: center;
+
+background: linear-gradient(90deg,#3b82f6,#4ade80);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
 }
+
+/* Input container */
 
 .input-group {
-  display: flex;
-  gap: 25px;         /* Larger gap */
-  justify-content: center;
-  width: 100%;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 30px;
+width: 100%;
 }
 
-.scan-card input {
-  flex: 1;
-  padding: 25px 35px; /* Thicker input field */
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
-  color: white;
-  font-size: 1.5rem;  /* Larger input text */
-  outline: none;
-  transition: 0.3s;
+/* URL Input */
+
+.large-input {
+width: 700px;
+max-width: 90%;
+padding: 22px 30px;
+
+border-radius: 14px;
+border: 1px solid rgba(255,255,255,0.15);
+
+background: rgba(0,0,0,0.35);
+color: white;
+
+font-size: 1.4rem;
+text-align: center;
+
+outline: none;
+transition: all 0.25s ease;
 }
 
-.scan-card input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+.large-input::placeholder {
+color: rgba(255,255,255,0.35);
 }
 
-.scan-card button {
-  padding: 0 60px;    /* Wider button */
-  border-radius: 16px;
-  border: none;
-  background: linear-gradient(90deg, #3b82f6, #4ade80);
-  color: #0f172a;
-  font-size: 1.5rem;  /* Larger button text */
-  font-weight: 800;
-  cursor: pointer;
-  transition: transform 0.3s, box-shadow 0.3s;
-  white-space: nowrap;
+.large-input:focus {
+border-color: #4ade80;
+box-shadow: 0 0 15px rgba(74,222,128,0.3);
 }
 
-.scan-card button:hover:not(:disabled) {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 10px 25px rgba(74, 222, 128, 0.4);
+/* Scan Button */
+
+.large-button {
+width: 350px;
+max-width: 80%;
+
+padding: 20px;
+
+border-radius: 18px;
+border: none;
+
+background: linear-gradient(90deg,#3b82f6,#4ade80);
+color: #0f172a;
+
+font-size: 1.4rem;
+font-weight: 800;
+
+cursor: pointer;
+
+transition: transform .25s, box-shadow .25s;
 }
 
-.scan-card button:disabled {
-  background: #475569;
-  cursor: not-allowed;
-  opacity: 0.7;
+.large-button:hover:not(:disabled) {
+transform: translateY(-2px);
+box-shadow: 0 12px 28px rgba(74,222,128,.35);
 }
 
-/* RESULTS SECTION (SCALED UP) */
+.large-button:disabled {
+background: #475569;
+cursor: not-allowed;
+opacity: 0.7;
+}
+
+/* Result Box */
+
 .result {
-  margin-top: 60px;
-  padding: 40px;
-  border-radius: 20px;
-  background: rgba(0, 0, 0, 0.5);
-  text-align: center;
+margin-top: 60px;
+padding: 35px;
+border-radius: 18px;
+background: rgba(0,0,0,0.5);
+text-align: center;
+width: 700px;
+max-width: 90%;
 }
 
 .result.safe {
-  border: 1px solid rgba(74, 222, 128, 0.4);
-  box-shadow: 0 0 30px rgba(74, 222, 128, 0.1);
+border: 1px solid rgba(74,222,128,0.4);
+box-shadow: 0 0 30px rgba(74,222,128,0.1);
 }
 
 .result.danger {
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  box-shadow: 0 0 30px rgba(239, 68, 68, 0.1);
+border: 1px solid rgba(239,68,68,0.4);
+box-shadow: 0 0 30px rgba(239,68,68,0.1);
 }
 
-.result h3 {
-  font-size: 36px;    /* Larger result title */
-  margin-top: 0;
-  margin-bottom: 20px;
+.result-title {
+font-size: 34px;
+margin-top: 0;
+margin-bottom: 20px;
 }
 
-.result p {
-  margin-bottom: 25px;
-  color: #cbd5e1;
-  font-size: 1.6rem;  /* Larger risk score text */
+.result-text {
+margin-bottom: 25px;
+color: #cbd5e1;
+font-size: 1.3rem;
 }
+
+/* Risk Bar */
 
 .risk-bar {
-  height: 20px;       /* Thicker progress bar */
-  width: 100%;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+height: 16px;
+width: 100%;
+background: rgba(255,255,255,0.05);
+border-radius: 20px;
+overflow: hidden;
 }
 
 .risk-fill {
-  height: 100%;
-  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+height: 100%;
+transition: width 1s cubic-bezier(.4,0,.2,1);
 }
 
 .safe-fill {
-  background: linear-gradient(90deg, #3b82f6, #4ade80);
-  box-shadow: 0 0 15px rgba(74, 222, 128, 0.5);
+background: linear-gradient(90deg,#3b82f6,#4ade80);
 }
 
 .danger-fill {
-  background: linear-gradient(90deg, #ef4444, #dc2626);
-  box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+background: linear-gradient(90deg,#ef4444,#dc2626);
+}
+
+/* Mobile */
+
+@media (max-width:900px) {
+
+.scan-card {
+padding: 50px 30px;
+}
+
+.scan-card h2 {
+font-size: 44px;
+}
+
+.large-input {
+width: 100%;
+}
+
+.large-button {
+width: 100%;
+}
+
 }
