@@ -2,14 +2,19 @@ import { useState } from "react";
 import { FaGithub, FaTwitter, FaLinkedin } from "react-icons/fa";
 import Background from "../components/Background";
 import ScanPanel from "../components/ScanPanel";
-import AuthModal from "../components/AuthModal.jsx"; // .jsx added to prevent Vite errors
+import AuthModal from "../components/AuthModal.jsx";
 import "./Dashboard.css";
 
-export default function Dashboard() {
-  // --- NEW AUTHENTICATION STATE ---
+export default function Dashboard({ onLogout }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState("login");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const [scanHistory, setScanHistory] = useState([
+    { id: 1, url: "secure-login-update.com/auth", date: "Oct 24, 2025", risk: 89, status: "Phishing" },
+    { id: 2, url: "github.com/uditpandya07", date: "Oct 24, 2025", risk: 2, status: "Safe" },
+    { id: 3, url: "netflix-billing-verify.net", date: "Oct 23, 2025", risk: 94, status: "Phishing" },
+  ]);
 
   const openModal = (mode, e) => {
     if (e) e.preventDefault();
@@ -21,7 +26,10 @@ export default function Dashboard() {
     setIsLoggedIn(true);
     setIsModalOpen(false);
   };
-  // --------------------------------
+
+  const handleNewScan = (newScan) => {
+    setScanHistory([newScan, ...scanHistory]);
+  };
 
   return (
     <div className="dashboard-root">
@@ -41,9 +49,17 @@ export default function Dashboard() {
             <a href="#history">History</a>
           </div>
           <div className="auth-links">
-            {/* --- UPDATED LOGIN/LOGOUT LOGIC --- */}
             {isLoggedIn ? (
-              <button className="nav-btn" onClick={() => setIsLoggedIn(false)}>Log Out</button>
+              // 2. LOG OUT BUTTON FIX:
+              <button 
+                className="nav-btn" 
+                onClick={() => {
+                  setIsLoggedIn(false);
+                  if (onLogout) onLogout(); 
+                }}
+              >
+                Log Out
+              </button>
             ) : (
               <>
                 <a href="#login" className="login-btn" onClick={(e) => openModal("login", e)}>Log In</a>
@@ -85,25 +101,34 @@ export default function Dashboard() {
           <header className="topbar">
             <div className="stat-card glass-panel border-primary">
               <span>Total Scans</span>
-              <strong>124</strong>
+              {/* Dynamically show how many items are in the history! */}
+              <strong>{scanHistory.length}</strong>
             </div>
             <div className="stat-card glass-panel border-danger">
               <span>Threats</span>
-              <strong className="text-danger">39</strong>
+              <strong className="text-danger">
+                {scanHistory.filter(scan => scan.status === "Phishing").length}
+              </strong>
             </div>
             <div className="stat-card glass-panel border-safe">
               <span>Safe</span>
-              <strong className="text-safe">85</strong>
+              <strong className="text-safe">
+                {scanHistory.filter(scan => scan.status === "Safe").length}
+              </strong>
             </div>
           </header>
 
           <div className="scan-wrapper">
-             {/* --- UPDATED TO PASS AUTH STATE --- */}
-             <ScanPanel isLoggedIn={isLoggedIn} onAuthRequired={() => openModal("login")} />
+             {/* 3. PASSED THE NEW FUNCTION TO THE SCAN PANEL */}
+             <ScanPanel 
+               isLoggedIn={isLoggedIn} 
+               onAuthRequired={() => openModal("login")} 
+               onScanComplete={handleNewScan} 
+             />
           </div>
         </section>
 
-        {/* RECENT HISTORY MOCKUP */}
+        {/* HISTORY TABLE SECTION */}
         <section id="history" className="history-section glass-panel">
           <div className="history-header">
             <h3>Recent Scans</h3>
@@ -120,30 +145,25 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td className="url-cell">secure-login-update.com/auth</td>
-                  <td>Oct 24, 2025</td>
-                  <td>89%</td>
-                  <td><span className="badge danger">Phishing</span></td>
-                </tr>
-                <tr>
-                  <td className="url-cell">github.com/uditpandya07</td>
-                  <td>Oct 24, 2025</td>
-                  <td>2%</td>
-                  <td><span className="badge safe">Safe</span></td>
-                </tr>
-                <tr>
-                  <td className="url-cell">netflix-billing-verify.net</td>
-                  <td>Oct 23, 2025</td>
-                  <td>94%</td>
-                  <td><span className="badge danger">Phishing</span></td>
-                </tr>
+                {/* 4. MAGIC HAPPENS HERE: We loop through our memory to create the rows */}
+                {scanHistory.map((scan) => (
+                  <tr key={scan.id}>
+                    <td className="url-cell">{scan.url}</td>
+                    <td>{scan.date}</td>
+                    <td>{scan.risk}%</td>
+                    <td>
+                      <span className={`badge ${scan.status === "Safe" ? "safe" : "danger"}`}>
+                        {scan.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
         </section>
 
-        {/* EXPANDED FEATURES SECTION */}
+        {/* FEATURES SECTION (Unchanged) */}
         <section id="features" className="features-section">
           <h2 className="section-title">Everything You Need to Stay Safe</h2>
           <div className="features-grid">
@@ -174,7 +194,7 @@ export default function Dashboard() {
           </div>
         </section>
         
-        {/* FOOTER */}
+        {/* FOOTER (Unchanged) */}
         <footer className="footer">
           <div className="footer-box">
             <div className="footer-top">
@@ -221,7 +241,6 @@ export default function Dashboard() {
         </footer>
       </div>
 
-      {/* --- NEW MODAL INJECTION --- */}
       <AuthModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 

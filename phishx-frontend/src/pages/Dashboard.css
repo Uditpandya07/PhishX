@@ -74,6 +74,7 @@
   display: flex;
   gap: 30px;
   align-items: center;
+  
 }
 
 .nav-links a {
@@ -82,6 +83,7 @@
   font-weight: 500;
   transition: 0.3s;
   font-size: 0.95rem;
+  white-space: nowrap; 
 }
 
 .nav-links a:hover {
