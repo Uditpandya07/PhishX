@@ -23,7 +23,8 @@ export default function App() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
         >
-          <Dashboard />
+          {/* We pass the onLogout function to Dashboard here */}
+          <Dashboard onLogout={() => setEntered(false)} />
         </motion.div>
       )}
     </AnimatePresence>
