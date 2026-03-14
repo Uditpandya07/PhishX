@@ -187,3 +187,54 @@ width: 100%;
 }
 
 }
+/* --- UI Improvements --- */
+
+/* Shake Animation */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+.scan-section-container.shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+/* Clear Icon Placement */
+.input-relative-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.clear-icon-inner {
+  position: absolute;
+  right: 15px;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: color 0.2s;
+  z-index: 10;
+}
+
+.clear-icon-inner:hover {
+  color: #ef4444;
+}
+
+/* Smoother Risk Bar */
+.risk-bar {
+  background: rgba(255, 255, 255, 0.1);
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.risk-fill {
+  height: 100%;
+  border-radius: 6px;
+}
+
+.safe-fill { background: linear-gradient(90deg, #4ade80, #22c55e); }
+.danger-fill { background: linear-gradient(90deg, #f87171, #ef4444); }
