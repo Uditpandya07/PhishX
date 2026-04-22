@@ -1,42 +1,54 @@
 import pandas as pd
 import joblib
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
 import sys
 import os
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
 
-# Allow importing feature_extractor
+# Ensure the backend folder is accessible for feature extraction
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from backend.feature_extractor import extract_features
 
-# Load dataset
-df = pd.read_csv("dataset.csv")
+print("🚀 Booting High-Accuracy PhishX Training...")
 
-# Convert type column to numeric label
-def convert_label(value):
-    if value == "benign":
-        return 0
-    else:  # phishing or defacement
-        return 1
+print("1. Loading dataset...")
+# Load your Kaggle file
+df = pd.read_csv("phishing_site_urls.csv")
+df = df.dropna(subset=['URL', 'Label'])
 
-df["label"] = df["type"].apply(convert_label)
+# Standardize labels: 'bad' -> 1, 'good' -> 0
+df['target'] = df['Label'].apply(lambda x: 1 if str(x).strip().lower() == 'bad' else 0)
 
-X = []
-y = df["label"]
+# --- 🎯 THE BALANCE FIX ---
+# Separate the classes
+df_phish = df[df['target'] == 1].drop_duplicates(subset=['URL'])
+df_safe = df[df['target'] == 0].drop_duplicates(subset=['URL'])
 
-for url in df["url"]:
-    X.append(extract_features(url))
+print(f"   - Unique Malicious URLs found: {len(df_phish)}")
+print(f"   - Unique Safe URLs found: {len(df_safe)}")
 
-# Split data
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
+# We will use ALL malicious URLs and match that number with Safe URLs for a 50/50 split
+sample_size = min(len(df_phish), 50000) # Cap at 50k for speed, or remove cap for max accuracy
+df_phish_final = df_phish.sample(n=sample_size, random_state=42)
+df_safe_final = df_safe.sample(n=sample_size, random_state=42)
 
-# Train model
-model = RandomForestClassifier()
+df_final = pd.concat([df_phish_final, df_safe_final], ignore_index=True)
+print(f"2. Training on {len(df_final)} balanced samples (50% Phishing / 50% Safe)")
+
+print("3. Extracting Features... (This may take a few minutes)")
+X = df_final["URL"].apply(extract_features).tolist()
+y = df_final["target"].tolist()
+
+print("4. Training the Enhanced Random Forest...")
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
+
+# Using more estimators and deeper trees for better detection
+model = RandomForestClassifier(n_estimators=150, max_depth=25, n_jobs=-1, random_state=42)
 model.fit(X_train, y_train)
 
-# Save model
-joblib.dump(model, "phishing_model.pkl")
+# Calculate Accuracy for your peace of mind
+accuracy = model.score(X_test, y_test)
+print(f"📊 Training Accuracy: {accuracy * 100:.2f}%")
 
-print("Model trained and saved successfully.")
+joblib.dump(model, "phishing_model.pkl")
+print("✅ High-Accuracy Model saved successfully.")
