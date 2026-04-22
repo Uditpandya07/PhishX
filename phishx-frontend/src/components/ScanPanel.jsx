@@ -17,13 +17,10 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }
       return;
     }
 
-    // 🔥 STRICTOR VALIDATION: Must have a dot (.) or a colon (:) for ports
-    // This allows localhost:5173, google.com, 192.168.1.1, but BLOCKS simple words.
-    const urlPattern = /^(https?:\/\/)?([a-zA-Z0-9.-]+(\.[a-zA-Z]{2,6})|localhost:[0-9]+|(\d{1,3}\.){3}\d{1,3})([\/\w .-]*)*\/?$/;
+    // 🔥 THE 100% FREEZE-PROOF REGEX
+    const urlPattern = /^(https?:\/\/)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|localhost|\d{1,3}(\.\d{1,3}){3})(:\d+)?(\/.*)?$/;
     
-    // Check if it matches the pattern AND has a dot or port colon
-    const hasStructure = url.includes(".") || url.includes(":");
-    const isValid = urlPattern.test(url.trim()) && hasStructure;
+    const isValid = urlPattern.test(url.trim());
 
     if (!url.trim() || !isValid) {
       setIsError(true);
