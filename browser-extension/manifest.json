@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "PhishX: AI Phishing Protection",
+  "version": "1.0.0",
+  "description": "Real-time AI-powered phishing detection for a safer browsing experience.",
+  "permissions": ["tabs", "storage", "activeTab"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

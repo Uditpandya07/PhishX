@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --secondary: #4ade80;
+      --bg: #030712;
+      --glass: rgba(15, 23, 42, 0.8);
+    }
+    body {
+      width: 350px;
+      margin: 0;
+      padding: 20px;
+      background-color: var(--bg);
+      color: #fff;
+      font-family: system-ui, -apple-system, sans-serif;
+      overflow: hidden;
+    }
+    .glass-container {
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 20px;
+      padding: 25px;
+      text-align: center;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+    .header img {
+      height: 32px;
+    }
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 900;
+      margin: 0;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .url-display {
+      background: rgba(0,0,0,0.3);
+      padding: 10px 15px;
+      border-radius: 12px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 20px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .scan-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      border: none;
+      border-radius: 12px;
+      color: #0f172a;
+      font-weight: 800;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 10px 20px rgba(59, 130, 246, 0.2);
+    }
+    .scan-btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+      box-shadow: 0 15px 30px rgba(59, 130, 246, 0.4);
+    }
+    .scan-btn:disabled {
+      opacity: 0.5;
+      cursor: wait;
+    }
+    .result-box {
+      display: none;
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    #prediction {
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+    }
+    .footer {
+      margin-top: 25px;
+      font-size: 0.75rem;
+      color: #475569;
+    }
+    .dot-grid {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background-image: radial-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="dot-grid"></div>
+  <div class="glass-container">
+    <div class="header">
+      <img src="icon128.png" alt="X">
+      <h1>PHISHX</h1>
+    </div>
+    
+    <div id="url-display" class="url-display">Analyzing current tab...</div>
+    
+    <button id="scan-now" class="scan-btn">Deep Scan</button>
+    
+    <div id="result-box" class="result-box">
+      <div id="prediction">SCANNING...</div>
+      <div style="margin-top: 15px; font-size: 0.8rem; color: #64748b;">
+        Lexical analysis complete.
+      </div>
+    </div>
+    
+    <div class="footer">
+      Powered by PhishX AI Model v1.0
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
