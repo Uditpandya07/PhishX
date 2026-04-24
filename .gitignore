@@ -1,5 +1,54 @@
+# Virtual Environments
 venv/
+.venv/
+env/
+
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Databases & Local Data
+*.db
+*.sqlite
+*.sqlite3
 dataset.csv
 model/phishing_model.pkl
+
+# Environment Secrets
+.env
+.env.local
+.env.*.local
+
+# Node.js
+node_modules/
+dist/
+build/
+.npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDEs & OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Frontend specific
+phishx-frontend/dist/
+phishx-frontend/node_modules/
