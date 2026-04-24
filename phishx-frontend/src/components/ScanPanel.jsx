@@ -56,11 +56,12 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }
     // Simulate progress while scanning
     const progressInterval = setInterval(() => {
       setScanProgress(prev => {
-        if (prev >= 95) {
+        const next = prev + Math.floor(Math.random() * 15) + 5;
+        if (next >= 95) {
           clearInterval(progressInterval);
-          return prev;
+          return 95;
         }
-        return prev + Math.floor(Math.random() * 15) + 5;
+        return next;
       });
     }, 200);
 
