@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { FaGithub, FaTwitter, FaLinkedin, FaShieldAlt, FaBolt, FaRobot, FaLock, FaHistory, FaCode, FaChartLine, FaEnvelopeOpenText, FaSearch, FaExclamationTriangle, FaTerminal } from "react-icons/fa";
-import { motion } from "framer-motion";
+import { FaGithub, FaTwitter, FaLinkedin, FaShieldAlt, FaBolt, FaRobot, FaLock, FaHistory, FaCode, FaChartLine, FaEnvelopeOpenText, FaSearch, FaExclamationTriangle, FaTerminal, FaInfoCircle, FaCrown, FaCog, FaSignOutAlt, FaSignInAlt, FaUserPlus, FaUserShield } from "react-icons/fa";
+import { motion, useScroll, useSpring } from "framer-motion";
 import axios from "axios";
 import Background from "../components/Background";
 import ScanPanel from "../components/ScanPanel";
@@ -20,13 +20,12 @@ import VisionPage from "./VisionPage";
 
 import "./Dashboard.css";
 
-export default function Dashboard({ onLogout }) {
+export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEntered, triggerNotification }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [currentView, setCurrentView] = useState('main'); // 'main', 'admin', 'pricing', 'privacy', 'terms', 'creator', 'api', 'docs', 'vision'
   const [user, setUser] = useState(null);
   const [authMode, setAuthMode] = useState("login");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [scanHistory, setScanHistory] = useState([]);
   const [visibleCount, setVisibleCount] = useState(5);
 
@@ -34,18 +33,21 @@ export default function Dashboard({ onLogout }) {
     if (isLoggedIn) {
       const fetchHistory = async () => {
         try {
-          const token = localStorage.getItem("token");
+          const token = sessionStorage.getItem("token");
           if (!token) return;
-          const res = await axios.get("http://127.0.0.1:8000/api/v1/scans/history", {
+          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/scans/history`, {
             headers: { Authorization: `Bearer ${token}` }
           });
-          const formattedHistory = res.data.map(scan => ({
-            id: scan.id,
-            url: scan.url,
-            date: new Date(scan.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-            risk: Math.round(scan.risk_score),
-            status: scan.prediction === "Phishing" ? "Phishing" : "Safe"
-          }));
+          const clearTimestamp = sessionStorage.getItem("history_clear_timestamp");
+          const formattedHistory = res.data
+            .filter(scan => !clearTimestamp || new Date(scan.timestamp) > new Date(parseInt(clearTimestamp)))
+            .map(scan => ({
+              id: scan.id,
+              url: scan.url,
+              date: new Date(scan.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+              risk: Math.round(scan.risk_score),
+              status: scan.prediction === "Phishing" ? "Phishing" : "Safe"
+            }));
           setScanHistory(formattedHistory);
         } catch (err) {
           console.error("Failed to fetch history:", err);
@@ -55,9 +57,9 @@ export default function Dashboard({ onLogout }) {
 
       const fetchUser = async () => {
         try {
-          const token = localStorage.getItem("token");
+          const token = sessionStorage.getItem("token");
           if (token) {
-            const res = await axios.get("http://127.0.0.1:8000/api/v1/users/me", {
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/users/me`, {
               headers: { Authorization: `Bearer ${token}` }
             });
             setUser(res.data);
@@ -78,11 +80,18 @@ export default function Dashboard({ onLogout }) {
 
   const handleLoginSuccess = async () => {
     setIsLoggedIn(true);
+    if (setEntered) setEntered(true);
     setIsModalOpen(false);
+    if (triggerNotification) triggerNotification("Authentication Successful! Welcome back.");
   };
 
   const handleNewScan = (newScan) => {
     setScanHistory([newScan, ...scanHistory]);
+  };
+
+  const handleClearLocalHistory = () => {
+    sessionStorage.setItem("history_clear_timestamp", Date.now().toString());
+    setScanHistory([]);
   };
 
   const setView = (view) => {
@@ -286,40 +295,70 @@ export default function Dashboard({ onLogout }) {
     }
   };
 
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
   return (
     <div className="dashboard-root">
+      <motion.div className="scroll-progress-bar" style={{ scaleX }} />
       <Background />
 
       <nav className="navbar">
-        <div className="nav-brand" onClick={() => setView('main')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div className="nav-brand" onClick={() => setView('main')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <img src="/logo-icon.png" alt="PhishX Icon" className="brand-icon" style={{ height: '40px' }} /> 
-          <img src="/brand-text.png" alt="PhishX" className="brand-text-img" style={{ height: '30px' }} />
+          <img src="/brand-text.png" alt="PhishX" className="brand-text-img" style={{ height: '40px' }} />
         </div>
         <div className="nav-links">
-          <a href="#about" onClick={() => setView('main')}>About</a>
-          <a href="#scan" onClick={() => setView('main')}>Scanner</a>
-          <a href="#history" onClick={() => setView('main')}>History</a>
-          <a href="#pricing" onClick={() => setView('pricing')}>Pricing</a>
+          <a href="#about" onClick={() => setView('main')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <FaInfoCircle style={{ fontSize: '0.9rem', opacity: 0.8, color: '#3b82f6' }} /> About
+          </a>
+          <a href="#scan" onClick={() => setView('main')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <FaBolt style={{ fontSize: '0.9rem', opacity: 0.8, color: '#4ade80' }} /> Scanner
+          </a>
+          <a href="#history" onClick={() => setView('main')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <FaHistory style={{ fontSize: '0.9rem', opacity: 0.8, color: '#a855f7' }} /> History
+          </a>
+          <a href="#pricing" onClick={() => setView('pricing')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <FaCrown style={{ fontSize: '0.9rem', opacity: 0.8, color: '#fbbf24' }} /> Pricing
+          </a>
         </div>
         <div className="auth-group">
           {isLoggedIn ? (
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               {user?.is_superuser && (
                 <button 
                   className="nav-btn" 
-                  style={{ background: currentView === 'admin' ? '#ef4444' : 'rgba(239, 68, 68, 0.15)', border: '1px solid #ef4444', color: currentView === 'admin' ? '#fff' : '#ef4444', padding: '10px 20px', borderRadius: '100px', fontWeight: 700 }}
+                  style={{ background: currentView === 'admin' ? '#ef4444' : 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.4)', color: currentView === 'admin' ? '#fff' : '#ef4444', padding: '6px 14px', borderRadius: '100px', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}
                   onClick={() => setView(currentView === 'admin' ? 'main' : 'admin')}
                 >
-                  {currentView === 'admin' ? "Exit Admin" : "Admin Panel"}
+                  <FaUserShield style={{ fontSize: '0.9rem' }} /> {currentView === 'admin' ? "Exit" : "Admin"}
                 </button>
               )}
-              <button className="login-btn" onClick={() => setIsSettingsOpen(true)}>Settings</button>
-              <button className="primary-btn-nav" onClick={() => { setIsLoggedIn(false); setUser(null); setView('main'); if (onLogout) onLogout(); }}>Log Out</button>
+              <button className="login-btn" onClick={() => setIsSettingsOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '0.85rem' }}>
+                <FaCog style={{ opacity: 0.8 }} /> Settings
+              </button>
+              <button className="primary-btn-nav" onClick={() => { 
+                sessionStorage.removeItem("token");
+                setIsLoggedIn(false); 
+                setUser(null); 
+                setView('main'); 
+                if (onLogout) onLogout(); 
+              }} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 16px', fontSize: '0.85rem' }}>
+                <FaSignOutAlt /> Log Out
+              </button>
             </div>
           ) : (
-            <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-              <a href="#login" className="login-btn" onClick={(e) => openModal("login", e)}>Log In</a>
-              <button className="primary-btn-nav" onClick={(e) => openModal("signup", e)}>Sign Up</button>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <a href="#login" className="login-btn" onClick={(e) => openModal("login", e)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '0.85rem' }}>
+                <FaSignInAlt style={{ opacity: 0.8 }} /> Log In
+              </a>
+              <button className="primary-btn-nav" onClick={(e) => openModal("signup", e)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 16px', fontSize: '0.85rem' }}>
+                <FaUserPlus /> Sign Up
+              </button>
             </div>
           )}
         </div>
@@ -374,7 +413,12 @@ export default function Dashboard({ onLogout }) {
       </div>
 
       <AuthModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} initialMode={authMode} onLoginSuccess={handleLoginSuccess} />
-      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} user={user} />
+      <SettingsModal 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+        user={user} 
+        onClearHistory={handleClearLocalHistory}
+      />
     </div>
   );
 }
