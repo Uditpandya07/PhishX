@@ -1,0 +1,81 @@
+.pricing-container {
+  padding: 40px 0;
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin-top: 40px;
+}
+
+.pricing-card {
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.pricing-card.highlight {
+  border-color: #7B61FF;
+  box-shadow: 0 0 20px rgba(123, 97, 255, 0.2);
+}
+
+.popular-tag {
+  position: absolute;
+  top: 15px;
+  right: -35px;
+  background: #7B61FF;
+  color: white;
+  padding: 5px 40px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  transform: rotate(45deg);
+}
+
+.pricing-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.price {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 30px;
+}
+
+.price span {
+  font-size: 1rem;
+  color: #94a3b8;
+  font-weight: normal;
+}
+
+.features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 40px 0;
+  text-align: left;
+  width: 100%;
+}
+
+.features-list li {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #cbd5e1;
+}
+
+.check-icon {
+  color: #4ade80;
+}
+
+.disabled-btn {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #64748b !important;
+  cursor: default !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}

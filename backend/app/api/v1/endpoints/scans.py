@@ -99,9 +99,8 @@ def predict_url(
         
         return scan
     except Exception as e:
-        import traceback
-        error_msg = str(e) + " | " + traceback.format_exc()
-        raise HTTPException(status_code=400, detail=f"Total Crash: {error_msg}")
+        print(f"Prediction Error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal analysis engine error. Please try again later.")
 
 @router.get("/history", response_model=List[ScanResponse])
 def get_scan_history(
