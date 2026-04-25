@@ -17,6 +17,7 @@ class User(Base):
     is_verified = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
+    ai_training_enabled = Column(Boolean, default=True)
     stripe_customer_id = Column(String, unique=True, nullable=True)
     metadata_json = Column(JSON, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -107,3 +108,16 @@ class Feedback(Base):
 
     scan = relationship("Scan", backref="feedbacks")
     user = relationship("User", back_populates="feedbacks")
+
+
+class DeletionRequest(Base):
+    __tablename__ = "deletion_requests"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    status = Column(String, default="pending") # "pending", "approved", "denied"
+    reason = Column(Text, nullable=True)
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+    processed_at = Column(DateTime(timezone=True), nullable=True)
+
+    user = relationship("User", backref="deletion_requests")

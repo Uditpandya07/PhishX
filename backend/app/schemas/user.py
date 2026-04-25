@@ -8,12 +8,17 @@ class UserBase(BaseModel):
     name: Optional[str] = None
     is_active: Optional[bool] = True
     is_superuser: bool = False
+    ai_training_enabled: bool = True
 
 class UserCreate(UserBase):
     password: str
 
-class UserUpdate(UserBase):
+class UserUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    name: Optional[str] = None
     password: Optional[str] = None
+    is_active: Optional[bool] = None
+    ai_training_enabled: Optional[bool] = None
 
 class UserInDBBase(UserBase):
     id: UUID
