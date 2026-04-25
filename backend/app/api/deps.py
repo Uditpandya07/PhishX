@@ -24,24 +24,40 @@ def get_current_user(
     db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)
 ) -> User:
     try:
+        # Use Supabase JWT Secret to decode
         payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=["HS256"]
+            token, settings.SUPABASE_JWT_SECRET, algorithms=["HS256"], 
+            audience="authenticated" # Supabase default audience
         )
-        token_data = payload.get("sub")
-        token_type = payload.get("type")
-        if token_type != "access":
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Invalid token type",
-            )
-    except (jwt.JWTError, ValidationError):
+        user_id = payload.get("sub")
+        email = payload.get("email")
+        metadata = payload.get("user_metadata", {})
+        
+        if not user_id:
+            raise HTTPException(status_code=403, detail="Invalid token")
+            
+    except (jwt.JWTError, ValidationError) as e:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Could not validate credentials",
+            detail=f"Could not validate credentials: {e}",
         )
-    user = db.query(User).filter(User.id == uuid.UUID(token_data)).first()
+        
+    # Check if user exists in our local DB
+    user = db.query(User).filter(User.id == uuid.UUID(user_id)).first()
+    
+    # Lazy-create user if they exist in Supabase but not in our DB yet
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        user = User(
+            id=uuid.UUID(user_id),
+            email=email,
+            name=metadata.get("full_name", "Supabase User"),
+            is_active=True,
+            is_verified=True # If they have a valid token, they are verified
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        
     return user
 
 def get_current_active_user(
