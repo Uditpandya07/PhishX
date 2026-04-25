@@ -26,6 +26,7 @@ jobs:
     - name: Run Pytest
       run: |
         cd backend
+        export PYTHONPATH=$PYTHONPATH:.
         pytest tests/
 
   build-frontend:
