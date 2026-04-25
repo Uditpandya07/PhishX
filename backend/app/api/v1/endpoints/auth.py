@@ -24,8 +24,8 @@ def login_access_token(
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     
-    access_token = security.create_access_token(user.id)
-    refresh_token = security.create_refresh_token(user.id)
+    access_token = security.create_access_token(user.id, secret_key=settings.SUPABASE_JWT_SECRET)
+    refresh_token = security.create_refresh_token(user.id, secret_key=settings.SUPABASE_JWT_SECRET)
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,

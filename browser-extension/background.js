@@ -1,10 +1,15 @@
 // PhishX Background Service Worker
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tab.url && tab.url.startsWith('http')) {
+    const API_URL = "http://localhost:8000"; // Should be updated during build
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/v1/scans/predict', {
+      const { token } = await chrome.storage.local.get(['token']);
+      const response = await fetch(`${API_URL}/api/v1/scans/predict`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify({ url: tab.url })
       });
       

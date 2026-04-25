@@ -103,23 +103,11 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }
       setScanProgress(100);
       
       setTimeout(() => {
-        console.log("Backend failed:", err.response?.data?.detail || err.message);
-        console.log("Simulating a scan...");
-        const fakeRisk = Math.floor(Math.random() * 100);
-        const fakeIsDanger = fakeRisk > 50;
-        const fakeResult = { prediction: fakeIsDanger ? "Phishing" : "Safe", risk_score: fakeRisk };
-        
-        setResult(fakeResult);
-        const newHistoryItem = {
-          id: Date.now(),
-          url: url.trim(),
-          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-          risk: fakeRisk,
-          status: fakeIsDanger ? "Phishing" : "Safe"
-        };
-
-        if (onScanComplete) onScanComplete(newHistoryItem);
+        console.error("Backend failed:", err.response?.data?.detail || err.message);
         setLoading(false);
+        setScanProgress(0);
+        // Show an error notification or alert
+        alert("Deep Analysis Engine is currently unavailable. Please check your connection and try again.");
       }, 500);
     }
   };

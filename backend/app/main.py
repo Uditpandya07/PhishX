@@ -6,8 +6,8 @@ from app.api.v1.api import api_router
 
 from app.db.base import Base
 from app.db.session import engine
-# Auto-create tables if they don't exist
-Base.metadata.create_all(bind=engine)
+# Auto-creation is disabled in favor of Alembic migrations
+# Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
