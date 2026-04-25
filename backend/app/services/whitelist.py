@@ -158,5 +158,111 @@ TRUSTED_DOMAINS = {
     "biblegateway.com", "bible.com", "quran.com", "chabad.org", "vatican.va",
     "ancestry.com", "23andme.com", "myheritage.com",
     "speedtest.net", "fast.com", "isitchaired.com", "downforeveryoneorjustme.com",
-    "isitdownrightnow.com", "downdetector.com"
+    "isitdownrightnow.com", "downdetector.com",
+
+    # ==========================================
+    # 🇮🇳 INDIAN TRUSTED DOMAINS (500+ SITES)
+    # ==========================================
+
+    # GOVERNMENT & PUBLIC SERVICES (.gov.in, .nic.in, .res.in)
+    "india.gov.in", "mygov.in", "uidai.gov.in", "nrega.nic.in", "pmkisan.gov.in",
+    "passportindia.gov.in", "incometaxindiaefiling.gov.in", "gst.gov.in", "epfindia.gov.in",
+    "esic.nic.in", "digitalindia.gov.in", "makeinindia.com", "startupindia.gov.in",
+    "mca.gov.in", "cbic.gov.in", "dgft.gov.in", "isro.gov.in", "drdo.gov.in",
+    "meity.gov.in", "mof.gov.in", "mha.gov.in", "mea.gov.in", "mohfw.gov.in",
+    "hrd.gov.in", "education.gov.in", "ugc.ac.in", "aicte-india.org", "ncert.nic.in",
+    "cbse.gov.in", "upsc.gov.in", "ssc.nic.in", "ncs.gov.in", "cowin.gov.in",
+    "digilocker.gov.in", "umang.gov.in", "parivahan.gov.in", "sarathi.parivahan.gov.in",
+    "echallan.parivahan.gov.in", "vahan.parivahan.gov.in", "pib.gov.in", "ddnews.gov.in",
+    "prasarbharati.gov.in", "eci.gov.in", "ceo.maharashtra.gov.in", "ceodelhi.gov.in",
+    "ceouttarpradesh.nic.in", "ceobihar.nic.in", "ceowestbengal.nic.in", "ceotamilnadu.nic.in",
+    "bhulekh.uk.gov.in", "upbhulekh.gov.in", "mpbhulekh.gov.in", "landrecords.karnataka.gov.in",
+
+    # BANKING & FINANCIAL SERVICES (INDIA)
+    "sbi.co.in", "onlinesbi.sbi", "hdfcbank.com", "icicibank.com", "axisbank.com",
+    "kotak.com", "bankofbaroda.in", "pnbindia.in", "canarabank.com", "unionbankofindia.co.in",
+    "idbi.com", "indusind.com", "yesbank.in", "rblbank.com", "idfcfirstbank.com",
+    "federalbank.co.in", "southindianbank.com", "karurvysya.com", "keralabank.co.in",
+    "bandhanbank.com", "indianbank.in", "ucobank.com", "centralbankofindia.co.in",
+    "mahabank.in", "iob.in", "bankofindia.co.in", "sidbi.in", "nabard.org", "eximbankindia.in",
+    "rbi.org.in", "sebi.gov.in", "irda.gov.in", "pfrda.org.in", "nhb.org.in",
+    "licindia.in", "gichousing.com", "hdfclife.com", "iciciprulife.com", "sbilife.co.in",
+    "bajajallianz.com", "tata-aig.com", "newindia.co.in", "orientalinsurance.org.in",
+    "unitedindia.co.in", "nationalinsurance.nic.in", "starhealth.in", "careinsurance.com",
+    "zerodha.com", "upstox.com", "groww.in", "angelone.in", "5paisa.com", "sharekhan.com",
+    "motilaloswal.com", "icicidirect.com", "hdfcsec.com", "axisdirect.in", "kotaksecurities.com",
+    "paytm.com", "phonepe.com", "google.com/pay", "bharatpe.com", "mobikwik.com",
+    "freecharge.in", "razorpay.com", "cashfree.com", "instamojo.com", "ccavenue.com",
+    "billdesk.com", "npci.org.in", "bhimupi.org.in", "rupay.co.in", "policybazaar.com",
+    "paisabazaar.com", "bankbazaar.com", "cred.club", "sliceit.com", "uni.cards",
+
+    # E-COMMERCE & MARKETPLACES (INDIA)
+    "flipkart.com", "myntra.com", "ajio.com", "nykaa.com", "meesho.com", "tatacliq.com",
+    "jiomart.com", "bigbasket.com", "blinkit.com", "zeptonow.com", "swiggy.com", "zomato.com",
+    "fnp.com", "fernsnpetals.com", "pepperfry.com", "urbanladder.com", "homelane.com",
+    "lenskart.com", "titan.co.in", "caratlane.com", "bluestone.com", "tanishq.co.in",
+    "firstcry.com", "hopscotch.in", "mamaearth.in", "wowskinscience.com", "beardo.in",
+    "themancompany.com", "boat-lifestyle.com", "noise.com", "boultaudio.com",
+    "decathlon.in", "pumaindia.com", "adidas.co.in", "reebok.co.in", "nike.com/in",
+    "reliancedigital.in", "croma.com", "poorvika.com", "sangeethamobile.com",
+    "snapdeal.com", "shopclues.com", "indiamart.com", "tradeindia.com", "exportersindia.com",
+    "olx.in", "quikr.com", "carwale.com", "cardekho.com", "droom.in", "bikewale.com",
+    "nobroker.in", "99acres.com", "magicbricks.com", "housing.com", "squareyards.com",
+
+    # TELECOM & UTILITIES (INDIA)
+    "jio.com", "airtel.in", "myvi.in", "bsnl.co.in", "mtnl.net.in", "tata-play.com",
+    "dishtv.in", "d2h.com", "airtel.tv", "sunnxt.com", "hoichoi.tv", "voot.com",
+    "hotstar.com", "zee5.com", "sonyliv.com", "erosnow.com", "mxplayer.in", "altbalaji.com",
+    "adaniwilmar.com", "adanipower.com", "adaniports.com", "relianceindustries.com",
+    "tata.com", "tcs.com", "infosys.com", "wipro.com", "hcltech.com", "mahindra.com",
+    "larsentoubro.com", "itcportal.com", "unilever.in", "hindustanunilever.com",
+    "marutisuzuki.com", "tatamotors.com", "mahindraauto.com", "hero-moto-corp.com",
+    "tvsmotor.com", "bajajauto.com", "royalenfield.com", "yamaha-motor-india.com",
+    "hpcl.co.in", "iocl.com", "bpcl.in", "ongcindia.com", "gailonline.com", "ntpc.co.in",
+    "powergridindia.com", "coalindia.in", "sail.co.in", "bhel.com", "hal-india.co.in",
+
+    # EDUCATION & INSTITUTIONS (INDIA)
+    "iitb.ac.in", "iitd.ac.in", "iitk.ac.in", "iitm.ac.in", "iitkgp.ac.in", "iitr.ac.in",
+    "iitg.ac.in", "iith.ac.in", "iitj.ac.in", "iitgn.ac.in", "iiti.ac.in", "iitp.ac.in",
+    "iitbbs.ac.in", "iitbhilai.ac.in", "iitgoa.ac.in", "iitjammu.ac.in", "iitpkd.ac.in",
+    "iitdh.ac.in", "iittirupati.ac.in", "iitjammu.ac.in", "iitbhu.ac.in", "ism.ac.in",
+    "iimk.ac.in", "iimb.ac.in", "iimahd.ernet.in", "iimc.ac.in", "iiml.ac.in", "iimidr.ac.in",
+    "iims.ac.in", "iimtrichy.ac.in", "iimrohtak.ac.in", "iimraipur.ac.in", "iimranchi.ac.in",
+    "bits-pilani.ac.in", "vit.ac.in", "srmist.edu.in", "manipal.edu", "amrita.edu",
+    "thapar.edu", "kiit.ac.in", "lovelyprofessionaluniversity.in", "lpu.in", "amity.edu",
+    "du.ac.in", "jnu.ac.in", "bhu.ac.in", "uohyd.ac.in", "amu.ac.in", "jmi.ac.in",
+    "mu.ac.in", "unipune.ac.in", "unical.ac.in", "unom.ac.in", "annauniv.edu",
+    "vtu.ac.in", "ptu.ac.in", "aktu.ac.in", "rgpv.ac.in", "ignou.ac.in", "nios.ac.in",
+    "byjus.com", "unacademy.com", "vedantu.com", "physicswallah.live", "pw.live",
+    "testbook.com", "adda247.com", "gradeup.co", "careerlauncher.com", "time4education.com",
+
+    # TRAVEL, TRANSPORT & LOGISTICS (INDIA)
+    "irctc.co.in", "indianrail.gov.in", "airindia.in", "indigo.in", "spicejet.com",
+    "akasaair.com", "airindiaexpress.com", "vistara.com", "makemytrip.com", "goibibo.com",
+    "yatra.com", "cleartrip.com", "easemytrip.com", "ixigo.com", "redbus.in", "abhibus.com",
+    "ola.in", "uber.com/in", "rapido.bike", "blablacar.in", "zoomcar.com", "revv.co.in",
+    "delhi-metro.com", "mumbaimetro.com", "bmtc.com", "ksrtc.in", "upsrtc.com", "msrtc.maharashtra.gov.in",
+    "bluedart.com", "delhivery.com", "ecomexpress.in", "shadowfax.in", "dtdc.com", "shiprocket.in",
+
+    # NEWS, MEDIA & INFORMATION (INDIA)
+    "timesofindia.com", "indiatimes.com", "economictimes.com", "hindustantimes.com",
+    "thehindu.com", "indianexpress.com", "ndtv.com", "aajtak.in", "zeenews.india.com",
+    "news18.com", "indiatvnews.com", "republicworld.com", "abplive.com", "dainikbhaskar.com",
+    "jagran.com", "amarujala.com", "mathrubhumi.com", "manoramaonline.com", "eenadu.net",
+    "sakshi.com", "dinamalar.com", "dailythanthi.com", "lokmat.com", "divyabhaskar.co.in",
+    "moneycontrol.com", "livemint.com", "business-standard.com", "financialexpress.com",
+    "scroll.in", "thewire.in", "theprint.in", "opindia.com", "altnews.in", "boomlive.in",
+    "digit.in", "91mobiles.com", "gadgets360.com", "smartprix.com", "trak.in", "yourstory.com",
+
+    # HEALTH & LIFESTYLE (INDIA)
+    "apollohospitals.com", "fortishealthcare.com", "maxhealthcare.in", "narayanahealth.org",
+    "medanta.org", "practo.com", "pharmeasy.in", "1mg.com", "netmeds.com", "tata1mg.com",
+    "apollopharmacy.in", "medplusmart.com", "healthians.com", "lalpathlabs.com", "metropolisindia.com",
+    "shaadi.com", "jeevansathi.com", "bharatmatrimony.com", "tinder.com/en-IN", "bumble.com",
+    "bookmyshow.com", "insider.in", "pvr-cinemas.com", "inoxmovies.com", "cinepolisindia.com",
+
+    # JOBS, REAL ESTATE & MISC (INDIA)
+    "naukri.com", "iimjobs.com", "foundit.in", "hirist.com", "internshala.com", "linkedin.com/jobs",
+    "magicbricks.com", "99acres.com", "commonfloor.com", "nobroker.in", "proptiger.com",
+    "sulekha.com", "justdial.com", "indialist.com", "yellowpages.in", "asklaila.com"
 }
