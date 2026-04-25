@@ -1,5 +1,5 @@
 from typing import Generator, Optional
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from pydantic import ValidationError
@@ -21,8 +21,16 @@ def get_db() -> Generator:
         db.close()
 
 def get_current_user(
-    db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)
+    request: Request,
+    db: Session = Depends(get_db), 
+    token_from_header: Optional[str] = Depends(reusable_oauth2)
 ) -> User:
+    token = request.cookies.get("access_token") or token_from_header
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+        )
     try:
         # Use Supabase JWT Secret to decode
         payload = jwt.decode(

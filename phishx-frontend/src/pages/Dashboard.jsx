@@ -33,11 +33,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
     if (isLoggedIn) {
       const fetchHistory = async () => {
         try {
-          const token = sessionStorage.getItem("token");
-          if (!token) return;
-          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/scans/history`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
+          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/scans/history`);
           const clearTimestamp = sessionStorage.getItem("history_clear_timestamp");
           const formattedHistory = res.data
             .filter(scan => !clearTimestamp || new Date(scan.timestamp) > new Date(parseInt(clearTimestamp)))
@@ -57,11 +53,8 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
 
       const fetchUser = async () => {
         try {
-          const token = sessionStorage.getItem("token");
-          if (token) {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/users/me`, {
-              headers: { Authorization: `Bearer ${token}` }
-            });
+          if (isLoggedIn) {
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/users/me`);
             setUser(res.data);
           }
         } catch (err) {
@@ -268,7 +261,9 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                       <tbody>
                          {scanHistory.slice(0, visibleCount).map((scan) => (
                             <tr key={scan.id}>
-                              <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>{scan.url}</td>
+                              <td style={{ fontFamily: 'monospace', fontWeight: 600, maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={scan.url}>
+                                {scan.url}
+                              </td>
                               <td style={{ color: '#64748b' }}>{scan.date}</td>
                               <td style={{ fontWeight: 700 }}>{scan.risk}%</td>
                               <td><span className={`badge ${scan.status === "Safe" ? "safe" : "danger"}`}>{scan.status}</span></td>
@@ -341,8 +336,12 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
               <button className="login-btn" onClick={() => setIsSettingsOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '0.85rem' }}>
                 <FaCog style={{ opacity: 0.8 }} /> Settings
               </button>
-              <button className="primary-btn-nav" onClick={() => { 
-                sessionStorage.removeItem("token");
+              <button className="primary-btn-nav" onClick={async () => { 
+                try {
+                  await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/auth/logout`);
+                } catch (err) {
+                  console.error("Logout failed:", err);
+                }
                 setIsLoggedIn(false); 
                 setUser(null); 
                 setView('main'); 

@@ -5,8 +5,11 @@ import { FaShieldAlt } from "react-icons/fa";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 
+axios.defaults.withCredentials = true;
+
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(!!sessionStorage.getItem("token"));
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const [entered, setEntered] = useState(false);
   const [notification, setNotification] = useState(null);
 
@@ -16,15 +19,27 @@ export default function App() {
   };
 
   useEffect(() => {
+    // Check if we are already logged in via cookie
+    axios.get(`${import.meta.env.VITE_API_URL}/api/v1/users/me`)
+      .then(res => {
+        setIsLoggedIn(true);
+        setEntered(true);
+      })
+      .catch(() => {
+        setIsLoggedIn(false);
+      })
+      .finally(() => {
+        setCheckingAuth(false);
+      });
+
     // Check if we are coming back from Google
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code");
     
     if (code) {
-      // Exchange code for token at our backend
+      setCheckingAuth(true);
       axios.post(`${import.meta.env.VITE_API_URL}/api/v1/auth/google/callback`, { code })
         .then(res => {
-          sessionStorage.setItem("token", res.data.access_token);
           setIsLoggedIn(true);
           setEntered(true);
           triggerNotification("Authentication Successful! Welcome back.");
@@ -34,6 +49,7 @@ export default function App() {
           setEntered(false);
         })
         .finally(() => {
+          setCheckingAuth(false);
           window.history.replaceState({}, document.title, "/");
         });
     }
@@ -41,6 +57,25 @@ export default function App() {
 
   const isCallback = useMemo(() => new URLSearchParams(window.location.search).has("code"), []);
   const showLanding = !entered && !isCallback;
+
+  if (checkingAuth) {
+    return (
+      <div style={{ 
+        height: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        background: '#020617',
+        color: '#fff'
+      }}>
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+          style={{ width: 40, height: 40, border: '4px solid #1e293b', borderTopColor: '#4ade80', borderRadius: '50%' }}
+        />
+      </div>
+    );
+  }
 
   return (
     <>
