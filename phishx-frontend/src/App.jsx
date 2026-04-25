@@ -22,7 +22,7 @@ export default function App() {
     
     if (code) {
       // Exchange code for token at our backend
-      axios.post("http://127.0.0.1:8000/api/v1/auth/google/callback", { code })
+      axios.post(`${import.meta.env.VITE_API_URL}/api/v1/auth/google/callback`, { code })
         .then(res => {
           sessionStorage.setItem("token", res.data.access_token);
           setIsLoggedIn(true);

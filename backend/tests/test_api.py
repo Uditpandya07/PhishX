@@ -27,7 +27,7 @@ app.dependency_overrides[get_db] = override_get_db
 client = TestClient(app)
 
 def test_home():
-    response = client.get("/api/v1/")
+    response = client.get("/")
     assert response.status_code == 200
     assert response.json() == {"message": "PhishX API is running"}
 

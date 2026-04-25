@@ -60,7 +60,13 @@ def analyze_url(url: str, model_instance) -> dict:
         from app.services.feature_extractor import extract_features
         features = extract_features(normalized_url)
         prediction = model_instance.predict([features])[0]
-        probability = model_instance.predict_proba([features])[0][1]
+        
+        # Determine the index of the 'Phishing' class dynamically
+        classes = list(model_instance.classes_)
+        # We assume the label is either "Phishing" or 1
+        phish_idx = classes.index("Phishing") if "Phishing" in classes else (classes.index(1) if 1 in classes else 1)
+        
+        probability = model_instance.predict_proba([features])[0][phish_idx]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"ML Error: {str(e)}")
 
