@@ -32,7 +32,7 @@ export default function CreatorPage() {
           <div className="glass-panel stats-creator">
             <div className="stat-item">
               <FaCode />
-              <span>Full-Stack Specialist</span>
+              <span>Full-Stack Developer</span>
             </div>
             <div className="stat-item">
               <FaRocket />

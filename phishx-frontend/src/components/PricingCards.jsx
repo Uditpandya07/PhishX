@@ -40,7 +40,7 @@ export default function PricingCards({ user }) {
     }
     
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const res = await axios.post(`http://127.0.0.1:8000/api/v1/payments/create-checkout-session?plan_id=${planId}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
