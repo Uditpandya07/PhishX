@@ -50,7 +50,7 @@ def get_user_feedbacks(
     """
     Get all feedbacks. Regular users only see their own. Admins see all.
     """
-    query = db.query(Feedback).options(joinedload(Feedback.scan))
+    query = db.query(Feedback).options(joinedload(Feedback.scan), joinedload(Feedback.user))
     
     if current_user.is_superuser:
         feedbacks = query.offset(skip).limit(limit).all()

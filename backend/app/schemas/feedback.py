@@ -16,6 +16,12 @@ class FeedbackCreate(BaseModel):
     feedback_type: Literal["false_positive", "false_negative"]
     comment: Optional[str] = None
 
+class UserShort(BaseModel):
+    email: str
+
+    class Config:
+        from_attributes = True
+
 class FeedbackResponse(BaseModel):
     id: UUID4
     scan_id: UUID4
@@ -24,6 +30,7 @@ class FeedbackResponse(BaseModel):
     comment: Optional[str]
     timestamp: datetime
     scan: Optional[ScanShort] = None  # Include basic scan info
+    user: Optional[UserShort] = None  # Include reporter email
 
     class Config:
         from_attributes = True
