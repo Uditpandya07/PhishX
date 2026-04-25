@@ -13,6 +13,9 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }
   const [isError, setIsError] = useState(false);
   const [feedbackSent, setFeedbackSent] = useState(false);
   const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [showFeedbackInput, setShowFeedbackInput] = useState(false);
+  const [feedbackComment, setFeedbackComment] = useState("");
+  const [activeFeedbackType, setActiveFeedbackType] = useState(null);
 
   const getThreatIndicators = (features) => {
     if (!features || !features.extracted_features) return [];
@@ -52,6 +55,8 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }
     setScanProgress(0);
     setResult(null);
     setFeedbackSent(false);
+    setShowFeedbackInput(false);
+    setFeedbackComment("");
 
     // Simulate progress while scanning
     const progressInterval = setInterval(() => {
@@ -66,8 +71,8 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }
     }, 200);
 
     try {
-      const token = localStorage.getItem("token");
-      const res = await axios.post("http://127.0.0.1:8000/api/v1/scans/predict", { 
+      const token = sessionStorage.getItem("token");
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/scans/predict`, { 
         url: url.trim() 
       }, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
@@ -119,21 +124,27 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }
     }
   };
 
-  const submitFeedback = async (type) => {
-    if (!result || !result.id) return;
+  const submitFeedback = async () => {
+    if (!result || !result.id) {
+      console.warn("Feedback failed: Scan result has no database ID (likely a simulated result).");
+      alert("Cannot report results from simulated scans. Please ensure your backend is connected and you are logged in.");
+      return;
+    }
     setFeedbackLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      await axios.post("http://127.0.0.1:8000/api/v1/feedback/", {
+      const token = sessionStorage.getItem("token");
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/feedback/`, {
         scan_id: result.id,
-        feedback_type: type,
-        comment: "Submitted via Quick Action"
+        feedback_type: activeFeedbackType,
+        comment: feedbackComment || "Submitted via Quick Action"
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setFeedbackSent(true);
+      setShowFeedbackInput(false);
     } catch (err) {
       console.error("Failed to submit feedback", err);
+      alert("Failed to submit report. Please check your connection.");
     } finally {
       setFeedbackLoading(false);
     }
@@ -227,18 +238,73 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }
 
               {/* FEEDBACK SECTION */}
               {isLoggedIn && (
-                <div className="feedback-section" style={{ marginTop: '1rem', textAlign: 'center' }}>
+                <div className="feedback-section" style={{ marginTop: '1.5rem', textAlign: 'center' }}>
                   {!feedbackSent ? (
-                    <button 
-                      className="feedback-btn text-sm opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
-                      style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', padding: '0.25rem 0.75rem', borderRadius: '4px', color: '#ccc' }}
-                      onClick={() => submitFeedback(isDanger ? "false_positive" : "false_negative")}
-                      disabled={feedbackLoading}
-                    >
-                      {feedbackLoading ? "Submitting..." : (isDanger ? "Wait, this is Safe (Report False Positive)" : "Wait, this is Phishing (Report False Negative)")}
-                    </button>
+                    <div className="feedback-flow">
+                      {!showFeedbackInput ? (
+                        <button 
+                          className="feedback-btn text-sm opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
+                          style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', padding: '0.4rem 1rem', borderRadius: '8px', color: '#ccc' }}
+                          onClick={() => {
+                            setActiveFeedbackType(isDanger ? "false_positive" : "false_negative");
+                            setShowFeedbackInput(true);
+                          }}
+                        >
+                          {isDanger ? "🚨 Report False Positive" : "🛡️ Report Missed Threat"}
+                        </button>
+                      ) : (
+                        <motion.div 
+                          className="feedback-input-wrapper"
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                        >
+                          <textarea 
+                            className="feedback-textarea"
+                            placeholder="Why is this classification incorrect? (optional)"
+                            value={feedbackComment}
+                            onChange={(e) => setFeedbackComment(e.target.value)}
+                            style={{ 
+                              width: '100%', 
+                              background: 'rgba(0,0,0,0.3)', 
+                              border: '1px solid rgba(255,255,255,0.1)', 
+                              borderRadius: '8px', 
+                              padding: '10px', 
+                              color: 'white',
+                              fontSize: '0.9rem',
+                              resize: 'none',
+                              marginBottom: '10px',
+                              height: '80px'
+                            }}
+                          />
+                          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                            <button 
+                              className="confirm-feedback-btn"
+                              style={{ background: '#3b82f6', border: 'none', padding: '0.4rem 1.2rem', borderRadius: '6px', color: 'white', fontWeight: '700', cursor: 'pointer' }}
+                              onClick={submitFeedback}
+                              disabled={feedbackLoading}
+                            >
+                              {feedbackLoading ? "Submitting..." : "Confirm Report"}
+                            </button>
+                            <button 
+                              className="cancel-feedback-btn"
+                              style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.4rem 1rem', borderRadius: '6px', color: '#94a3b8', cursor: 'pointer' }}
+                              onClick={() => setShowFeedbackInput(false)}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </div>
                   ) : (
-                    <span className="feedback-success" style={{ color: '#4ade80', fontSize: '0.85rem' }}>✓ Feedback sent! Thank you.</span>
+                    <motion.span 
+                      className="feedback-success" 
+                      initial={{ scale: 0.9 }}
+                      animate={{ scale: 1 }}
+                      style={{ color: '#4ade80', fontSize: '0.9rem', fontWeight: '700' }}
+                    >
+                      ✅ Intelligence Logged. Thank you for contributing!
+                    </motion.span>
                   )}
                 </div>
               )}
