@@ -23,6 +23,11 @@ jobs:
         pip install -r backend/requirements.txt
         pip install pytest httpx
         
+    - name: Create Dummy Model
+      run: |
+        mkdir -p model
+        echo "dummy" > model/phishing_model.pkl
+        
     - name: Run Pytest
       run: |
         cd backend

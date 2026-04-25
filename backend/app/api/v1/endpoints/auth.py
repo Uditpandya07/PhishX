@@ -1,7 +1,7 @@
 from datetime import timedelta
 from typing import Any
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.db.models import User
@@ -13,7 +13,13 @@ from app.schemas.user import UserCreate, User as UserSchema
 
 router = APIRouter()
 
-@router.post("/login", response_model=Token)
+@router.post("/logout")
+def logout(response: Response):
+    """Clear the authentication cookie."""
+    response.delete_cookie(key="access_token", httponly=True, secure=True, samesite="lax")
+    return {"message": "Logged out successfully"}
+
+@router.post("/login")
 def login_access_token(
     db: Session = Depends(deps.get_db), form_data: OAuth2PasswordRequestForm = Depends()
 ) -> Any:
@@ -25,12 +31,18 @@ def login_access_token(
         raise HTTPException(status_code=400, detail="Inactive user")
     
     access_token = security.create_access_token(user.id, secret_key=settings.SUPABASE_JWT_SECRET)
-    refresh_token = security.create_refresh_token(user.id, secret_key=settings.SUPABASE_JWT_SECRET)
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "token_type": "bearer",
-    }
+    
+    from fastapi import Response
+    response = Response(content="{\"message\": \"Login successful\"}", media_type="application/json")
+    response.set_cookie(
+        key="access_token", 
+        value=access_token, 
+        httponly=True, 
+        secure=True, 
+        samesite="lax",
+        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+    )
+    return response
 
 @router.post("/register", response_model=UserSchema)
 def register_user(
@@ -130,8 +142,16 @@ async def google_callback(
         db.refresh(user)
 
     # 4. Generate PhishX access token
-    phishx_token = security.create_access_token(user.id)
-    return {
-        "access_token": phishx_token,
-        "token_type": "bearer",
-    }
+    phishx_token = security.create_access_token(user.id, secret_key=settings.SUPABASE_JWT_SECRET)
+    
+    from fastapi import Response
+    response = Response(content="{\"message\": \"Google Login successful\"}", media_type="application/json")
+    response.set_cookie(
+        key="access_token", 
+        value=phishx_token, 
+        httponly=True, 
+        secure=True, 
+        samesite="lax",
+        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+    )
+    return response

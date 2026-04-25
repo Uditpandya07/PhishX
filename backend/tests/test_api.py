@@ -66,4 +66,5 @@ def test_user_login():
         data={"username": email, "password": "password"}
     )
     assert response.status_code == 200
-    assert "access_token" in response.json()
+    # Now we check if the access_token cookie is set
+    assert "access_token" in response.cookies
