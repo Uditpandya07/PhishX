@@ -21,10 +21,10 @@ def health_check(
             "database": "connected",
             "timestamp": datetime.utcnow().isoformat()
         }
-    except Exception as e:
+    except Exception:
         return {
             "status": "unhealthy",
-            "database": str(e),
+            "database": "error",
             "timestamp": datetime.utcnow().isoformat()
         }
 
@@ -46,8 +46,8 @@ def repair_database(
         db.execute(text("ANALYZE")) 
         
         return {"status": "success", "message": "Database tables synchronized and optimized."}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Repair failed: {str(e)}")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Database synchronization and optimization failed.")
 
 @router.get("/stats")
 def get_global_stats(
