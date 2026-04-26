@@ -1,6 +1,8 @@
 from datetime import timedelta
 from typing import Any
 import httpx
+import uuid
+from jose import jwt
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -19,7 +21,30 @@ def logout(response: Response):
     response.delete_cookie(key="access_token", httponly=True, secure=True, samesite="lax")
     return {"message": "Logged out successfully"}
 
-@router.post("/login")
+@router.get("/verify")
+def verify_email(token: str, db: Session = Depends(deps.get_db)):
+    """Verify a user's email address using a token."""
+    try:
+        payload = jwt.decode(token, settings.SUPABASE_JWT_SECRET, algorithms=["HS256"])
+        user_id = payload.get("sub")
+        if not user_id:
+            raise HTTPException(status_code=400, detail="Invalid verification token")
+        
+        user = db.query(User).filter(User.id == uuid.UUID(user_id)).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+            
+        user.is_verified = True
+        db.commit()
+        
+        # Redirect to frontend with a success message
+        return RedirectResponse(f"{settings.FRONTEND_URL}?verified=true")
+    except Exception as e:
+        return RedirectResponse(f"{settings.FRONTEND_URL}?error=verification_failed")
+
+from app.api.limiter import auth_limiter
+
+@router.post("/login", dependencies=[Depends(auth_limiter)])
 def login_access_token(
     db: Session = Depends(deps.get_db), form_data: OAuth2PasswordRequestForm = Depends()
 ) -> Any:
@@ -30,10 +55,28 @@ def login_access_token(
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     
-    access_token = security.create_access_token(user.id, secret_key=settings.SUPABASE_JWT_SECRET)
+    access_token = security.create_access_token(
+        user.id, 
+        secret_key=settings.SUPABASE_JWT_SECRET,
+        extra_claims={"email": user.email}
+    )
     
-    from fastapi import Response
-    response = Response(content="{\"message\": \"Login successful\"}", media_type="application/json")
+    # Return JSON with token and user info, while also setting the cookie
+    return_data = {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "message": "Login successful",
+        "user": {
+            "id": str(user.id),
+            "email": user.email,
+            "name": user.name,
+            "subscription_tier": user.subscription_tier,
+            "is_superuser": user.is_superuser
+        }
+    }
+    
+    from fastapi.responses import JSONResponse
+    response = JSONResponse(content=return_data)
     response.set_cookie(
         key="access_token", 
         value=access_token, 
@@ -44,7 +87,7 @@ def login_access_token(
     )
     return response
 
-@router.post("/register", response_model=UserSchema)
+@router.post("/register", response_model=UserSchema, dependencies=[Depends(auth_limiter)])
 def register_user(
     *,
     db: Session = Depends(deps.get_db),
@@ -61,10 +104,18 @@ def register_user(
         email=user_in.email,
         password_hash=security.get_password_hash(user_in.password),
         name=user_in.name,
+        is_verified=False # Start unverified
     )
     db.add(user)
     db.commit()
     db.refresh(user)
+
+    # Send verification email if SendGrid is configured
+    from app.services.email import email_service
+    # Generate a temporary verification token (reusing the access token logic for simplicity)
+    verify_token = security.create_access_token(user.id, expires_delta=timedelta(hours=24))
+    email_service.send_verification_email(user.email, user.name, verify_token)
+    
     return user
 
 from fastapi.responses import RedirectResponse
@@ -74,7 +125,7 @@ def google_login():
     """Redirect to Google Login."""
     # Note: Replace this with your actual Google Client ID from Google Cloud Console
     client_id = settings.GOOGLE_CLIENT_ID
-    redirect_uri = f"{settings.FRONTEND_URL}/auth/callback"
+    redirect_uri = f"{settings.API_V1_STR_FULL}/auth/callback"
     scope = "openid email profile"
     google_url = (
         f"https://accounts.google.com/o/oauth2/v2/auth?"
@@ -85,18 +136,18 @@ def google_login():
     )
     return RedirectResponse(google_url)
 
-@router.post("/google/callback")
+@router.get("/callback")
 async def google_callback(
-    request: dict,
+    code: str,
     db: Session = Depends(deps.get_db)
 ) -> Any:
-    """Handle Real Google OAuth2 callback and return PhishX token."""
-    code = request.get("code")
+    """Handle Google OAuth2 callback, set cookie, and redirect to frontend."""
     
     # These should be in your .env file eventually
     client_id = settings.GOOGLE_CLIENT_ID
     client_secret = settings.GOOGLE_CLIENT_SECRET
-    redirect_uri = f"{settings.FRONTEND_URL}/auth/callback"
+    # IMPORTANT: This MUST match the redirect_uri sent to Google in the first step
+    redirect_uri = f"{settings.API_V1_STR_FULL}/auth/callback"
     
     # 1. Exchange code for Google Access Token
     async with httpx.AsyncClient() as client:
@@ -114,7 +165,7 @@ async def google_callback(
         
         if "error" in token_data:
             print(f"[DEBUG] Google Token Exchange Error: {token_data}")
-            raise HTTPException(status_code=400, detail=f"Google authentication failed: {token_data.get('error_description')}")
+            return RedirectResponse(f"{settings.FRONTEND_URL}?error=google_auth_failed")
             
         access_token = token_data.get("access_token")
         
@@ -142,10 +193,14 @@ async def google_callback(
         db.refresh(user)
 
     # 4. Generate PhishX access token
-    phishx_token = security.create_access_token(user.id, secret_key=settings.SUPABASE_JWT_SECRET)
+    phishx_token = security.create_access_token(
+        user.id, 
+        secret_key=settings.SUPABASE_JWT_SECRET,
+        extra_claims={"email": user.email}
+    )
     
-    from fastapi import Response
-    response = Response(content="{\"message\": \"Google Login successful\"}", media_type="application/json")
+    # 5. Redirect to frontend with the cookie set
+    response = RedirectResponse(url=settings.FRONTEND_URL)
     response.set_cookie(
         key="access_token", 
         value=phishx_token, 

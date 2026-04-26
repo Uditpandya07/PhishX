@@ -59,7 +59,7 @@ TRUSTED_DOMAINS = {
     # TRAVEL & TRANSPORTATION
     "uber.com", "lyft.com", "airbnb.com", "booking.com", "expedia.com", "tripadvisor.com",
     "kayak.com", "skyscanner.net", "hotels.com", "agoda.com", "zillow.com", "realtor.com",
-    "tesla.com", "ford.com", "gm.com", "toyota.com", "honda.com", "bmw.com", "mercedes-benz.com",
+    "tesla.com", "ford.com", "gm.com", "toyota.com", "honda.com", "bmw.com", "mercedes-benz.com", "audi.com", "volkswagen.com", "porsche.com", "ferrari.com", "lamborghini.com", "nissan-global.com", "hyundai.com", "kia.com",
     "delta.com", "united.com", "aa.com", "southwest.com", "lufthansa.com", "emirates.com",
 
     # EDUCATION, REFERENCE & GOVERNMENT

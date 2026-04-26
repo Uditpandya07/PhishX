@@ -38,9 +38,12 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onLo
   const validateForm = () => {
     if (!isLogin && name.trim() === "") return "Full Name is required to sign up.";
     if (!email.includes("@") || !email.includes(".")) return "Please enter a valid email address.";
+    if (password.trim() === "") return "Password is required.";
     
-    if (!hasLength || !hasUpper || !hasNumber || !hasSymbol) {
-      return "Please meet all the password requirements.";
+    if (!isLogin) {
+      if (!hasLength || !hasUpper || !hasNumber || !hasSymbol) {
+        return "Please meet all the password requirements.";
+      }
     }
     return null; 
   };
@@ -59,41 +62,48 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onLo
     setIsLoading(true);
     const apiCall = async () => {
       try {
-        const { supabase } = await import("../supabaseClient");
+        const baseUrl = import.meta.env.VITE_API_URL;
         
         if (isLogin) {
-          const { data, error: authError } = await supabase.auth.signInWithPassword({
-            email,
-            password,
+          // Use our backend login
+          const params = new URLSearchParams();
+          params.append('username', email);
+          params.append('password', password);
+          
+          const res = await axios.post(`${baseUrl}/api/v1/auth/login`, params, {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
           });
 
-          if (authError) throw authError;
-
-          // Sync with our backend
-          sessionStorage.setItem("token", data.session.access_token);
-          if (onLoginSuccess) onLoginSuccess(data.user);
-        } else {
-          const { data, error: authError } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-              data: { full_name: name }
-            }
-          });
-
-          if (authError) throw authError;
-
-          // If email confirmation is enabled, we show a message
-          if (data.user && data.session === null) {
-            setVerificationSent(true);
-          } else {
-            // Auto-login if confirmation is disabled
-            sessionStorage.setItem("token", data.session.access_token);
-            if (onLoginSuccess) onLoginSuccess(data.user);
+          // Check if we got a token in the response (some setups might return it in JSON)
+          // But our backend currently sets a cookie. 
+          // If it returns a token in JSON, we should save it.
+          if (res.data.access_token) {
+             sessionStorage.setItem("token", res.data.access_token);
+             localStorage.setItem("phishx_token", res.data.access_token);
           }
+          
+          if (onLoginSuccess) onLoginSuccess(res.data.user || { email });
+        } else {
+          // Use our backend register
+          const res = await axios.post(`${baseUrl}/api/v1/auth/register`, {
+            email,
+            password,
+            name
+          });
+
+          // Show verification message
+          setVerificationSent(true);
+          triggerNotification && triggerNotification("Verification email sent! Please check your inbox.");
         }
       } catch (err) {
-        setError(err.message || "Authentication failed.");
+        let errorMsg = "Authentication failed.";
+        if (err.response?.data?.detail) {
+          const detail = err.response.data.detail;
+          errorMsg = Array.isArray(detail) ? detail[0].msg : detail;
+        } else {
+          errorMsg = err.message || errorMsg;
+        }
+        setError(errorMsg);
       } finally {
         setIsLoading(false);
       }
@@ -235,14 +245,8 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onLo
           <button 
             type="button" 
             className="social-btn google-login-btn" 
-            onClick={async () => {
-              const { supabase } = await import("../supabaseClient");
-              await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                  redirectTo: window.location.origin
-                }
-              });
+            onClick={() => {
+              window.location.href = `${import.meta.env.VITE_API_URL}/api/v1/auth/google/login`;
             }}
             style={{ 
               width: "100%", 

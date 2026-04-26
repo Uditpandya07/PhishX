@@ -10,7 +10,8 @@ from app.db.models import User
 import uuid
 
 reusable_oauth2 = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_STR}/auth/login"
+    tokenUrl=f"{settings.API_V1_STR}/auth/login",
+    auto_error=False
 )
 
 def get_db() -> Generator:

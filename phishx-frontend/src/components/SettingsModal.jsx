@@ -20,8 +20,9 @@ export default function SettingsModal({ isOpen, onClose, user, onClearHistory })
     const newValue = !toggleAI;
     setToggleAI(newValue); // Optimistic update
     try {
+      const baseUrl = import.meta.env.VITE_API_URL;
       const token = sessionStorage.getItem("token");
-      await axios.put("http://127.0.0.1:8000/api/v1/users/me", 
+      await axios.put(`${baseUrl}/api/v1/users/me`, 
         { ai_training_enabled: newValue },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -41,8 +42,9 @@ export default function SettingsModal({ isOpen, onClose, user, onClearHistory })
     }
     setLoading(true);
     try {
+      const baseUrl = import.meta.env.VITE_API_URL;
       const token = sessionStorage.getItem("token");
-      await axios.put("http://127.0.0.1:8000/api/v1/users/me", 
+      await axios.put(`${baseUrl}/api/v1/users/me`, 
         { password },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -58,8 +60,9 @@ export default function SettingsModal({ isOpen, onClose, user, onClearHistory })
   const generateApiKey = async () => {
     setLoading(true);
     try {
+      const baseUrl = import.meta.env.VITE_API_URL;
       const token = sessionStorage.getItem("token");
-      const res = await axios.post("http://127.0.0.1:8000/api/v1/users/api-keys", {}, {
+      const res = await axios.post(`${baseUrl}/api/v1/users/api-keys`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setApiKey(res.data.key_value);
@@ -215,8 +218,9 @@ export default function SettingsModal({ isOpen, onClose, user, onClearHistory })
                       if (window.confirm("Are you sure? This will send a permanent deletion request for your account and all associated data.")) {
                         setLoading(true);
                         try {
+                          const baseUrl = import.meta.env.VITE_API_URL;
                           const token = sessionStorage.getItem("token");
-                          await axios.post("http://127.0.0.1:8000/api/v1/users/delete-request", {}, {
+                          await axios.post(`${baseUrl}/api/v1/users/delete-request`, {}, {
                             headers: { Authorization: `Bearer ${token}` }
                           });
                           setMessage("✅ Deletion request sent. Our team will process it within 24 hours.");

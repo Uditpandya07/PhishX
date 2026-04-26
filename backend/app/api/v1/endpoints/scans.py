@@ -92,7 +92,9 @@ def analyze_url(url: str, model_instance) -> dict:
         "features": {"extracted_features": features}
     }
 
-@router.post("/predict", response_model=ScanResponse)
+from app.api.limiter import scan_limiter
+
+@router.post("/predict", response_model=ScanResponse, dependencies=[Depends(scan_limiter)])
 def predict_url(
     *,
     db: Session = Depends(deps.get_db),
@@ -158,3 +160,18 @@ def delete_my_scans(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to clear history: {str(e)}")
+
+@router.delete("/{scan_id}")
+def delete_scan(
+    scan_id: str,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_active_user),
+) -> Any:
+    """Delete a specific scan from history."""
+    scan = db.query(Scan).filter(Scan.id == scan_id, Scan.user_id == current_user.id).first()
+    if not scan:
+        raise HTTPException(status_code=404, detail="Scan not found or unauthorized")
+    
+    db.delete(scan)
+    db.commit()
+    return {"detail": "Scan deleted successfully"}

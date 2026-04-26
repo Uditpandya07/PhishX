@@ -2,11 +2,52 @@ from typing import Any, Dict, List
 from fastapi import APIRouter, Depends, HTTPException, status
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import func
+from sqlalchemy import func, text
 from app.api import deps
 from app.db.models import User, Scan, Feedback, ApiKey, DeletionRequest
 
 router = APIRouter()
+
+@router.get("/health")
+def health_check(
+    db: Session = Depends(deps.get_db),
+) -> Any:
+    """Check system health and database connectivity."""
+    try:
+        # Simple query to check DB
+        db.execute(text("SELECT 1"))
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception:
+        return {
+            "status": "unhealthy",
+            "database": "error",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+@router.post("/repair-db")
+def repair_database(
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """Force re-initialization of all database tables and optimize."""
+    try:
+        from app.db.base import Base
+        from app.db.session import engine
+        import app.db.models as models # Ensure models are loaded
+        
+        # This creates missing tables without affecting existing data
+        Base.metadata.create_all(bind=engine)
+        
+        # Clear any stalled connections or session states
+        db.execute(text("ANALYZE")) 
+        
+        return {"status": "success", "message": "Database tables synchronized and optimized."}
+    except Exception:
+        raise HTTPException(status_code=500, detail="Database synchronization and optimization failed.")
 
 @router.get("/stats")
 def get_global_stats(
@@ -24,7 +65,7 @@ def get_global_stats(
     scans_over_time = db.query(
         func.date(Scan.timestamp).label('date'),
         func.count(Scan.id).label('count')
-    ).filter(Scan.timestamp >= seven_days_ago).group_by(func.date(Scan.timestamp)).all()
+    ).filter(Scan.timestamp >= seven_days_ago).group_by(func.date(Scan.timestamp)).order_by(func.date(Scan.timestamp).asc()).all()
     
     time_series = [{"date": str(s.date), "count": s.count} for s in scans_over_time]
     
