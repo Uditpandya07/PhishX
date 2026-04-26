@@ -1,5 +1,13 @@
 # 🛡️ PhishX: Enterprise-Grade AI Phishing Protection
 
+<div align="center">
+  <img src="https://img.shields.io/badge/Achievement-Quickdraw-ff69b4?style=for-the-badge&logo=github" alt="Quickdraw Achievement" />
+  <img src="https://img.shields.io/badge/Security-PhishX_Engine_V2-3b82f6?style=for-the-badge&logo=shield" alt="PhishX Engine" />
+  <img src="https://img.shields.io/badge/Build-Production_Ready-4ade80?style=for-the-badge&logo=checkmarx" alt="Production Ready" />
+</div>
+
+<br />
+
 PhishX is a cutting-edge, full-stack cybersecurity platform designed to neutralize malicious URLs before they reach the user. By combining a **Pure Lexical Machine Learning Engine** with a **Real-Time Heuristic Override Layer**, PhishX provides sub-millisecond detection for advanced phishing threats, typosquatting, and social engineering attacks.
 
 ---
