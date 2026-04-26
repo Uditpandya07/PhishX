@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FaGithub, FaTwitter, FaLinkedin, FaShieldAlt, FaBolt, FaRobot, FaLock, FaHistory, FaCode, FaChartLine, FaEnvelopeOpenText, FaSearch, FaExclamationTriangle, FaTerminal, FaInfoCircle, FaCrown, FaCog, FaSignOutAlt, FaSignInAlt, FaUserPlus, FaUserShield } from "react-icons/fa";
+import { FaGithub, FaTwitter, FaLinkedin, FaShieldAlt, FaBolt, FaRobot, FaLock, FaHistory, FaCode, FaChartLine, FaEnvelopeOpenText, FaSearch, FaExclamationTriangle, FaTerminal, FaInfoCircle, FaCrown, FaCog, FaSignOutAlt, FaSignInAlt, FaUserPlus, FaUserShield, FaTrashAlt } from "react-icons/fa";
 import { motion, useScroll, useSpring } from "framer-motion";
 import axios from "axios";
 import Background from "../components/Background";
@@ -71,8 +71,9 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
     setIsModalOpen(true);
   };
 
-  const handleLoginSuccess = async () => {
+  const handleLoginSuccess = async (userData) => {
     setIsLoggedIn(true);
+    if (userData) setUser(userData);
     if (setEntered) setEntered(true);
     setIsModalOpen(false);
     if (triggerNotification) triggerNotification("Authentication Successful! Welcome back.");
@@ -85,6 +86,22 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
   const handleClearLocalHistory = () => {
     sessionStorage.setItem("history_clear_timestamp", Date.now().toString());
     setScanHistory([]);
+  };
+
+  const handleDeleteScan = async (scanId) => {
+    if (!window.confirm("Permanently delete this scan from your history?")) return;
+    
+    try {
+      const token = sessionStorage.getItem("token");
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/v1/scans/${scanId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setScanHistory(prev => prev.filter(s => s.id !== scanId));
+      if (triggerNotification) triggerNotification("Scan deleted successfully.");
+    } catch (err) {
+      console.error("Failed to delete scan:", err);
+      alert("Failed to delete scan. Please try again.");
+    }
   };
 
   const setView = (view) => {
@@ -256,7 +273,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                  <div className="table-responsive">
                     <table className="history-table">
                       <thead>
-                        <tr><th>Target Entity</th><th>Discovery Date</th><th>Risk Evaluation</th><th>Status</th></tr>
+                        <tr><th>Target Entity</th><th>Discovery Date</th><th>Risk Evaluation</th><th>Status</th><th>Actions</th></tr>
                       </thead>
                       <tbody>
                          {scanHistory.slice(0, visibleCount).map((scan) => (
@@ -267,6 +284,25 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                               <td style={{ color: '#64748b' }}>{scan.date}</td>
                               <td style={{ fontWeight: 700 }}>{scan.risk}%</td>
                               <td><span className={`badge ${scan.status === "Safe" ? "safe" : "danger"}`}>{scan.status}</span></td>
+                              <td>
+                                <button 
+                                  onClick={() => handleDeleteScan(scan.id)}
+                                  className="delete-item-btn"
+                                  title="Delete from history"
+                                  style={{ 
+                                    background: 'transparent', 
+                                    border: 'none', 
+                                    color: '#64748b', 
+                                    cursor: 'pointer',
+                                    transition: 'color 0.2s',
+                                    padding: '5px'
+                                  }}
+                                  onMouseOver={(e) => e.currentTarget.style.color = '#ef4444'}
+                                  onMouseOut={(e) => e.currentTarget.style.color = '#64748b'}
+                                >
+                                  <FaTrashAlt />
+                                </button>
+                              </td>
                             </tr>
                          ))}
                       </tbody>
