@@ -23,24 +23,25 @@ export default function AdminPanel() {
   ]);
 
   const fetchData = async () => {
+    const baseUrl = import.meta.env.VITE_API_URL;
     const token = sessionStorage.getItem("token");
     const headers = { Authorization: `Bearer ${token}` };
 
     // Fetch Stats
     try {
-      const res = await axios.get("http://127.0.0.1:8000/api/v1/admin/stats", { headers });
+      const res = await axios.get(`${baseUrl}/api/v1/admin/stats`, { headers });
       setStats(res.data);
     } catch (err) { console.error("Stats fetch failed:", err); }
 
     // Fetch Feedback
     try {
-      const res = await axios.get("http://127.0.0.1:8000/api/v1/feedback/", { headers });
+      const res = await axios.get(`${baseUrl}/api/v1/feedback/`, { headers });
       setFeedback(res.data);
     } catch (err) { console.error("Feedback fetch failed:", err); }
 
     // Fetch Deletion Requests
     try {
-      const res = await axios.get("http://127.0.0.1:8000/api/v1/admin/deletion-requests", { headers });
+      const res = await axios.get(`${baseUrl}/api/v1/admin/deletion-requests`, { headers });
       // Map the data to ensure email is accessible
       const mapped = res.data.map(req => ({
         ...req,
@@ -54,6 +55,7 @@ export default function AdminPanel() {
 
   const runDiagnostics = async () => {
     setIsPulseRunning(true);
+    const baseUrl = import.meta.env.VITE_API_URL;
     const token = sessionStorage.getItem("token");
     const headers = { Authorization: `Bearer ${token}` };
 
@@ -66,14 +68,14 @@ export default function AdminPanel() {
 
     // 1. API Gateway Test
     try {
-      await axios.get("http://127.0.0.1:8000/", { headers });
+      await axios.get(`${baseUrl}/`, { headers });
       updateTest('api', 'success', 'Live');
     } catch { updateTest('api', 'error', 'Offline'); }
 
     // 2. Database Test
     try {
       const start = performance.now();
-      await axios.get("http://127.0.0.1:8000/api/v1/admin/stats", { headers });
+      await axios.get(`${baseUrl}/api/v1/admin/stats`, { headers });
       const end = performance.now();
       updateTest('db', 'success', 'Connected');
       updateTest('latency', 'success', `${Math.round(end - start)}ms`);
@@ -84,13 +86,13 @@ export default function AdminPanel() {
 
     // 3. Scanner Test
     try {
-      await axios.get("http://127.0.0.1:8000/api/v1/scans/history", { headers });
+      await axios.get(`${baseUrl}/api/v1/scans/history`, { headers });
       updateTest('scanner', 'success', 'Ready');
     } catch { updateTest('scanner', 'error', 'Fault'); }
 
     // 4. Auth Test
     try {
-      await axios.get("http://127.0.0.1:8000/api/v1/users/me", { headers });
+      await axios.get(`${baseUrl}/api/v1/users/me`, { headers });
       updateTest('auth', 'success', 'Secured');
     } catch { updateTest('auth', 'error', 'Expired'); }
 
@@ -106,7 +108,7 @@ export default function AdminPanel() {
     try {
       // We use a simple fetch to see if the endpoint is responsive
       // If it redirects (307), it's working!
-      const res = await axios.get("http://127.0.0.1:8000/api/v1/auth/google/login", { headers });
+      const res = await axios.get(`${baseUrl}/api/v1/auth/google/login`, { headers });
       updateTest('cors', 'success', 'Passing');
       updateTest('oauth', 'success', 'Responsive');
     } catch (err) {
@@ -124,7 +126,7 @@ export default function AdminPanel() {
     // 7. Logic Core (Minute Function Test)
     try {
       // Perform a 'Circuit Check' on the internal state engine
-      const res = await axios.get("http://127.0.0.1:8000/api/v1/users/me", { headers });
+      const res = await axios.get(`${baseUrl}/api/v1/users/me`, { headers });
       const userData = res.data;
       
       // Verify that 'Minute' fields like ai_training_enabled are present and typed correctly
@@ -137,19 +139,38 @@ export default function AdminPanel() {
       updateTest('logic', 'error', 'Drift');
     }
 
+    // 8. Database Deep Health
+    try {
+      const res = await axios.get(`${baseUrl}/api/v1/admin/health`, { headers });
+      if (res.data.status === "healthy") {
+        updateTest('db', 'success', 'Optimized');
+      } else {
+        updateTest('db', 'error', res.data.database || 'Congested');
+      }
+    } catch (err) {
+      updateTest('db', 'error', 'Disconnected');
+    }
+
     setIsPulseRunning(false);
   };
 
   useEffect(() => {
     fetchData();
+    // Auto-run diagnostics every 60 seconds
+    const interval = setInterval(() => {
+      runDiagnostics();
+      fetchData();
+    }, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleAction = async (id, action) => {
     if (!window.confirm(`Are you sure you want to ${action} this deletion request?`)) return;
     
     try {
+      const baseUrl = import.meta.env.VITE_API_URL;
       const token = sessionStorage.getItem("token");
-      await axios.post(`http://127.0.0.1:8000/api/v1/admin/deletion-requests/${id}/${action}`, {}, {
+      await axios.post(`${baseUrl}/api/v1/admin/deletion-requests/${id}/${action}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert(`Request ${action}ed successfully.`);
@@ -208,6 +229,40 @@ export default function AdminPanel() {
           >
             <FaSyncAlt className={isPulseRunning ? 'spin' : ''} />
             {isPulseRunning ? 'SCANNING...' : 'RUN DIAGNOSTICS'}
+          </button>
+          <button 
+            className="pulse-btn"
+            onClick={async () => {
+              if (window.confirm("Attempt to repair and synchronize all database tables?")) {
+                try {
+                  const token = sessionStorage.getItem("token");
+                  const baseUrl = import.meta.env.VITE_API_URL;
+                  await axios.post(`${baseUrl}/api/v1/admin/repair-db`, {}, {
+                    headers: { Authorization: `Bearer ${token}` }
+                  });
+                  alert("✅ Neural Database Repaired & Optimized.");
+                  runDiagnostics();
+                } catch (err) {
+                  alert("❌ Repair failed. Check backend logs.");
+                }
+              }
+            }}
+            style={{
+              background: 'rgba(59, 130, 246, 0.1)',
+              color: '#3b82f6',
+              border: '1px solid rgba(59, 130, 246, 0.3)',
+              padding: '10px 20px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              fontWeight: '600',
+              transition: 'all 0.3s'
+            }}
+          >
+            <FaDatabase />
+            REPAIR DATABASE
           </button>
         </div>
         <div className="pulse-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
