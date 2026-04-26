@@ -9,6 +9,11 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "super-secret-key-please-change-me"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    BACKEND_URL: str = "http://localhost:8000"
+    
+    @property
+    def API_V1_STR_FULL(self) -> str:
+        return f"{self.BACKEND_URL}{self.API_V1_STR}"
     
     # CORS
     FRONTEND_URL: str = "http://localhost:5173"
