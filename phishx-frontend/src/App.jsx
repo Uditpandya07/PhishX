@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 import { FaShieldAlt } from "react-icons/fa";
+import { supabase } from "./supabaseClient";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 
@@ -12,6 +13,7 @@ export default function App() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [entered, setEntered] = useState(false);
   const [notification, setNotification] = useState(null);
+  const codeProcessed = useRef(false);
 
   const triggerNotification = (msg) => {
     setNotification(msg);
@@ -19,40 +21,90 @@ export default function App() {
   };
 
   useEffect(() => {
-    // Check if we are already logged in via cookie
-    axios.get(`${import.meta.env.VITE_API_URL}/api/v1/users/me`)
-      .then(res => {
+    // Fail-safe: ensure the app eventually stops loading even if network hangs
+    const failSafe = setTimeout(() => {
+      setCheckingAuth(false);
+    }, 3000);
+
+    // Add axios interceptor for auth
+    const interceptor = axios.interceptors.request.use(
+      async (config) => {
+        let token = sessionStorage.getItem("token") || localStorage.getItem("phishx_token");
+        
+        // Only check Supabase if no local token is found (prevents slow requests)
+        if (!token) {
+          try {
+            const { data } = await supabase.auth.getSession();
+            token = data.session?.access_token;
+          } catch (e) {
+            console.warn("Supabase session check skipped/failed");
+          }
+        }
+
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
+
+    const checkAuth = async () => {
+      try {
+        await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/users/me`);
         setIsLoggedIn(true);
         setEntered(true);
-      })
-      .catch(() => {
+      } catch (err) {
         setIsLoggedIn(false);
-      })
-      .finally(() => {
+      } finally {
         setCheckingAuth(false);
-      });
+      }
+    };
 
-    // Check if we are coming back from Google
+    checkAuth();
+
     const urlParams = new URLSearchParams(window.location.search);
+    
+    // Handle Email Verification Results
+    if (urlParams.get("verified") === "true") {
+      triggerNotification("Email Verified Successfully! You can now access all features.");
+      window.history.replaceState({}, document.title, "/");
+    } else if (urlParams.get("error") === "verification_failed") {
+      triggerNotification("Verification failed or link expired. Please try again.");
+      window.history.replaceState({}, document.title, "/");
+    }
+
+    // Check if we are coming back from Google (Backend-driven OAuth)
     const code = urlParams.get("code");
     
-    if (code) {
+    if (code && !codeProcessed.current) {
+      codeProcessed.current = true;
       setCheckingAuth(true);
       axios.post(`${import.meta.env.VITE_API_URL}/api/v1/auth/google/callback`, { code })
         .then(res => {
+          if (res.data.access_token) {
+            sessionStorage.setItem("token", res.data.access_token);
+            localStorage.setItem("phishx_token", res.data.access_token);
+          }
           setIsLoggedIn(true);
           setEntered(true);
           triggerNotification("Authentication Successful! Welcome back.");
         })
         .catch(err => {
           console.error("Google Auth failed:", err);
-          setEntered(false);
+          triggerNotification("Google login failed. Please try again or use email.");
         })
         .finally(() => {
           setCheckingAuth(false);
+          // Clean up the URL
           window.history.replaceState({}, document.title, "/");
         });
     }
+
+    return () => {
+      axios.interceptors.request.eject(interceptor);
+      clearTimeout(failSafe);
+    };
   }, []);
 
   const isCallback = useMemo(() => new URLSearchParams(window.location.search).has("code"), []);
@@ -128,7 +180,18 @@ export default function App() {
           >
             {/* We pass the onLogout function and login state to Dashboard here */}
             <Dashboard 
-              onLogout={() => { setEntered(false); setIsLoggedIn(false); triggerNotification("Logged out successfully."); }} 
+              onLogout={async () => { 
+                try {
+                  await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/auth/logout`);
+                } catch (e) {
+                  console.error("Logout request failed:", e);
+                }
+                sessionStorage.removeItem("token");
+                localStorage.removeItem("phishx_token");
+                setEntered(false); 
+                setIsLoggedIn(false); 
+                triggerNotification("Logged out successfully."); 
+              }} 
               isLoggedIn={isLoggedIn} 
               setIsLoggedIn={setIsLoggedIn}
               setEntered={setEntered}
