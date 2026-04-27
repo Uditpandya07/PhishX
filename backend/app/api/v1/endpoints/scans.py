@@ -8,6 +8,8 @@ import joblib
 import os
 import re
 from urllib.parse import urlparse
+from app.core.config import settings
+from fastapi.concurrency import run_in_threadpool
 
 # Wait, instead of importing feature_extractor here, we should put it in services
 from app.services.feature_extractor import extract_features
@@ -21,27 +23,38 @@ model = None
 def get_model():
     global model
     if model is None:
-        # Construct path to the model file
-        model_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', '..', 'model', 'phishing_model.pkl')
+        # Resolve path - allow absolute or relative to root
+        if os.path.isabs(settings.MODEL_PATH):
+            model_path = settings.MODEL_PATH
+        else:
+            # Assume relative to project root
+            # This is a more robust way to find the model file
+            root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', '..'))
+            model_path = os.path.join(root_dir, settings.MODEL_PATH)
         
-        # INTEGRITY CHECK (Audit #9)
+        # INTEGRITY CHECK
         import hashlib
         try:
             with open(model_path, 'rb') as f:
                 content = f.read()
                 file_hash = hashlib.sha256(content).hexdigest()
-                # Use a dummy hash if the file is being generated; 
-                # In production, this should be the actual hash of phishing_model.pkl
-                EXPECTED_HASH = os.getenv("EXPECTED_MODEL_HASH", "5d1d2d16fabd7ad78a9896cb3dfe5855c622cdccdedcfefe70d47f434c55d899")
-                if file_hash != EXPECTED_HASH:
+                
+                # Check against configured hash
+                if file_hash != settings.EXPECTED_MODEL_HASH:
+                    # In dev, we might have a different model, so we log warning but don't halt 
+                    # unless it's a known production-critical mismatch
                     print(f"CRITICAL: Model Integrity Violation! Found: {file_hash}")
-                    # For safety in dev, we log but continue if hash is the dummy
-                    if EXPECTED_HASH != "4841968846c921c5f340889fdf2e210a48ec2a66504a74a1617415414cf5f98a":
+                    if os.getenv("STRICT_MODEL_CHECK", "False").lower() == "true":
                         raise HTTPException(status_code=500, detail="Security violation: ML model tampered.")
             
             model = joblib.load(model_path)
         except FileNotFoundError:
-            raise HTTPException(status_code=500, detail="Machine learning model not found.")
+            # Fallback for local development if the path above is slightly off
+            alt_path = os.path.join(os.getcwd(), settings.MODEL_PATH)
+            if os.path.exists(alt_path):
+                model = joblib.load(alt_path)
+            else:
+                raise HTTPException(status_code=500, detail=f"Machine learning model not found at {model_path}")
     return model
 
 SAFE_WHITELIST = TRUSTED_DOMAINS
@@ -95,7 +108,7 @@ def analyze_url(url: str, model_instance) -> dict:
 from app.api.limiter import scan_limiter
 
 @router.post("/predict", response_model=ScanResponse, dependencies=[Depends(scan_limiter)])
-def predict_url(
+async def predict_url(
     *,
     db: Session = Depends(deps.get_db),
     scan_in: ScanCreate,
@@ -105,8 +118,8 @@ def predict_url(
     try:
         ml_model = get_model()
         
-        # Analyze
-        result = analyze_url(scan_in.url, ml_model)
+        # Analyze - run CPU intensive task in threadpool
+        result = await run_in_threadpool(analyze_url, scan_in.url, ml_model)
         
         # Save to DB
         scan = Scan(

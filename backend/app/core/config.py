@@ -55,6 +55,7 @@ class Settings(BaseSettings):
 
     # Model Integrity
     EXPECTED_MODEL_HASH: str = "5d1d2d16fabd7ad78a9896cb3dfe5855c622cdccdedcfefe70d47f434c55d899"
+    MODEL_PATH: str = "model/phishing_model.pkl" # Relative to project root or absolute
 
     # Sentry
     SENTRY_DSN: Optional[str] = None
