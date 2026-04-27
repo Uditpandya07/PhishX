@@ -7,13 +7,14 @@ from sklearn.ensemble import RandomForestClassifier
 
 # Ensure the backend folder is accessible for feature extraction
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from backend.feature_extractor import extract_features
+from backend.app.services.feature_extractor import extract_features
 
-print("🚀 Booting High-Accuracy PhishX Training...")
+print("Booting High-Accuracy PhishX Training...")
 
 print("1. Loading dataset...")
 # Load your Kaggle file
-df = pd.read_csv("phishing_site_urls.csv")
+csv_path = os.path.join(os.path.dirname(__file__), "phishing_site_urls.csv")
+df = pd.read_csv(csv_path)
 df = df.dropna(subset=['URL', 'Label'])
 
 # Standardize labels: 'bad' -> 1, 'good' -> 0
@@ -48,7 +49,7 @@ model.fit(X_train, y_train)
 
 # Calculate Accuracy for your peace of mind
 accuracy = model.score(X_test, y_test)
-print(f"📊 Training Accuracy: {accuracy * 100:.2f}%")
+print(f"Training Accuracy: {accuracy * 100:.2f}%")
 
-joblib.dump(model, "phishing_model.pkl")
-print("✅ High-Accuracy Model saved successfully.")
+joblib.dump(model, os.path.join(os.path.dirname(__file__), "phishing_model.pkl"))
+print("High-Accuracy Model saved successfully.")
