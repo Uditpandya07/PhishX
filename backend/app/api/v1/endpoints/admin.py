@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, text
 from app.api import deps
+from app.schemas.admin import GlobalStats, DeletionRequestResponse
 from app.db.models import User, Scan, Feedback, ApiKey, DeletionRequest
 
 router = APIRouter()
@@ -49,7 +50,7 @@ def repair_database(
     except Exception:
         raise HTTPException(status_code=500, detail="Database synchronization and optimization failed.")
 
-@router.get("/stats")
+@router.get("/stats", response_model=GlobalStats)
 def get_global_stats(
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_active_superuser),
@@ -77,30 +78,14 @@ def get_global_stats(
         "scans_over_time": time_series,
     }
 
-@router.get("/deletion-requests")
+@router.get("/deletion-requests", response_model=List[DeletionRequestResponse])
 def get_deletion_requests(
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_active_superuser),
 ) -> Any:
-    """Get all pending deletion requests with user info (Fixed Serialization)."""
-    requests = db.query(DeletionRequest).options(joinedload(DeletionRequest.user)).all()
-    
-    # Manually convert to dict to prevent Pydantic serialization errors
-    results = []
-    for r in requests:
-        if r.status == "pending":
-            results.append({
-                "id": str(r.id),
-                "user_id": str(r.user_id),
-                "status": r.status,
-                "timestamp": r.timestamp.isoformat() if r.timestamp else None,
-                "user": {
-                    "email": r.user.email if r.user else "N/A"
-                }
-            })
-    
-    print(f"\n[DEBUG] Admin Panel sync successful. Found: {len(results)} pending requests.\n")
-    return results
+    """Get all pending deletion requests with user info."""
+    requests = db.query(DeletionRequest).options(joinedload(DeletionRequest.user)).filter(DeletionRequest.status == "pending").all()
+    return requests
 
 @router.post("/deletion-requests/{request_id}/approve")
 def approve_deletion(
