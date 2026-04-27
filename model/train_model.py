@@ -29,22 +29,22 @@ print(f"   - Unique Malicious URLs found: {len(df_phish)}")
 print(f"   - Unique Safe URLs found: {len(df_safe)}")
 
 # We will use ALL malicious URLs and match that number with Safe URLs for a 50/50 split
-sample_size = min(len(df_phish), 50000) # Cap at 50k for speed, or remove cap for max accuracy
+sample_size = min(len(df_phish), 100000) # Increased to 100k for V3
 df_phish_final = df_phish.sample(n=sample_size, random_state=42)
 df_safe_final = df_safe.sample(n=sample_size, random_state=42)
 
 df_final = pd.concat([df_phish_final, df_safe_final], ignore_index=True)
 print(f"2. Training on {len(df_final)} balanced samples (50% Phishing / 50% Safe)")
 
-print("3. Extracting Features... (This may take a few minutes)")
+print("3. Extracting 20 Features... (This may take a few minutes)")
 X = df_final["URL"].apply(extract_features).tolist()
 y = df_final["target"].tolist()
 
-print("4. Training the Enhanced Random Forest...")
+print("4. Training the V3 Elite Random Forest...")
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
 
-# Using more estimators and deeper trees for better detection
-model = RandomForestClassifier(n_estimators=150, max_depth=25, n_jobs=-1, random_state=42)
+# Using 200 estimators and deeper trees for Elite detection
+model = RandomForestClassifier(n_estimators=200, max_depth=35, n_jobs=-1, random_state=42)
 model.fit(X_train, y_train)
 
 # Calculate Accuracy for your peace of mind
