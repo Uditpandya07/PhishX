@@ -23,6 +23,9 @@ if settings.FRONTEND_URL not in origins:
 # Also allow localhost for development if needed
 if "http://localhost:5173" not in origins:
     origins.append("http://localhost:5173")
+if "http://127.0.0.1:5173" not in origins:
+    origins.append("http://127.0.0.1:5173")
+
 
 @app.middleware("http")
 async def add_security_headers(request, call_next):
