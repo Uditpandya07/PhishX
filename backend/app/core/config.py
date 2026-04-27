@@ -53,6 +53,9 @@ class Settings(BaseSettings):
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
 
+    # Model Integrity
+    EXPECTED_MODEL_HASH: str = "5d1d2d16fabd7ad78a9896cb3dfe5855c622cdccdedcfefe70d47f434c55d899"
+
     # Sentry
     SENTRY_DSN: Optional[str] = None
 
