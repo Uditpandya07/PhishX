@@ -3,12 +3,12 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.db.session import Base
 import uuid
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.types import Uuid
 
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    id = Column(Uuid, primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
     password_hash = Column(String, nullable=True)
@@ -33,8 +33,8 @@ class User(Base):
 class Scan(Base):
     __tablename__ = "scans"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    id = Column(Uuid, primary_key=True, default=uuid.uuid4, index=True)
+    user_id = Column(Uuid, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     url = Column(String, index=True, nullable=False)
     prediction = Column(String, nullable=False)
     risk_score = Column(Float, nullable=False)
@@ -47,8 +47,8 @@ class Scan(Base):
 class Payment(Base):
     __tablename__ = "payments"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    id = Column(Uuid, primary_key=True, default=uuid.uuid4, index=True)
+    user_id = Column(Uuid, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     stripe_payment_id = Column(String, unique=True, index=True)
     amount = Column(Float, nullable=False)
     currency = Column(String, default="usd")
@@ -63,8 +63,8 @@ class Payment(Base):
 class ApiKey(Base):
     __tablename__ = "api_keys"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    id = Column(Uuid, primary_key=True, default=uuid.uuid4, index=True)
+    user_id = Column(Uuid, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     key_hash = Column(String, nullable=False, unique=True)
     last_used = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -77,8 +77,8 @@ class ApiKey(Base):
 class AuditLog(Base):
     __tablename__ = "audit_logs"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    id = Column(Uuid, primary_key=True, default=uuid.uuid4, index=True)
+    user_id = Column(Uuid, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     action = Column(String, nullable=False)
     ip_address = Column(String, nullable=True)
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
@@ -89,7 +89,7 @@ class AuditLog(Base):
 class SubscriptionPlan(Base):
     __tablename__ = "subscription_plans"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    id = Column(Uuid, primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String, unique=True, index=True)
     price = Column(Float, nullable=False)
     scan_limit = Column(Integer, default=-1) # -1 means unlimited
@@ -99,9 +99,9 @@ class SubscriptionPlan(Base):
 class Feedback(Base):
     __tablename__ = "feedbacks"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    scan_id = Column(UUID(as_uuid=True), ForeignKey("scans.id", ondelete="CASCADE"), nullable=False)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    id = Column(Uuid, primary_key=True, default=uuid.uuid4, index=True)
+    scan_id = Column(Uuid, ForeignKey("scans.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Uuid, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     feedback_type = Column(String, nullable=False) # "false_positive" or "false_negative"
     comment = Column(Text, nullable=True)
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
@@ -113,8 +113,8 @@ class Feedback(Base):
 class DeletionRequest(Base):
     __tablename__ = "deletion_requests"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    id = Column(Uuid, primary_key=True, default=uuid.uuid4, index=True)
+    user_id = Column(Uuid, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     status = Column(String, default="pending") # "pending", "approved", "denied"
     reason = Column(Text, nullable=True)
     timestamp = Column(DateTime(timezone=True), server_default=func.now())

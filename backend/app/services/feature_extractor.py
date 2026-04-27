@@ -54,4 +54,23 @@ def extract_features(url):
     # 15. Redirection Tricks (Double slashes in the path)
     features.append(1 if '//' in parsed.path else 0)
 
+    # --- THE V3 ELITE FEATURES ---
+    
+    # 16. Subdomain Count (More subdomains = higher risk of smuggling)
+    subdomains = domain.split('.')
+    # Exclude 'www' and the TLD
+    features.append(max(0, len(subdomains) - 2) if len(subdomains) > 2 else 0)
+    
+    # 17. Punycode Detection (Detects "homograph" attacks like googlė.com)
+    features.append(1 if "xn--" in domain else 0)
+    
+    # 18. Digit Ratio in Domain (Random looking domains often have many numbers)
+    features.append(sum(c.isdigit() for c in domain) / len(domain) if len(domain) > 0 else 0)
+    
+    # 19. Non-Standard Port Usage
+    features.append(1 if parsed.port and parsed.port not in [80, 443] else 0)
+    
+    # 20. Tilde Presence (Common in legacy personal sites and phishing kits)
+    features.append(1 if '~' in url else 0)
+
     return features
