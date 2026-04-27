@@ -18,7 +18,7 @@ router = APIRouter()
 @router.post("/logout")
 def logout(response: Response):
     """Clear the authentication cookie."""
-    response.delete_cookie(key="access_token", httponly=True, secure=True, samesite="lax")
+    response.delete_cookie(key="access_token", httponly=True, secure=False, samesite="lax")
     return {"message": "Logged out successfully"}
 
 @router.get("/verify")
@@ -81,7 +81,7 @@ def login_access_token(
         key="access_token", 
         value=access_token, 
         httponly=True, 
-        secure=True, 
+        secure=False, 
         samesite="lax",
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
     )
@@ -205,7 +205,7 @@ async def google_callback(
         key="access_token", 
         value=phishx_token, 
         httponly=True, 
-        secure=True, 
+        secure=False, 
         samesite="lax",
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
     )
