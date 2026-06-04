@@ -11,6 +11,10 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     BACKEND_URL: str = "http://localhost:8000"
     
+    # Environment
+    PHISHX_ENV: str = "development"
+    COOKIE_SECURE: bool = True
+    
     @property
     def API_V1_STR_FULL(self) -> str:
         return f"{self.BACKEND_URL}{self.API_V1_STR}"
@@ -63,5 +67,6 @@ class Settings(BaseSettings):
     class Config:
         case_sensitive = True
         env_file = "../.env"
+        extra = "ignore"
 
 settings = Settings()
