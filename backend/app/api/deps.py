@@ -46,9 +46,11 @@ def get_current_user(
             raise HTTPException(status_code=403, detail="Invalid token")
             
     except (jwt.JWTError, ValidationError) as e:
+        import logging
+        logging.getLogger(__name__).warning(f"Token validation failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Could not validate credentials: {e}",
+            detail="Could not validate credentials",
         )
         
     # Check if user exists in our local DB

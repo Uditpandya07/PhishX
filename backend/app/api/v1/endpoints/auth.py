@@ -1,5 +1,7 @@
 from datetime import timedelta
 from typing import Any
+import os
+import logging
 import httpx
 import uuid
 from jose import jwt
@@ -13,12 +15,16 @@ from app.core.config import settings
 from app.schemas.token import Token
 from app.schemas.user import UserCreate, User as UserSchema
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
+
+# Production should always be True; only False for local HTTP dev
+COOKIE_SECURE = os.getenv("COOKIE_SECURE", "true").lower() == "true"
 
 @router.post("/logout")
 def logout(response: Response):
     """Clear the authentication cookie."""
-    response.delete_cookie(key="access_token", httponly=True, secure=False, samesite="lax")
+    response.delete_cookie(key="access_token", httponly=True, secure=COOKIE_SECURE, samesite="lax")
     return {"message": "Logged out successfully"}
 
 @router.get("/verify")
@@ -81,7 +87,7 @@ def login_access_token(
         key="access_token", 
         value=access_token, 
         httponly=True, 
-        secure=False, 
+        secure=COOKIE_SECURE, 
         samesite="lax",
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
     )
@@ -164,7 +170,7 @@ async def google_callback(
         token_data = token_res.json()
         
         if "error" in token_data:
-            print(f"[DEBUG] Google Token Exchange Error: {token_data}")
+            logger.error(f"Google Token Exchange Error: {token_data.get('error', 'unknown')}")
             return RedirectResponse(f"{settings.FRONTEND_URL}?error=google_auth_failed")
             
         access_token = token_data.get("access_token")
@@ -205,7 +211,7 @@ async def google_callback(
         key="access_token", 
         value=phishx_token, 
         httponly=True, 
-        secure=False, 
+        secure=COOKIE_SECURE, 
         samesite="lax",
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
     )

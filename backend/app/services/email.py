@@ -1,7 +1,10 @@
 import os
+import logging
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 class EmailService:
     def __init__(self):
@@ -10,7 +13,7 @@ class EmailService:
         
     def send_email(self, to_email: str, subject: str, html_content: str):
         if not self.api_key or self.api_key == "SG....":
-            print(f"[DEBUG] Skipping email to {to_email} (No SendGrid API Key)")
+            logger.debug(f"Skipping email to {to_email} (No SendGrid API Key)")
             return False
             
         message = Mail(
@@ -22,10 +25,10 @@ class EmailService:
         try:
             sg = SendGridAPIClient(self.api_key)
             response = sg.send(message)
-            print(f"[DEBUG] Email sent to {to_email}, status code: {response.status_code}")
+            logger.info(f"Email sent to {to_email}, status code: {response.status_code}")
             return True
         except Exception as e:
-            print(f"[DEBUG] SendGrid Error: {e}")
+            logger.error(f"SendGrid Error: {e}")
             return False
 
     def send_verification_email(self, to_email: str, name: str, token: str):

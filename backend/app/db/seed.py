@@ -32,10 +32,20 @@ def seed_db():
                 logger.info(f"Plan already exists: {plan_data['name']}")
                 
         # 2. Seed an Admin User
-        admin_email = "admin@phishx.com"
+        admin_email = os.environ.get("ADMIN_EMAIL", "admin@phishx.com")
         admin_user = db.query(User).filter(User.email == admin_email).first()
         if not admin_user:
-            hashed_password = get_password_hash("admin123")
+            admin_password = os.environ.get("ADMIN_PASSWORD")
+            if not admin_password:
+                import secrets as _secrets
+                admin_password = _secrets.token_urlsafe(16)
+                logger.warning(
+                    f"No ADMIN_PASSWORD env var set. Generated a random admin password for {admin_email}."
+                )
+                logger.warning(
+                    "Store credentials securely and rotate/reset the password through a secure channel."
+                )
+            hashed_password = get_password_hash(admin_password)
             new_admin = User(
                 name="Admin",
                 email=admin_email,
@@ -45,7 +55,7 @@ def seed_db():
                 subscription_tier="Enterprise"
             )
             db.add(new_admin)
-            logger.info("Created admin user: admin@phishx.com (password: admin123)")
+            logger.info(f"Created admin user: {admin_email}")
         else:
             logger.info("Admin user already exists")
 

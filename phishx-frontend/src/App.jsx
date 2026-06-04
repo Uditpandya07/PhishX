@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 import { FaShieldAlt } from "react-icons/fa";
@@ -13,7 +13,6 @@ export default function App() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [entered, setEntered] = useState(false);
   const [notification, setNotification] = useState(null);
-  const codeProcessed = useRef(false);
 
   const triggerNotification = (msg) => {
     setNotification(msg);
@@ -34,8 +33,10 @@ export default function App() {
         // Only check Supabase if no local token is found (prevents slow requests)
         if (!token) {
           try {
-            const { data } = await supabase.auth.getSession();
-            token = data.session?.access_token;
+            if (supabase) {
+              const { data } = await supabase.auth.getSession();
+              token = data.session?.access_token;
+            }
           } catch (e) {
             console.warn("Supabase session check skipped/failed");
           }
@@ -74,32 +75,6 @@ export default function App() {
       window.history.replaceState({}, document.title, "/");
     }
 
-    // Check if we are coming back from Google (Backend-driven OAuth)
-    const code = urlParams.get("code");
-    
-    if (code && !codeProcessed.current) {
-      codeProcessed.current = true;
-      setCheckingAuth(true);
-      axios.post(`${import.meta.env.VITE_API_URL}/api/v1/auth/google/callback`, { code })
-        .then(res => {
-          if (res.data.access_token) {
-            sessionStorage.setItem("token", res.data.access_token);
-            localStorage.setItem("phishx_token", res.data.access_token);
-          }
-          setIsLoggedIn(true);
-          setEntered(true);
-          triggerNotification("Authentication Successful! Welcome back.");
-        })
-        .catch(err => {
-          console.error("Google Auth failed:", err);
-          triggerNotification("Google login failed. Please try again or use email.");
-        })
-        .finally(() => {
-          setCheckingAuth(false);
-          // Clean up the URL
-          window.history.replaceState({}, document.title, "/");
-        });
-    }
 
     return () => {
       axios.interceptors.request.eject(interceptor);
@@ -107,8 +82,7 @@ export default function App() {
     };
   }, []);
 
-  const isCallback = useMemo(() => new URLSearchParams(window.location.search).has("code"), []);
-  const showLanding = !entered && !isCallback;
+  const showLanding = !entered;
 
   if (checkingAuth) {
     return (
