@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 from fastapi import APIRouter, Depends, HTTPException, status
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, text
 from app.api import deps
@@ -20,13 +20,13 @@ def health_check(
         return {
             "status": "healthy",
             "database": "connected",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
     except Exception:
         return {
             "status": "unhealthy",
             "database": "error",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
 
 @router.post("/repair-db")
@@ -62,7 +62,7 @@ def get_global_stats(
     total_feedback = db.query(func.count(Feedback.id)).scalar()
     
     # Get scans over the last 7 days
-    seven_days_ago = datetime.utcnow() - timedelta(days=7)
+    seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
     scans_over_time = db.query(
         func.date(Scan.timestamp).label('date'),
         func.count(Scan.id).label('count')
@@ -134,6 +134,6 @@ def deny_deletion(
         raise HTTPException(status_code=404, detail="Request not found")
     
     req.status = "denied"
-    req.processed_at = datetime.utcnow()
+    req.processed_at = datetime.now(timezone.utc)
     db.commit()
     return {"detail": "Deletion request denied. User remains active."}
