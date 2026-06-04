@@ -40,9 +40,11 @@ def seed_db():
                 import secrets as _secrets
                 admin_password = _secrets.token_urlsafe(16)
                 logger.warning(
-                    f"No ADMIN_PASSWORD env var set. Generated random password for {admin_email}: {admin_password}"
+                    f"No ADMIN_PASSWORD env var set. Generated a random admin password for {admin_email}."
                 )
-                logger.warning("Store this password securely — it will NOT be shown again.")
+                logger.warning(
+                    "Store credentials securely and rotate/reset the password through a secure channel."
+                )
             hashed_password = get_password_hash(admin_password)
             new_admin = User(
                 name="Admin",
