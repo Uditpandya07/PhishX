@@ -1,4 +1,5 @@
 from typing import Any, List
+import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.api import deps
@@ -11,9 +12,10 @@ from urllib.parse import urlparse
 from app.core.config import settings
 from fastapi.concurrency import run_in_threadpool
 
-# Wait, instead of importing feature_extractor here, we should put it in services
 from app.services.feature_extractor import extract_features
 from app.services.whitelist import TRUSTED_DOMAINS
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -23,38 +25,29 @@ model = None
 def get_model():
     global model
     if model is None:
-        # Resolve path - allow absolute or relative to root
-        if os.path.isabs(settings.MODEL_PATH):
-            model_path = settings.MODEL_PATH
-        else:
-            # Assume relative to project root
-            # This is a more robust way to find the model file
-            root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', '..'))
-            model_path = os.path.join(root_dir, settings.MODEL_PATH)
-        
+        model_path = settings.MODEL_PATH
+
+        # If not absolute, resolve relative to the working directory
+        if not os.path.isabs(model_path):
+            model_path = os.path.join(os.getcwd(), model_path)
+
+        if not os.path.exists(model_path):
+            raise HTTPException(
+                status_code=500,
+                detail=f"Machine learning model not found at {model_path}"
+            )
+
         # INTEGRITY CHECK
         import hashlib
-        try:
-            with open(model_path, 'rb') as f:
-                content = f.read()
-                file_hash = hashlib.sha256(content).hexdigest()
-                
-                # Check against configured hash
-                if file_hash != settings.EXPECTED_MODEL_HASH:
-                    # In dev, we might have a different model, so we log warning but don't halt 
-                    # unless it's a known production-critical mismatch
-                    print(f"CRITICAL: Model Integrity Violation! Found: {file_hash}")
-                    if os.getenv("STRICT_MODEL_CHECK", "False").lower() == "true":
-                        raise HTTPException(status_code=500, detail="Security violation: ML model tampered.")
-            
-            model = joblib.load(model_path)
-        except FileNotFoundError:
-            # Fallback for local development if the path above is slightly off
-            alt_path = os.path.join(os.getcwd(), settings.MODEL_PATH)
-            if os.path.exists(alt_path):
-                model = joblib.load(alt_path)
-            else:
-                raise HTTPException(status_code=500, detail=f"Machine learning model not found at {model_path}")
+        with open(model_path, 'rb') as f:
+            file_hash = hashlib.sha256(f.read()).hexdigest()
+
+        if file_hash != settings.EXPECTED_MODEL_HASH:
+            logger.critical(f"Model Integrity Violation! Expected={settings.EXPECTED_MODEL_HASH}, Found={file_hash}")
+            if os.getenv("STRICT_MODEL_CHECK", "false").lower() == "true":
+                raise HTTPException(status_code=500, detail="Security violation: ML model tampered.")
+
+        model = joblib.load(model_path)
     return model
 
 SAFE_WHITELIST = TRUSTED_DOMAINS
@@ -91,8 +84,15 @@ def analyze_url(url: str, model_instance) -> dict:
         
         # Determine the index of the 'Phishing' class dynamically
         classes = list(model_instance.classes_)
-        # We assume the label is either "Phishing" or 1
-        phish_idx = classes.index("Phishing") if "Phishing" in classes else (classes.index(1) if 1 in classes else 1)
+        if "Phishing" in classes:
+            phish_idx = classes.index("Phishing")
+            is_phishing = prediction == "Phishing"
+        elif 1 in classes:
+            phish_idx = classes.index(1)
+            is_phishing = prediction == 1
+        else:
+            phish_idx = 1
+            is_phishing = prediction == 1
         
         probability = model_instance.predict_proba([features])[0][phish_idx]
     except Exception as e:
@@ -100,7 +100,7 @@ def analyze_url(url: str, model_instance) -> dict:
 
     return {
         "url": url,
-        "prediction": "Phishing" if prediction == 1 else "Safe",
+        "prediction": "Phishing" if is_phishing else "Safe",
         "risk_score": float(round(probability * 100, 2)),
         "features": {"extracted_features": features}
     }
@@ -135,7 +135,7 @@ async def predict_url(
         
         return scan
     except Exception as e:
-        print(f"Prediction Error: {str(e)}")
+        logger.error(f"Prediction Error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal analysis engine error. Please try again later.")
 
 @router.get("/history", response_model=List[ScanResponse])
