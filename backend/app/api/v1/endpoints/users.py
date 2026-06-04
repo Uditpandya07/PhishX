@@ -1,4 +1,5 @@
 from typing import Any, List
+import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.api import deps
@@ -6,6 +7,8 @@ from app.schemas.user import User as UserSchema, UserUpdate
 from app.db.models import User, ApiKey
 import secrets
 import hashlib
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -17,7 +20,8 @@ def read_user_me(
     try:
         return UserSchema.from_orm(current_user) if hasattr(UserSchema, "from_orm") else UserSchema.model_validate(current_user)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Serialization Error: {e}")
+        logger.error(f"User serialization error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to load user profile")
 
 @router.put("/me", response_model=UserSchema)
 def update_user_me(
@@ -27,7 +31,7 @@ def update_user_me(
     current_user: User = Depends(deps.get_current_active_user),
 ) -> Any:
     """Update own user."""
-    user_data = user_in.dict(exclude_unset=True)
+    user_data = user_in.model_dump(exclude_unset=True)
     if "password" in user_data:
         from app.core.security import get_password_hash
         hashed_password = get_password_hash(user_data["password"])
@@ -89,6 +93,6 @@ def request_account_deletion(
     db.commit()
     
     # Still print to console for visibility
-    print(f"\n📧 NEW DELETION REQUEST: {current_user.email}\n")
+    logger.info(f"NEW DELETION REQUEST from user: {current_user.email}")
     
     return {"detail": "Deletion request received. Our team will process it shortly."}
