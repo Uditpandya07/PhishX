@@ -1,11 +1,5 @@
 <div align="center">
 
-  <a href="https://phishx-app.vercel.app/" target="_blank">
-    <img src="https://raw.githubusercontent.com/Uditpandya07/PhishX/main/phishx-frontend/public/logo.png" alt="PhishX Logo" width="280" />
-  </a>
-  
-  <br />
-  <br />
 
   <!-- 3D Animated Shield/Cybersecurity Element -->
   <img src="https://cdn.dribbble.com/users/1162077/screenshots/4382009/media/32185c7cb13715e714659b6dcc2fbfdf.gif" alt="3D Cybersecurity Shield" width="200" style="border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 230, 118, 0.4);" />
