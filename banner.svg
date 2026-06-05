@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" width="100%" height="100%">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&amp;display=swap');
+      
+      .bg { fill: #050b14; }
+      .grid { stroke: rgba(16, 185, 129, 0.15); stroke-width: 1; fill: none; }
+      .hex { stroke: rgba(16, 185, 129, 0.08); stroke-width: 1; fill: none; }
+      .shield { fill: none; stroke: #10b981; stroke-width: 3; filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.6)); }
+      .shield-inner { fill: rgba(16, 185, 129, 0.1); }
+      .check { fill: none; stroke: #10b981; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.8)); }
+      .radar-ring { fill: none; stroke: rgba(16, 185, 129, 0.3); stroke-width: 1; }
+      .radar-sweep { fill: url(#sweep-grad); }
+      .text { font-family: 'JetBrains Mono', monospace; fill: #10b981; font-size: 12px; opacity: 0.7; }
+      .text-alert { fill: #ef4444; }
+      .blip-green { fill: #10b981; filter: drop-shadow(0 0 5px #10b981); }
+      .blip-red { fill: #ef4444; filter: drop-shadow(0 0 5px #ef4444); }
+      .corner { stroke: #10b981; stroke-width: 2; fill: none; opacity: 0.5; }
+      .scanline { fill: url(#scan-grad); opacity: 0.3; }
+      .particle { fill: #10b981; opacity: 0.6; }
+      
+      /* Animations */
+      @keyframes pulse {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 1; }
+      }
+      @keyframes radar {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      @keyframes scan {
+        0% { transform: translateY(-400px); }
+        100% { transform: translateY(400px); }
+      }
+      @keyframes floatUp {
+        0% { transform: translateY(0); opacity: 0; }
+        50% { opacity: 0.6; }
+        100% { transform: translateY(-50px); opacity: 0; }
+      }
+      @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+      }
+      @keyframes dash {
+        to { stroke-dashoffset: -100; }
+      }
+
+      .anim-pulse { animation: pulse 3s infinite; }
+      .anim-radar { animation: radar 4s linear infinite; transform-origin: 600px 200px; }
+      .anim-scan { animation: scan 6s linear infinite; }
+      .anim-blink { animation: blink 1s step-end infinite; }
+      .anim-dash { stroke-dasharray: 10, 10; animation: dash 2s linear infinite; }
+    </style>
+
+    <linearGradient id="sweep-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(16, 185, 129, 0.4)" />
+      <stop offset="100%" stop-color="rgba(16, 185, 129, 0)" />
+    </linearGradient>
+
+    <linearGradient id="scan-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="rgba(16, 185, 129, 0)" />
+      <stop offset="50%" stop-color="rgba(16, 185, 129, 0.5)" />
+      <stop offset="100%" stop-color="rgba(16, 185, 129, 0)" />
+    </linearGradient>
+
+    <!-- Hexagon Pattern -->
+    <pattern id="hex-pattern" x="0" y="0" width="40" height="69.28" patternUnits="userSpaceOnUse">
+      <path class="hex" d="M 40 17.32 L 20 5.77 L 0 17.32 L 0 40.41 L 20 51.96 L 40 40.41 Z" />
+      <path class="hex" d="M 20 51.96 L 0 63.51" />
+      <path class="hex" d="M 20 51.96 L 40 63.51" />
+    </pattern>
+
+    <!-- Grid Pattern -->
+    <pattern id="grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+      <rect width="40" height="40" fill="none" stroke="rgba(16, 185, 129, 0.05)" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="400" class="bg" />
+
+  <!-- Hex Overlay with Pulse -->
+  <rect width="1200" height="400" fill="url(#hex-pattern)" class="anim-pulse" style="animation-duration: 5s;" />
+
+  <!-- Perspective Grid (Fake 3D) -->
+  <g opacity="0.3">
+    <!-- Horizontal lines -->
+    <line x1="0" y1="200" x2="1200" y2="200" class="grid" />
+    <line x1="0" y1="230" x2="1200" y2="230" class="grid" />
+    <line x1="0" y1="270" x2="1200" y2="270" class="grid" />
+    <line x1="0" y1="320" x2="1200" y2="320" class="grid" />
+    <line x1="0" y1="380" x2="1200" y2="380" class="grid" />
+    
+    <!-- Vertical Perspective lines -->
+    <line x1="600" y1="200" x2="600" y2="400" class="grid" />
+    <line x1="600" y1="200" x2="400" y2="400" class="grid" />
+    <line x1="600" y1="200" x2="800" y2="400" class="grid" />
+    <line x1="600" y1="200" x2="200" y2="400" class="grid" />
+    <line x1="600" y1="200" x2="1000" y2="400" class="grid" />
+    <line x1="600" y1="200" x2="0" y2="400" class="grid" />
+    <line x1="600" y1="200" x2="1200" y2="400" class="grid" />
+  </g>
+
+  <!-- Central Radar Base -->
+  <circle cx="600" cy="200" r="150" class="radar-ring" stroke-dasharray="4 4" />
+  <circle cx="600" cy="200" r="100" class="radar-ring" opacity="0.5" />
+  <circle cx="600" cy="200" r="50" class="radar-ring" opacity="0.3" />
+  
+  <!-- Radar Sweep -->
+  <path d="M 600 200 L 600 50 A 150 150 0 0 1 750 200 Z" class="radar-sweep anim-radar" />
+
+  <!-- Shield Icon -->
+  <g transform="translate(560, 150) scale(1.6)">
+    <path class="shield shield-inner" d="M 25 0 L 50 10 L 50 25 C 50 40 35 55 25 60 C 15 55 0 40 0 25 L 0 10 Z" />
+    <path class="check anim-pulse" d="M 15 30 L 22 37 L 35 22" />
+  </g>
+
+  <!-- Blips -->
+  <circle cx="680" cy="120" r="3" class="blip-green anim-pulse" style="animation-duration: 2s; animation-delay: 1s;" />
+  <circle cx="520" cy="260" r="4" class="blip-red anim-pulse" style="animation-duration: 1.5s; animation-delay: 0.5s;" />
+  <circle cx="720" cy="280" r="2" class="blip-green anim-pulse" style="animation-duration: 3s; animation-delay: 2s;" />
+
+  <!-- Corner Brackets -->
+  <path class="corner" d="M 40 60 L 40 40 L 60 40" />
+  <path class="corner" d="M 1160 60 L 1160 40 L 1140 40" />
+  <path class="corner" d="M 40 340 L 40 360 L 60 360" />
+  <path class="corner" d="M 1160 340 L 1160 360 L 1140 360" />
+
+  <!-- HUD Text Elements -->
+  <text x="60" y="60" class="text">SYS//PHISHX.AI_</text>
+  <text x="60" y="80" class="text" opacity="0.5">SECURE_NODE_ACTIVE</text>
+  
+  <text x="1000" y="60" class="text">THREAT_BLOCKS</text>
+  <text x="1000" y="80" class="text" style="font-size: 16px; font-weight: bold;">4,507,291</text>
+
+  <!-- Bottom Data Stream -->
+  <text x="60" y="350" class="text" opacity="0.5">ANALYZING_TRAFFIC...</text>
+  <line x1="220" y1="346" x2="350" y2="346" stroke="#10b981" stroke-width="2" class="anim-dash" />
+  
+  <text x="450" y="350" class="text text-alert anim-blink">THREAT_DETECTED_</text>
+  
+  <text x="1000" y="350" class="text" opacity="0.5">MODEL_V2.1.4</text>
+
+  <!-- Floating Particles -->
+  <circle cx="400" cy="300" r="1.5" class="particle" style="animation: floatUp 4s infinite 0s;" />
+  <circle cx="450" cy="100" r="1" class="particle" style="animation: floatUp 5s infinite 1s;" />
+  <circle cx="800" cy="250" r="2" class="particle" style="animation: floatUp 3.5s infinite 2s;" />
+  <circle cx="850" cy="150" r="1" class="particle" style="animation: floatUp 4.5s infinite 0.5s;" />
+
+  <!-- Global Scanline Overlay -->
+  <rect width="1200" height="40" class="scanline anim-scan" />
+
+</svg>
