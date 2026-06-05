@@ -33,11 +33,18 @@ def get_current_user(
             detail="Not authenticated",
         )
     try:
-        # Use Supabase JWT Secret to decode
-        payload = jwt.decode(
-            token, settings.SUPABASE_JWT_SECRET, algorithms=["HS256"], 
-            audience="authenticated" # Supabase default audience
-        )
+        # Try local JWT verification first
+        try:
+            payload = jwt.decode(
+                token, settings.SECRET_KEY, algorithms=["HS256"]
+            )
+        except jwt.JWTError:
+            # Fallback to Supabase token verification
+            payload = jwt.decode(
+                token, settings.SUPABASE_JWT_SECRET, algorithms=["HS256"], 
+                audience="authenticated"
+            )
+            
         user_id = payload.get("sub")
         email = payload.get("email")
         metadata = payload.get("user_metadata", {})

@@ -63,7 +63,6 @@ def login_access_token(
     
     access_token = security.create_access_token(
         user.id, 
-        secret_key=settings.SUPABASE_JWT_SECRET,
         extra_claims={"email": user.email}
     )
     
@@ -201,7 +200,6 @@ async def google_callback(
     # 4. Generate PhishX access token
     phishx_token = security.create_access_token(
         user.id, 
-        secret_key=settings.SUPABASE_JWT_SECRET,
         extra_claims={"email": user.email}
     )
     
