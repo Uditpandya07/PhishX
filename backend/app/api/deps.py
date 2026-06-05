@@ -33,31 +33,24 @@ def get_current_user(
             detail="Not authenticated",
         )
     try:
-        # Try local JWT verification first
-        try:
-            payload = jwt.decode(
-                token, settings.SECRET_KEY, algorithms=["HS256"]
-            )
-        except jwt.JWTError:
-            # Fallback to Supabase token verification
-            payload = jwt.decode(
-                token, settings.SUPABASE_JWT_SECRET, algorithms=["HS256"], 
-                audience="authenticated"
-            )
+        # Strict local JWT verification
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=["HS256"]
+        )
             
         user_id = payload.get("sub")
         email = payload.get("email")
         metadata = payload.get("user_metadata", {})
         
         if not user_id:
-            raise HTTPException(status_code=403, detail="Invalid token")
+            raise HTTPException(status_code=403, detail="Invalid token: missing sub")
             
     except (jwt.JWTError, ValidationError) as e:
         import logging
         logging.getLogger(__name__).warning(f"Token validation failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Could not validate credentials",
+            detail=f"Could not validate credentials: {str(e)}",
         )
         
     # Check if user exists in our local DB
