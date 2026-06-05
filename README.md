@@ -7,13 +7,7 @@
 
 
 <a href="https://phishx-app.vercel.app/" target="_blank">
-  <img src="https://raw.githubusercontent.com/Uditpandya07/PhishX/main/phishx-frontend/public/logo.png" alt="PhishX Logo" width="120" />
-</a>
-
-<br/>
-
-<a href="https://phishx-app.vercel.app/" target="_blank">
-  <img src="https://raw.githubusercontent.com/Uditpandya07/PhishX/main/phishx-frontend/public/brand-text.png" alt="PhishX" width="260" />
+  <img src="https://raw.githubusercontent.com/Uditpandya07/PhishX/main/banner.svg" alt="PhishX Threat Radar" width="100%" />
 </a>
 
 <br/><br/>
