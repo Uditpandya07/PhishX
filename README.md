@@ -7,14 +7,13 @@
 
 
 <a href="https://phishx-app.vercel.app/" target="_blank">
-  <img src="https://raw.githubusercontent.com/Uditpandya07/PhishX/main/phishx-frontend/public/brand-text.png" alt="PhishX" width="260" />
+  <img src="https://raw.githubusercontent.com/Uditpandya07/PhishX/main/phishx-frontend/public/logo.png" alt="PhishX Logo" width="120" />
 </a>
 
-<br/><br/>
+<br/>
 
-<!-- Animated 3D Cybersecurity Hero GIF -->
 <a href="https://phishx-app.vercel.app/" target="_blank">
-  <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbzZhcHJrdTQ0NXVicTNtbm1mMTBoZ3B4NXM0enVnZHZxajJmbnl4eSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/26tn33aiTi1jkl6H6/giphy.gif" width="480" alt="Cybersecurity AI Shield Animation" />
+  <img src="https://raw.githubusercontent.com/Uditpandya07/PhishX/main/phishx-frontend/public/brand-text.png" alt="PhishX" width="260" />
 </a>
 
 <br/><br/>
@@ -272,10 +271,11 @@ PhishX/
 │
 ├── docker-compose.yml                   # Development Environment
 ├── docker-compose.prod.yml              # Production Environment
-├── DEPLOYMENT.md                        # Production Deployment Guide
-├── JOURNEY.md                           # Architecture & Decision History
-├── RULE_AUTHORING.md                    # Threat Detection Rule Authoring
-└── RULE_PRECEDENCE.md                   # Rule Evaluation Order Reference
+├── 📁 docs/                             # Project Documentation
+│   ├── DEPLOYMENT.md                    #   → Production Deployment Guide
+│   ├── JOURNEY.md                       #   → Architecture & Decision History
+│   ├── RULE_AUTHORING.md                #   → Threat Detection Rule Authoring
+│   └── RULE_PRECEDENCE.md               #   → Rule Evaluation Order Reference
 ```
 
 </details>
@@ -397,7 +397,7 @@ PhishX is engineered with a **security-first** philosophy at every layer of the 
     <td align="center" width="25%">
       <br/>
       <strong>🚀 Deployment Guide</strong><br/>
-      <a href="DEPLOYMENT.md"><code>DEPLOYMENT.md</code></a>
+      <a href="docs/DEPLOYMENT.md"><code>docs/DEPLOYMENT.md</code></a>
       <br/><br/>
       <sub>Step-by-step instructions for pushing PhishX to a production environment with Docker.</sub>
       <br/><br/>
@@ -405,7 +405,7 @@ PhishX is engineered with a **security-first** philosophy at every layer of the 
     <td align="center" width="25%">
       <br/>
       <strong>📖 Development Journey</strong><br/>
-      <a href="JOURNEY.md"><code>JOURNEY.md</code></a>
+      <a href="docs/JOURNEY.md"><code>docs/JOURNEY.md</code></a>
       <br/><br/>
       <sub>The history, architecture decisions, and trade-offs made throughout the build.</sub>
       <br/><br/>
@@ -413,7 +413,7 @@ PhishX is engineered with a **security-first** philosophy at every layer of the 
     <td align="center" width="25%">
       <br/>
       <strong>✍️ Rule Authoring</strong><br/>
-      <a href="RULE_AUTHORING.md"><code>RULE_AUTHORING.md</code></a>
+      <a href="docs/RULE_AUTHORING.md"><code>docs/RULE_AUTHORING.md</code></a>
       <br/><br/>
       <sub>Guidelines for writing custom threat detection rules for the scanning engine.</sub>
       <br/><br/>
@@ -421,7 +421,7 @@ PhishX is engineered with a **security-first** philosophy at every layer of the 
     <td align="center" width="25%">
       <br/>
       <strong>⚖️ Rule Precedence</strong><br/>
-      <a href="RULE_PRECEDENCE.md"><code>RULE_PRECEDENCE.md</code></a>
+      <a href="docs/RULE_PRECEDENCE.md"><code>docs/RULE_PRECEDENCE.md</code></a>
       <br/><br/>
       <sub>How conflicting rules are evaluated and resolved by the detection pipeline.</sub>
       <br/><br/>
