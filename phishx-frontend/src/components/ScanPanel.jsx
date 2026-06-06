@@ -113,11 +113,12 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }
       setScanProgress(100);
       
       setTimeout(() => {
-        console.error("Backend failed:", err.response?.data?.detail || err.message);
+        const errorMsg = err.response?.data?.detail || err.message || "Unknown error";
+        console.error("Backend failed:", errorMsg);
         setLoading(false);
         setScanProgress(0);
-        // Show an error notification or alert
-        alert("Deep Analysis Engine is currently unavailable. Please check your connection and try again.");
+        // Show the actual error so we know why it's failing
+        alert(`Deep Analysis Engine Error: ${errorMsg}`);
       }, 500);
     }
   };
