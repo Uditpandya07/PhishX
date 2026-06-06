@@ -1,3 +1,6 @@
+import logging
+import os
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
@@ -8,7 +11,25 @@ from app.db.session import engine
 # Auto-creation is disabled in favor of Alembic migrations
 # Base.metadata.create_all(bind=engine)
 
+logger = logging.getLogger(__name__)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Pre-load the ML model at startup so the first request isn't slow/timed-out."""
+    try:
+        from app.api.v1.endpoints.scans import get_model
+        logger.info("Loading ML model at startup...")
+        get_model()
+        logger.info("ML model loaded successfully and ready to serve predictions.")
+    except Exception as e:
+        logger.error(f"Failed to pre-load ML model at startup: {e}")
+        # Don't crash the server — model will be loaded lazily on first request
+    yield
+    # Shutdown
+    logger.info("Shutting down PhishX API.")
+
 app = FastAPI(
+    lifespan=lifespan,
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     description="Production-grade AI-powered phishing URL detection API",
