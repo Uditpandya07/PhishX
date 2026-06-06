@@ -31,15 +31,11 @@ class Settings(BaseSettings):
             return v
         raise ValueError(v)
 
-    # Database
+    # Database (Neon Postgres)
     DATABASE_URL: Optional[str] = None
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "postgres"
     POSTGRES_DB: str = "phishx"
-    
-    SUPABASE_URL: str = ""
-    SUPABASE_ANON_KEY: str = ""
-    SUPABASE_JWT_SECRET: str = ""
 
     # Stripe
     STRIPE_API_KEY: Optional[str] = None

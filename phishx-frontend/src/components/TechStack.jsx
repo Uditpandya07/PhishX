@@ -1,13 +1,13 @@
 import { motion } from "framer-motion";
 import { FaPython, FaReact, FaDatabase, FaShieldAlt } from "react-icons/fa";
-import { SiFastapi, SiScikitlearn, SiSupabase, SiVite } from "react-icons/si";
+import { SiFastapi, SiScikitlearn, SiPostgresql, SiVite } from "react-icons/si";
 import "./TechStack.css";
 
 const tools = [
   { name: "FastAPI", icon: <SiFastapi />, desc: "High-performance backend engine" },
   { name: "Random Forest", icon: <SiScikitlearn />, desc: "Optimized ML Classifier" },
   { name: "React 19", icon: <FaReact />, desc: "Reactive & dynamic interface" },
-  { name: "Supabase", icon: <SiSupabase />, desc: "Secure vector & relational data" },
+  { name: "Neon Postgres", icon: <SiPostgresql />, desc: "Serverless relational database" },
   { name: "Python", icon: <FaPython />, desc: "Data processing & feature extraction" },
   { name: "Secure API", icon: <FaShieldAlt />, desc: "Protected endpoint infrastructure" }
 ];

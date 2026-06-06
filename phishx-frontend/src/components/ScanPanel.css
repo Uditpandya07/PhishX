@@ -251,3 +251,41 @@
   50% { opacity: 1; }
   100% { opacity: 0.5; }
 }
+
+@media (max-width: 768px) {
+  .scan-card {
+    padding: 30px 15px;
+  }
+  .scan-card h2 {
+    font-size: 1.3rem;
+    padding: 8px 20px;
+    margin-bottom: 30px !important;
+    letter-spacing: 2px;
+  }
+  .large-input {
+    padding: 16px 20px;
+    padding-right: 50px;
+    font-size: 1.05rem;
+    border-radius: 16px;
+  }
+  .clear-icon-inner {
+    right: 15px;
+    font-size: 1.2rem;
+  }
+  .large-button {
+    margin-top: 30px !important;
+    padding: 18px;
+    font-size: 1.15rem;
+    border-radius: 16px;
+    letter-spacing: 2px;
+  }
+  .result {
+    padding: 20px 15px;
+    border-radius: 16px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .result-title {
+    font-size: 1.8rem;
+  }
+}

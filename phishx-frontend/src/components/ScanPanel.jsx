@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { FaTimesCircle } from "react-icons/fa";
 import axios from "axios";
+import { API_URL, isConfigured } from "../config";
 import ElectricBorder from "./ElectricBorder";
 import "./ScanPanel.css";
 
@@ -72,7 +73,16 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }
 
     try {
       const token = sessionStorage.getItem("token");
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/scans/predict`, { 
+
+      if (!isConfigured) {
+        clearInterval(progressInterval);
+        setLoading(false);
+        setScanProgress(0);
+        alert("The PhishX backend URL is not configured. Please contact the administrator.");
+        return;
+      }
+
+      const res = await axios.post(`${API_URL}/api/v1/scans/predict`, { 
         url: url.trim() 
       }, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}

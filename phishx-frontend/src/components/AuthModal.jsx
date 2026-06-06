@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { FaTimes, FaEye, FaEyeSlash, FaGoogle, FaGithub, FaEnvelope, FaLock, FaUser } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
+import { API_URL, isConfigured } from "../config";
 import DotGrid from "./DotGrid";
 import "./AuthModal.css";
 
@@ -62,15 +63,18 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onLo
     setIsLoading(true);
     const apiCall = async () => {
       try {
-        const baseUrl = import.meta.env.VITE_API_URL;
-        
+        if (!isConfigured) {
+          setError("API server URL is not configured.");
+          setIsLoading(false);
+          return;
+        }
+
         if (isLogin) {
-          // Use our backend login
           const params = new URLSearchParams();
           params.append('username', email);
           params.append('password', password);
-          
-          const res = await axios.post(`${baseUrl}/api/v1/auth/login`, params, {
+
+          const res = await axios.post(`${API_URL}/api/v1/auth/login`, params, {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
           });
 
@@ -84,14 +88,11 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onLo
           
           if (onLoginSuccess) onLoginSuccess(res.data.user || { email });
         } else {
-          // Use our backend register
-          const res = await axios.post(`${baseUrl}/api/v1/auth/register`, {
+          const res = await axios.post(`${API_URL}/api/v1/auth/register`, {
             email,
             password,
             name
           });
-
-          // Show verification message
           setVerificationSent(true);
           triggerNotification && triggerNotification("Verification email sent! Please check your inbox.");
         }
@@ -246,7 +247,11 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onLo
             type="button" 
             className="social-btn google-login-btn" 
             onClick={() => {
-              window.location.href = `${import.meta.env.VITE_API_URL}/api/v1/auth/google/login`;
+              if (!isConfigured) {
+                alert("Google login is unavailable: backend URL is not configured.");
+                return;
+              }
+              window.location.href = `${API_URL}/api/v1/auth/google/login`;
             }}
             style={{ 
               width: "100%", 

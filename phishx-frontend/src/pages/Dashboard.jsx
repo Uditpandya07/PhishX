@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FaGithub, FaTwitter, FaLinkedin, FaShieldAlt, FaBolt, FaRobot, FaLock, FaHistory, FaCode, FaChartLine, FaEnvelopeOpenText, FaSearch, FaExclamationTriangle, FaTerminal, FaInfoCircle, FaCrown, FaCog, FaSignOutAlt, FaSignInAlt, FaUserPlus, FaUserShield, FaTrashAlt } from "react-icons/fa";
+import { FaGithub, FaTwitter, FaLinkedin, FaShieldAlt, FaBolt, FaRobot, FaLock, FaHistory, FaCode, FaChartLine, FaEnvelopeOpenText, FaSearch, FaExclamationTriangle, FaTerminal, FaInfoCircle, FaCrown, FaCog, FaSignOutAlt, FaSignInAlt, FaUserPlus, FaUserShield, FaTrashAlt, FaBars, FaTimes } from "react-icons/fa";
 import { motion, useScroll, useSpring } from "framer-motion";
 import axios from "axios";
 import Background from "../components/Background";
@@ -28,6 +28,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
   const [authMode, setAuthMode] = useState("login");
   const [scanHistory, setScanHistory] = useState([]);
   const [visibleCount, setVisibleCount] = useState(5);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -145,9 +146,9 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                   PhishX uses advanced lexical analysis and Random Forest classifiers to detect 
                   deceptive URLs in milliseconds. Protecting individuals and communities from digital threats.
                 </p>
-                <div style={{ display: 'flex', gap: '30px', justifyContent: 'center', alignItems: 'center' }}>
-                    <a href="#scan" className="primary-btn-nav" style={{ padding: '18px 45px', fontSize: '1.2rem' }}>Start Scanning</a>
-                    <a href="#about" className="login-btn" style={{ fontSize: '1.1rem', fontWeight: 600 }}>Learn More &rarr;</a>
+                <div className="hero-btn-group">
+                    <a href="#scan" className="primary-btn-nav hero-primary-btn">Start Scanning</a>
+                    <a href="#about" className="login-btn hero-secondary-btn">Learn More &rarr;</a>
                 </div>
               </motion.div>
             </section>
@@ -184,12 +185,12 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
             <section id="about" className="glass-section">
               <div className="about-grid">
                 <div className="about-text">
-                  <h2 style={{ fontSize: '3.5rem', fontWeight: 900, marginBottom: '20px', lineHeight: 1.1 }}>Intelligent <br/> Threat Detection.</h2>
+                  <h2 className="about-title" style={{ fontWeight: 900, marginBottom: '20px', lineHeight: 1.1 }}>Intelligent <br/> Threat Detection.</h2>
                   <p style={{ color: '#94a3b8', fontSize: '1.2rem', lineHeight: 1.8 }}>
                     Modern phishing attacks evolve every hour. Our engine analyzes 15+ lexical features—including entropy, 
                     suspicious keywords, and redirection patterns—to identify the DNA of a threat before it reaches your inbox.
                   </p>
-                  <div style={{ marginTop: '40px', display: 'flex', gap: '40px' }}>
+                  <div className="about-stats" style={{ marginTop: '40px', display: 'flex' }}>
                     <div>
                       <strong style={{ display: 'block', fontSize: '2rem', color: '#3b82f6' }}>15+</strong>
                       <span style={{ color: '#64748b', fontSize: '1rem', fontWeight: 600 }}>Feature Indicators</span>
@@ -210,7 +211,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
             {/* CAPABILITIES SECTION */}
             <section id="features">
               <div className="section-header">
-                <h2 style={{ fontSize: '3rem' }}>Platform Capabilities</h2>
+                <h2 className="section-header-title">Platform Capabilities</h2>
                 <p>Protecting the digital footprint of common people with enterprise-grade technology.</p>
               </div>
               <div className="grid-3">
@@ -254,13 +255,13 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
 
             {/* RECENT ACTIVITY */}
             <section id="history" className="glass-section">
-               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px', alignItems: 'center' }}>
+                <div className="history-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px', alignItems: 'center' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <FaHistory style={{ color: '#3b82f6', fontSize: '1.5rem' }} />
                     <h3 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Recent Activity</h3>
                   </div>
                   <span style={{ color: '#3b82f6', fontWeight: 600, cursor: 'pointer' }}>Detailed Logs &rarr;</span>
-               </div>
+                </div>
                
                {scanHistory.length === 0 ? (
                  <div className="empty-state">
@@ -338,38 +339,48 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
       <motion.div className="scroll-progress-bar" style={{ scaleX }} />
       <Background />
 
-      <nav className="navbar">
-        <div className="nav-brand" onClick={() => setView('main')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <nav className={`navbar ${isMobileMenuOpen ? "mobile-menu-active" : ""}`}>
+        <div className="nav-brand" onClick={() => { setView('main'); setIsMobileMenuOpen(false); }} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <img src="/logo-icon.png" alt="PhishX Icon" className="brand-icon" style={{ height: '40px' }} /> 
           <img src="/brand-text.png" alt="PhishX" className="brand-text-img" style={{ height: '40px' }} />
         </div>
-        <div className="nav-links">
-          <a href="#about" onClick={() => setView('main')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+
+        <button 
+          className="navbar-toggle" 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label="Toggle navigation menu"
+        >
+          {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
+        </button>
+
+        <div className={`nav-links ${isMobileMenuOpen ? "open" : ""}`}>
+          <a href="#about" onClick={() => { setView('main'); setIsMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <FaInfoCircle style={{ fontSize: '0.9rem', opacity: 0.8, color: '#3b82f6' }} /> About
           </a>
-          <a href="#scan" onClick={() => setView('main')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <a href="#scan" onClick={() => { setView('main'); setIsMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <FaBolt style={{ fontSize: '0.9rem', opacity: 0.8, color: '#4ade80' }} /> Scanner
           </a>
-          <a href="#history" onClick={() => setView('main')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <a href="#history" onClick={() => { setView('main'); setIsMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <FaHistory style={{ fontSize: '0.9rem', opacity: 0.8, color: '#a855f7' }} /> History
           </a>
-          <a href="#pricing" onClick={() => setView('pricing')} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <a href="#pricing" onClick={() => { setView('pricing'); setIsMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <FaCrown style={{ fontSize: '0.9rem', opacity: 0.8, color: '#fbbf24' }} /> Pricing
           </a>
         </div>
-        <div className="auth-group">
+
+        <div className={`auth-group ${isMobileMenuOpen ? "open" : ""}`}>
           {isLoggedIn ? (
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }} className="auth-btn-wrapper">
               {user?.is_superuser && (
                 <button 
                   className="nav-btn" 
                   style={{ background: currentView === 'admin' ? '#ef4444' : 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.4)', color: currentView === 'admin' ? '#fff' : '#ef4444', padding: '6px 14px', borderRadius: '100px', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}
-                  onClick={() => setView(currentView === 'admin' ? 'main' : 'admin')}
+                  onClick={() => { setView(currentView === 'admin' ? 'main' : 'admin'); setIsMobileMenuOpen(false); }}
                 >
                   <FaUserShield style={{ fontSize: '0.9rem' }} /> {currentView === 'admin' ? "Exit" : "Admin"}
                 </button>
               )}
-              <button className="login-btn" onClick={() => setIsSettingsOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '0.85rem' }}>
+              <button className="login-btn" onClick={() => { setIsSettingsOpen(true); setIsMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '0.85rem' }}>
                 <FaCog style={{ opacity: 0.8 }} /> Settings
               </button>
               <button className="primary-btn-nav" onClick={async () => { 
@@ -381,17 +392,18 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                 setIsLoggedIn(false); 
                 setUser(null); 
                 setView('main'); 
+                setIsMobileMenuOpen(false);
                 if (onLogout) onLogout(); 
               }} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 16px', fontSize: '0.85rem' }}>
                 <FaSignOutAlt /> Log Out
               </button>
             </div>
           ) : (
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <a href="#login" className="login-btn" onClick={(e) => openModal("login", e)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '0.85rem' }}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }} className="auth-btn-wrapper">
+              <a href="#login" className="login-btn" onClick={(e) => { openModal("login", e); setIsMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '0.85rem' }}>
                 <FaSignInAlt style={{ opacity: 0.8 }} /> Log In
               </a>
-              <button className="primary-btn-nav" onClick={(e) => openModal("signup", e)} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 16px', fontSize: '0.85rem' }}>
+              <button className="primary-btn-nav" onClick={(e) => { openModal("signup", e); setIsMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 16px', fontSize: '0.85rem' }}>
                 <FaUserPlus /> Sign Up
               </button>
             </div>

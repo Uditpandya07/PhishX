@@ -20,11 +20,7 @@ def create_access_token(
     if extra_claims:
         to_encode.update(extra_claims)
     
-    # Use provided secret or default; if using Supabase secret, default audience to 'authenticated'
     key = secret_key or settings.SECRET_KEY
-    if secret_key and "aud" not in to_encode:
-        to_encode["aud"] = "authenticated"
-        
     encoded_jwt = jwt.encode(to_encode, key, algorithm="HS256")
     return encoded_jwt
 
