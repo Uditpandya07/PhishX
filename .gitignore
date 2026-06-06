@@ -26,7 +26,6 @@ scratch/
 *.sqlite
 *.sqlite3
 dataset.csv
-model/phishing_model.pkl
 
 # Environment Secrets
 .env
