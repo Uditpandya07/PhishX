@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379/0"
 
     # Model Integrity
-    EXPECTED_MODEL_HASH: str = "5d1d2d16fabd7ad78a9896cb3dfe5855c622cdccdedcfefe70d47f434c55d899"
+    EXPECTED_MODEL_HASH: str = "247bd70ddd486c93d49e06049adcca230c0f66f89176eabb5820db389d72ba99"
     MODEL_PATH: str = "model/phishing_model.pkl" # Relative to project root or absolute
 
     # Sentry
