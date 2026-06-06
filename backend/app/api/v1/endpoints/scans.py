@@ -37,10 +37,13 @@ def get_model():
                 detail=f"Machine learning model not found at {model_path}"
             )
 
-        # INTEGRITY CHECK
+        # INTEGRITY CHECK — chunked read to avoid double-loading 198MB into RAM
         import hashlib
+        sha256 = hashlib.sha256()
         with open(model_path, 'rb') as f:
-            file_hash = hashlib.sha256(f.read()).hexdigest()
+            for chunk in iter(lambda: f.read(65536), b''):
+                sha256.update(chunk)
+        file_hash = sha256.hexdigest()
 
         if file_hash != settings.EXPECTED_MODEL_HASH:
             logger.critical(f"Model Integrity Violation! Expected={settings.EXPECTED_MODEL_HASH}, Found={file_hash}")
