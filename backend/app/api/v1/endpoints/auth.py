@@ -31,7 +31,7 @@ def logout(response: Response):
 def verify_email(token: str, db: Session = Depends(deps.get_db)):
     """Verify a user's email address using a token."""
     try:
-        payload = jwt.decode(token, settings.SUPABASE_JWT_SECRET, algorithms=["HS256"])
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
         user_id = payload.get("sub")
         if not user_id:
             raise HTTPException(status_code=400, detail="Invalid verification token")

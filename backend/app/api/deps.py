@@ -56,12 +56,12 @@ def get_current_user(
     # Check if user exists in our local DB
     user = db.query(User).filter(User.id == uuid.UUID(user_id)).first()
     
-    # Lazy-create user if they exist in Supabase but not in our DB yet
+    # If user doesn't exist locally (e.g., created via Google OAuth), lazy-create them
     if not user:
         user = User(
             id=uuid.UUID(user_id),
             email=email,
-            name=metadata.get("full_name", "Supabase User"),
+            name=metadata.get("full_name", "PhishX User"),
             is_active=True,
             is_verified=True # If they have a valid token, they are verified
         )
