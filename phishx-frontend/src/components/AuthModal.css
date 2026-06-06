@@ -21,6 +21,12 @@
   margin: auto;
   padding: 25px;
   animation: modalFadeIn 0.3s ease-out;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .modal-overlay { padding: 20px 10px; }
+  .modal-content { padding: 25px 15px; }
 }
 
 @keyframes modalFadeIn {
