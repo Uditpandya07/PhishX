@@ -70,15 +70,39 @@ def analyze_url(url: str, model_instance) -> dict:
     if domain in SAFE_WHITELIST:
         return {"url": url, "prediction": "Safe", "risk_score": 0.0, "features": {}}
 
-    bad_indicators = [
-        re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', domain),
-        '//' in parsed.path,
-        (len(raw_url) > 50 and any(x in raw_url for x in ['login', 'verify', 'update', 'admin', 'secure', 'bank', 'account'])),
-        any(domain.endswith(tld) for tld in ['.xyz', '.tk', '.pw', '.top', '.online', '.site'])
-    ]
+    # --- ENHANCED SEMANTIC RULES (Zero-RAM High Accuracy) ---
+    # 1. Raw IP address instead of domain
+    is_ip = bool(re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', domain))
+    
+    # 2. Punycode (homograph attacks like "googlė.com" -> "xn--")
+    is_punycode = "xn--" in domain
+    
+    # 3. Suspicious Keywords in Path/Domain
+    sensitive_words = ['login', 'verify', 'update', 'admin', 'secure', 'bank', 'account', 'auth', 'payment', 'wallet', 'credential']
+    has_sensitive_word = any(word in raw_url for word in sensitive_words)
+    
+    # 4. Abused Free/Cheap TLDs
+    cheap_tlds = ['.xyz', '.tk', '.pw', '.top', '.online', '.site', '.club', '.biz', '.info', '.cc', '.ws']
+    has_cheap_tld = any(domain.endswith(tld) for tld in cheap_tlds)
+    
+    # 5. Suspicious Subdomains (e.g. login.paypal.com.scam.net)
+    subdomain_count = len(domain.split('.')) - 2
+    excessive_subdomains = subdomain_count >= 3
+    
+    # 6. Typosquatting patterns (very basic check for common replacements)
+    typosquatting = any(x in domain for x in ['paypa1', 'goog1e', 'micros0ft', 'yaho0', 'app1e', '1nstagram'])
+    
+    # Evaluate Rules
+    risk_score = 0.0
+    if is_ip: risk_score = max(risk_score, 99.0)
+    if is_punycode: risk_score = max(risk_score, 95.0)
+    if typosquatting: risk_score = max(risk_score, 98.0)
+    if has_cheap_tld and has_sensitive_word: risk_score = max(risk_score, 90.0)
+    if excessive_subdomains and has_sensitive_word: risk_score = max(risk_score, 85.0)
+    if '//' in parsed.path: risk_score = max(risk_score, 80.0)
 
-    if any(bad_indicators):
-        return {"url": url, "prediction": "Phishing", "risk_score": 98.0, "features": {"manual_override": True}}
+    if risk_score >= 80.0:
+        return {"url": url, "prediction": "Phishing", "risk_score": risk_score, "features": {"semantic_rule_trigger": True}}
 
     try:
         from app.services.feature_extractor import extract_features
