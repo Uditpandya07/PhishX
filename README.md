@@ -30,6 +30,9 @@
 <a href="https://phishx-app.vercel.app/" target="_blank">
   <img src="https://img.shields.io/badge/Status-Production_Ready-00E676?style=for-the-badge&labelColor=111111" alt="Status" />
 </a>
+<a href="./LICENSE" target="_blank">
+  <img src="https://img.shields.io/badge/License-PolyForm_NC_1.0-FF6D00?style=for-the-badge&labelColor=111111" alt="License: PolyForm Noncommercial" />
+</a>
 
 <br/><br/>
 
@@ -422,6 +425,25 @@ PhishX is engineered with a **security-first** philosophy at every layer of the 
     </td>
   </tr>
 </table>
+
+---
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--                         LICENSE                               -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+
+## ✦ License
+
+PhishX is released under the **[PolyForm Noncommercial License 1.0.0](./LICENSE)**.
+
+| Permission | Details |
+|---|---|
+| ✅ Personal use | Free to use for personal, educational, and research purposes |
+| ✅ Modification | Fork, modify, and adapt the source code |
+| ✅ Distribution | Share the software in its original or modified form |
+| ❌ Commercial use | Using PhishX or any derivative in a paid product, SaaS, or commercial service is **not permitted** |
+
+> For commercial licensing enquiries, please open an issue or contact the maintainer directly.
 
 ---
 
