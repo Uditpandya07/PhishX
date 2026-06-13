@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { FaGithub, FaTwitter, FaLinkedin, FaShieldAlt, FaBolt, FaRobot, FaLock, FaHistory, FaCode, FaChartLine, FaEnvelopeOpenText, FaSearch, FaExclamationTriangle, FaTerminal, FaInfoCircle, FaCrown, FaCog, FaSignOutAlt, FaSignInAlt, FaUserPlus, FaUserShield, FaTrashAlt, FaBars, FaTimes } from "react-icons/fa";
-import { motion, useScroll, useSpring } from "framer-motion";
+import { motion, useScroll, useSpring, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import Background from "../components/Background";
 import ScanPanel from "../components/ScanPanel";
@@ -29,6 +29,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
   const [scanHistory, setScanHistory] = useState([]);
   const [visibleCount, setVisibleCount] = useState(5);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isWarningOpen, setIsWarningOpen] = useState(false);
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -466,6 +467,55 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
         user={user} 
         onClearHistory={handleClearLocalHistory}
       />
+
+      {/* Floating Status Indicator */}
+      <motion.div
+        initial={{ y: 50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.5, duration: 0.5 }}
+        onClick={() => setIsWarningOpen(true)}
+        whileHover={{ scale: 1.05, borderColor: "rgba(239, 68, 68, 0.7)" }}
+        className="status-pill"
+      >
+        <motion.div
+          animate={{ opacity: [0.4, 1, 0.4] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+          style={{ width: '8px', height: '8px', background: '#ef4444', borderRadius: '50%', boxShadow: '0 0 12px #ef4444' }}
+        />
+        <span className="status-pill-text" style={{ color: '#f8fafc', fontWeight: 600, letterSpacing: '0.5px' }}>Performance</span>
+      </motion.div>
+
+      <AnimatePresence>
+        {isWarningOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              style={{ background: '#0f172a', padding: '30px', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.3)', maxWidth: '400px', width: '100%', textAlign: 'center', boxShadow: '0 0 20px rgba(239, 68, 68, 0.15)' }}
+            >
+              <FaExclamationTriangle style={{ fontSize: '3rem', color: '#ef4444', marginBottom: '20px' }} />
+              <h3 style={{ color: '#fff', marginBottom: '15px', fontSize: '1.4rem' }}>Limited Capability</h3>
+              <p style={{ color: '#94a3b8', lineHeight: '1.6', marginBottom: '25px', fontSize: '0.95rem' }}>
+                As a free, community-driven project, our backend intelligence engines occasionally enter sleep mode to conserve resources. Because of this, you may experience a slight delay (cold start) during your first scan or login as the servers wake up. 
+              </p>
+              <button 
+                onClick={() => setIsWarningOpen(false)}
+                style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '10px 24px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.95rem', width: '100%', transition: 'background 0.2s' }}
+                onMouseOver={(e) => e.target.style.background = '#dc2626'}
+                onMouseOut={(e) => e.target.style.background = '#ef4444'}
+              >
+                I Understand
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -677,4 +677,37 @@
     gap: 15px;
     align-items: flex-start !important;
   }
+
+  .status-pill {
+    bottom: 15px !important;
+    right: 15px !important;
+    padding: 6px 12px !important;
+    gap: 8px !important;
+  }
+  
+  .status-pill-text {
+    font-size: 0.75rem !important;
+  }
+}
+
+/* --- STATUS PILL --- */
+.status-pill {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 8px 16px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  z-index: 9900;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+}
+
+.status-pill-text {
+  font-size: 0.85rem;
 }

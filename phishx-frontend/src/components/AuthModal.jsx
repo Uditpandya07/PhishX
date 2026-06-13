@@ -242,33 +242,31 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onLo
         <div className="social-login-divider">
           <span>or continue with</span>
         </div>
-        <div className="social-buttons" style={{ display: "flex", justifyContent: "center" }}>
+        <div className="social-buttons" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
           <button 
             type="button" 
             className="social-btn google-login-btn" 
-            onClick={() => {
-              if (!isConfigured) {
-                alert("Google login is unavailable: backend URL is not configured.");
-                return;
-              }
-              window.location.href = `${API_URL}/api/v1/auth/google/login`;
-            }}
+            disabled={true}
             style={{ 
               width: "100%", 
               display: "flex", 
               alignItems: "center", 
               justifyContent: "center", 
               gap: "12px", 
-              background: "#fff", 
-              color: "#000", 
+              background: "rgba(255, 255, 255, 0.1)", 
+              color: "#94a3b8", 
               fontWeight: "600",
               border: "none",
-              padding: "12px"
+              padding: "12px",
+              cursor: "not-allowed"
             }}
           >
-            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style={{ height: "20px" }} />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style={{ height: "20px", filter: "grayscale(100%) opacity(0.5)" }} />
             {isLogin ? "Sign in with Google" : "Sign up with Google"}
           </button>
+          <p style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '10px', textAlign: 'center', fontWeight: '500' }}>
+            * Google authentication is temporarily disabled.
+          </p>
         </div>
 
         <p className="auth-switch" style={{ marginTop: '20px' }}>
