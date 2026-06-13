@@ -40,7 +40,10 @@ export default function Landing({ onEnter }) {
           src="/logo.png"
           alt="PhishX"
           style={{
-            width: 280,
+            width: "100%",
+            maxWidth: 280,
+            padding: "0 30px",
+            boxSizing: "border-box",
             filter: "drop-shadow(0 0 80px rgba(168,85,247,0.8))"
           }}
         />
@@ -50,9 +53,11 @@ export default function Landing({ onEnter }) {
           transition={{ repeat: Infinity, duration: 2.5 }}
           style={{
             marginTop: 60,
-            fontSize: "15px",
+            fontSize: "clamp(12px, 4vw, 15px)",
             letterSpacing: "2px",
-            color: "#888"
+            color: "#888",
+            textAlign: "center",
+            padding: "0 20px"
           }}
         >
           CLICK TO CONTINUE
