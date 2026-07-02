@@ -13,7 +13,7 @@ from app.api import deps
 from app.core import security
 from app.core.config import settings
 from app.schemas.token import Token
-from app.schemas.user import UserCreate, User as UserSchema
+from app.schemas.user import UserCreate, User as UserSchema, ForgotPasswordRequest, ResetPasswordRequest
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -60,6 +60,8 @@ def login_access_token(
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
+    elif not user.is_verified:
+        raise HTTPException(status_code=403, detail="Email not verified. Please check your inbox.")
     
     access_token = security.create_access_token(
         user.id, 
@@ -214,3 +216,45 @@ async def google_callback(
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
     )
     return response
+
+@router.post("/forgot-password")
+def forgot_password(
+    request: ForgotPasswordRequest,
+    db: Session = Depends(deps.get_db)
+):
+    """Initiate a password reset flow."""
+    user = db.query(User).filter(User.email == request.email).first()
+    if not user:
+        # Don't reveal if user exists or not
+        return {"message": "If that email is in our system, we sent a password reset link."}
+        
+    # Send verification email if SendGrid is configured
+    from app.services.email import email_service
+    # Generate a temporary reset token
+    reset_token = security.create_access_token(user.id, expires_delta=timedelta(hours=1))
+    email_service.send_password_reset_email(user.email, reset_token)
+    
+    return {"message": "If that email is in our system, we sent a password reset link."}
+
+@router.post("/reset-password")
+def reset_password(
+    request: ResetPasswordRequest,
+    db: Session = Depends(deps.get_db)
+):
+    """Complete a password reset flow."""
+    try:
+        payload = jwt.decode(request.token, settings.SECRET_KEY, algorithms=["HS256"])
+        user_id = payload.get("sub")
+        if not user_id:
+            raise HTTPException(status_code=400, detail="Invalid token")
+            
+        user = db.query(User).filter(User.id == uuid.UUID(user_id)).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+            
+        user.password_hash = security.get_password_hash(request.new_password)
+        db.commit()
+        return {"message": "Password reset successful."}
+    except Exception as e:
+        logger.error(f"Reset password error: {e}")
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
