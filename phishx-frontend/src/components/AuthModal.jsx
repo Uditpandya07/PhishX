@@ -246,7 +246,9 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onLo
           <button 
             type="button" 
             className="social-btn google-login-btn" 
-            disabled={true}
+            onClick={() => {
+              window.location.href = `${API_URL}/api/v1/auth/google/login`;
+            }}
             style={{ 
               width: "100%", 
               display: "flex", 
@@ -254,19 +256,20 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onLo
               justifyContent: "center", 
               gap: "12px", 
               background: "rgba(255, 255, 255, 0.1)", 
-              color: "#94a3b8", 
+              color: "#fff", 
               fontWeight: "600",
-              border: "none",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
               padding: "12px",
-              cursor: "not-allowed"
+              cursor: "pointer",
+              borderRadius: "8px",
+              transition: "all 0.3s ease"
             }}
+            onMouseOver={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.2)"}
+            onMouseOut={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)"}
           >
-            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style={{ height: "20px", filter: "grayscale(100%) opacity(0.5)" }} />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style={{ height: "20px" }} />
             {isLogin ? "Sign in with Google" : "Sign up with Google"}
           </button>
-          <p style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '10px', textAlign: 'center', fontWeight: '500' }}>
-            * Google authentication is temporarily disabled.
-          </p>
         </div>
 
         <p className="auth-switch" style={{ marginTop: '20px' }}>
