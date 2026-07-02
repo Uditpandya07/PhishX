@@ -48,6 +48,7 @@ yarn-error.log*
 *.swo
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # Frontend specific
 phishx-frontend/dist/
