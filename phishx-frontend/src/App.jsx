@@ -75,15 +75,8 @@ export default function App() {
     // Fail-safe: ensure the app eventually stops loading even if network hangs
     const failSafe = setTimeout(() => setCheckingAuth(false), 3000);
 
-    // Attach JWT from storage to every outgoing request
-    const interceptor = axios.interceptors.request.use(
-      (config) => {
-        const token = sessionStorage.getItem("token") || localStorage.getItem("phishx_token");
-        if (token) config.headers.Authorization = `Bearer ${token}`;
-        return config;
-      },
-      (error) => Promise.reject(error)
-    );
+    // The backend uses HttpOnly cookies for authentication.
+    // axios.defaults.withCredentials = true is set globally at the top of this file.
 
     const checkAuth = async () => {
       try {
@@ -109,7 +102,6 @@ export default function App() {
     }
 
     return () => {
-      axios.interceptors.request.eject(interceptor);
       clearTimeout(failSafe);
     };
   }, []);
