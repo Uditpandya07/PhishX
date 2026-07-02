@@ -42,7 +42,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
             .map(scan => ({
               id: scan.id,
               url: scan.url,
-              date: new Date(scan.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+              date: new Date(scan.timestamp).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }),
               risk: Math.round(scan.risk_score),
               status: scan.prediction === "Phishing" ? "Phishing" : "Safe"
             }));

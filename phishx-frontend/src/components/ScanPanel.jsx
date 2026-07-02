@@ -99,7 +99,7 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }
         const newHistoryItem = {
           id: res.data.id || Date.now(),
           url: url.trim(),
-          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          date: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }),
           risk: risk,
           status: isDanger ? "Phishing" : "Safe"
         };
