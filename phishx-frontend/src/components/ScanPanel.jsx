@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { FaTimesCircle } from "react-icons/fa";
+import { FaTimesCircle, FaSearch, FaCode, FaBrain, FaShieldAlt, FaCheckCircle, FaSpinner } from "react-icons/fa";
 import axios from "axios";
 import { API_URL, isConfigured } from "../config";
 import ElectricBorder from "./ElectricBorder";
@@ -188,16 +188,51 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }
           {loading && (
             <motion.div 
               className="loading-progress-container"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
             >
-              <div className="loading-bar-track">
-                <motion.div 
-                  className="loading-bar-fill"
-                  style={{ width: `${scanProgress}%` }}
-                ></motion.div>
+              <div className="scanner-hud">
+                <div className="hud-header">
+                  <span className="pulse-dot"></span>
+                  <span className="hud-title">SYSTEM ANALYSIS IN PROGRESS</span>
+                  <span className="hud-progress">{scanProgress}%</span>
+                </div>
+                
+                <div className="loading-bar-track">
+                  <motion.div 
+                    className="loading-bar-fill glow"
+                    style={{ width: `${scanProgress}%` }}
+                    layout
+                  ></motion.div>
+                </div>
+                
+                <div className="scan-steps-container">
+                  {[
+                    { t: 0, text: "Initializing Deep Lexical Analysis...", icon: <FaSearch /> },
+                    { t: 20, text: "Extracting semantic features & domain metrics...", icon: <FaCode /> },
+                    { t: 45, text: "Running AI neural network models...", icon: <FaBrain /> },
+                    { t: 70, text: "Cross-referencing global threat intelligence...", icon: <FaShieldAlt /> },
+                    { t: 90, text: "Finalizing security risk score...", icon: <FaCheckCircle /> }
+                  ].map((step, idx) => {
+                    const isDone = scanProgress > step.t + 15;
+                    const isActive = scanProgress >= step.t && !isDone;
+                    return (
+                    <motion.div 
+                      key={idx}
+                      className={`scan-step ${scanProgress >= step.t ? 'active' : 'pending'}`}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={scanProgress >= step.t ? { opacity: 1, x: 0 } : { opacity: 0.3, x: -10 }}
+                      transition={{ duration: 0.4 }}
+                    >
+                      <span className={`step-icon ${isActive ? 'spin-icon' : ''}`}>
+                        {isActive ? <FaSpinner /> : step.icon}
+                      </span>
+                      <span className="step-text">{step.text}</span>
+                    </motion.div>
+                  )})}
+                </div>
               </div>
-              <div className="loading-status">Running Deep Lexical Analysis...</div>
             </motion.div>
           )}
 
