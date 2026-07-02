@@ -43,4 +43,17 @@ class EmailService:
         """
         return self.send_email(to_email, subject, html_content)
 
+    def send_password_reset_email(self, to_email: str, token: str):
+        subject = "Reset your PhishX Password"
+        # The frontend will handle the reset UI
+        reset_url = f"{settings.FRONTEND_URL}/?reset_token={token}"
+        html_content = f"""
+            <h3>Password Reset Request</h3>
+            <p>We received a request to reset your password. Click the button below to choose a new password:</p>
+            <a href="{reset_url}" style="padding: 10px 20px; background: #3b82f6; color: white; text-decoration: none; border-radius: 5px;">Reset Password</a>
+            <p>If you didn't request this, you can safely ignore this email.</p>
+            <p>If the button doesn't work, copy and paste this link: {reset_url}</p>
+        """
+        return self.send_email(to_email, subject, html_content)
+
 email_service = EmailService()
