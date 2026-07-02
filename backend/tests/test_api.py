@@ -60,6 +60,22 @@ def test_user_login():
         "/api/v1/auth/register",
         json={"email": email, "password": "password", "name": "Login User"}
     )
+    
+    # Check that unverified login fails with 403
+    response_unverified = client.post(
+        "/api/v1/auth/login",
+        data={"username": email, "password": "password"}
+    )
+    assert response_unverified.status_code == 403
+
+    # Verify user manually via DB
+    db = TestingSessionLocal()
+    from app.db.models import User
+    user = db.query(User).filter(User.email == email).first()
+    user.is_verified = True
+    db.commit()
+    db.close()
+    
     # Then login
     response = client.post(
         "/api/v1/auth/login",

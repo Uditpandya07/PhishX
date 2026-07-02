@@ -81,10 +81,8 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onLo
           // Check if we got a token in the response (some setups might return it in JSON)
           // But our backend currently sets a cookie. 
           // If it returns a token in JSON, we should save it.
-          if (res.data.access_token) {
-             sessionStorage.setItem("token", res.data.access_token);
-             localStorage.setItem("phishx_token", res.data.access_token);
-          }
+          // The backend automatically sets the access_token in an HttpOnly cookie.
+          // We no longer store it in localStorage/sessionStorage for security reasons.
           
           if (onLoginSuccess) onLoginSuccess(res.data.user || { email });
         } else {
