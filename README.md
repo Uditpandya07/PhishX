@@ -76,7 +76,7 @@
       <br/><br/>
       <strong>🧠 AI-Driven Threat Detection</strong>
       <br/><br/>
-      <sub>Custom ML model trained on large-scale phishing datasets with advanced lexical feature extraction. Identifies zero-day phishing attempts that rule-based systems miss entirely.</sub>
+      <sub>Custom ML model combined with a <strong>Zero-Latency Offline Top 10k Whitelist</strong> and a <strong>Dynamic Community Feedback loop</strong>. Identifies zero-day phishing attempts while organically adapting to prevent false positives — completely free of charge.</sub>
       <br/><br/>
     </td>
     <td align="center" width="33%">
@@ -187,6 +187,7 @@ graph TD
         H["📊 Feature Extractor\n(Lexical Analysis)"]
         I["🧠 Phishing Classifier\n(Trained ML Model)"]
         J["📁 Dataset\nphishing_site_urls.csv"]
+        W["⚡ Zero-Latency\nTop 10k & Feedback Whitelist"]
     end
 
     subgraph DATA["🗄️  DATA LAYER"]
@@ -196,7 +197,7 @@ graph TD
 
     A -- "HTTPS REST" --> C & D & E & F
     B -- "HTTPS REST" --> D
-    D --> H --> I --> J
+    D --> W --> H --> I --> J
     C & D & E & F & G --> K
     L --> K
 
