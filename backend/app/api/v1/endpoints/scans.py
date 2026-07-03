@@ -79,7 +79,7 @@ def analyze_url(url: str, model_instance) -> dict:
     
     # 3. Suspicious Keywords in Path/Domain
     sensitive_words = ['login', 'verify', 'update', 'admin', 'secure', 'bank', 'account', 'auth', 'payment', 'wallet', 'credential']
-    has_sensitive_word = any(word in raw_url for word in sensitive_words)
+    has_sensitive_word = any(word in domain for word in sensitive_words)
     
     # 4. Abused Free/Cheap TLDs
     cheap_tlds = ['.xyz', '.tk', '.pw', '.top', '.online', '.site', '.club', '.biz', '.info', '.cc', '.ws']
@@ -104,6 +104,37 @@ def analyze_url(url: str, model_instance) -> dict:
     if risk_score >= 80.0:
         return {"url": url, "prediction": "Phishing", "risk_score": risk_score, "features": {"semantic_rule_trigger": True}}
 
+    # --- LIVE CONTENT ANALYSIS LAYER ---
+    import httpx
+    try:
+        with httpx.Client(timeout=3.0, verify=False, follow_redirects=True) as client:
+            response = client.get(normalized_url)
+            html = response.text.lower()
+            
+            # Check for credential harvesting
+            if 'type="password"' in html or "type='password'" in html:
+                if has_cheap_tld or not normalized_url.startswith("https://"):
+                    risk_score = max(risk_score, 85.0)
+            
+            # Very basic brand impersonation check
+            if "<title>" in html:
+                title_start = html.find("<title>") + 7
+                title_end = html.find("</title>")
+                if title_end > title_start:
+                    title = html[title_start:title_end]
+                    major_brands = ["paypal", "microsoft", "google", "apple", "facebook", "amazon", "netflix", "bank of america", "chase", "wellsfargo"]
+                    for brand in major_brands:
+                        if brand in title and brand not in domain:
+                            risk_score = max(risk_score, 90.0)
+                            
+            if risk_score >= 80.0:
+                return {"url": url, "prediction": "Phishing", "risk_score": risk_score, "features": {"live_analysis_trigger": True}}
+    except Exception as e:
+        # Failsafe: if the site is down, blocks our bot, or times out, proceed to ML analysis
+        import logging
+        logging.getLogger(__name__).warning(f"Live analysis failed for {url}: {e}")
+
+
     try:
         from app.services.feature_extractor import extract_features
         features = extract_features(normalized_url)
@@ -122,6 +153,7 @@ def analyze_url(url: str, model_instance) -> dict:
             is_phishing = prediction == 1
         
         probability = model_instance.predict_proba([features])[0][phish_idx]
+        is_phishing = probability >= 0.70
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"ML Error: {str(e)}")
 

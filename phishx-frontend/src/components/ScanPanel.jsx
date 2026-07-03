@@ -94,7 +94,7 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }
       setTimeout(() => {
         setResult(res.data);
         const risk = Math.round(res.data.risk_score);
-        const isDanger = risk > 50;
+        const isDanger = risk >= 70;
         
         const newHistoryItem = {
           id: res.data.id || Date.now(),
