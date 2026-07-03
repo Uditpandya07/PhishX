@@ -63,7 +63,7 @@ TRUSTED_DOMAINS = {
     "delta.com", "united.com", "aa.com", "southwest.com", "lufthansa.com", "emirates.com",
 
     # EDUCATION, REFERENCE & GOVERNMENT
-    "wikipedia.org", "wiktionary.org", "wikimedia.org", "britannica.com", "dictionary.com",
+    "wikipedia.org", "wikipedia.com", "wiktionary.org", "wikimedia.org", "britannica.com", "dictionary.com",
     "thesaurus.com", "merriam-webster.com", "oxfordlearnersdictionaries.com",
     "harvard.edu", "stanford.edu", "mit.edu", "berkeley.edu", "ox.ac.uk", "cam.ac.uk",
     "coursera.org", "udemy.com", "edx.org", "khanacademy.org", "duolingo.com",
