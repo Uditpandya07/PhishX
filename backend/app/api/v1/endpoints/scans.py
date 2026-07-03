@@ -67,6 +67,14 @@ def analyze_url(url: str, model_instance) -> dict:
     if domain.startswith("www."):
         domain = domain[4:]
 
+    # 100% FREE PERMANENT FIX: Check Offline Top 10k List
+    try:
+        from app.services.top_10k import TOP_10K_DOMAINS
+        if domain in TOP_10K_DOMAINS:
+            return {"url": url, "prediction": "Safe", "risk_score": 0.0, "features": {"top_10k_whitelist": True}}
+    except ImportError:
+        pass
+
     if domain in SAFE_WHITELIST:
         return {"url": url, "prediction": "Safe", "risk_score": 0.0, "features": {}}
 
@@ -177,8 +185,18 @@ async def predict_url(
     try:
         ml_model = get_model()
         
-        # Analyze - run CPU intensive task in threadpool
-        result = await run_in_threadpool(analyze_url, scan_in.url, ml_model)
+        # 100% FREE PERMANENT FIX: Check dynamic community whitelist (Feedbacks)
+        from app.db.models import Feedback, Scan as DBScan
+        previous_fp = db.query(Feedback).join(DBScan).filter(
+            Feedback.feedback_type == "false_positive",
+            DBScan.url == scan_in.url
+        ).first()
+
+        if previous_fp:
+            result = {"url": scan_in.url, "prediction": "Safe", "risk_score": 0.0, "features": {"community_whitelist": True}}
+        else:
+            # Analyze - run CPU intensive task in threadpool
+            result = await run_in_threadpool(analyze_url, scan_in.url, ml_model)
         
         # Save to DB
         scan = Scan(
