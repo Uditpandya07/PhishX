@@ -68,9 +68,9 @@ def analyze_url(url: str, model_instance) -> dict:
         domain = domain[4:]
 
     # Custom Whitelist for Creator Domains
-    is_phishx_app = "phishx" in raw_url and "vercel.app" in raw_url
-    is_phishtra = "phishtra" in raw_url.lower() or "uditpandya07.github.io" in raw_url
-    is_udit_domain = "uditpandya.vercel.app" in raw_url
+    is_phishx_app = domain == "phishx.vercel.app" or domain.endswith(".phishx.vercel.app")
+    is_phishtra = domain == "phishtra.vercel.app" or domain.endswith(".phishtra.vercel.app") or domain == "uditpandya07.github.io"
+    is_udit_domain = domain == "uditpandya.vercel.app" or domain.endswith(".uditpandya.vercel.app")
     
     if is_phishx_app or is_phishtra or is_udit_domain:
         return {

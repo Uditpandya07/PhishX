@@ -1,5 +1,8 @@
 from fastapi import APIRouter
 import httpx
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -45,5 +48,6 @@ async def get_cyber_news():
                             break
             
             return {"status": "success", "data": filtered_news}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+    except Exception:
+        logger.exception("Failed to fetch cybersecurity news")
+        return {"status": "error", "message": "An internal error occurred"}

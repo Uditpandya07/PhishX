@@ -40,17 +40,32 @@ const TypewriterText = ({ text, speed = 30, onNavigate }) => {
   }, [text, speed]);
 
   const renderText = (rawText) => {
-    // Check if the privacy policy URL is typed out
     const policyUrl = "https://phishx-app.vercel.app/legal";
-    if (rawText.includes(policyUrl)) {
-      const parts = rawText.split(policyUrl);
-      return (
-        <>
-          {parts[0]}
-          <a href="#privacy" onClick={(e) => { e.preventDefault(); if (onNavigate) onNavigate('privacy'); }} style={{ color: '#60a5fa', textDecoration: 'underline', cursor: 'pointer' }}>Privacy Policy</a>
-          {parts[1]}
-        </>
-      );
+    const allowedPolicyUrl = new URL(policyUrl);
+    const urlRegex = /https?:\/\/[^\s]+/g;
+    const matches = rawText.match(urlRegex);
+
+    if (matches) {
+      for (const candidate of matches) {
+        try {
+          const parsed = new URL(candidate);
+          const normalizedPath = parsed.pathname.replace(/\/+$/, "") || "/";
+          const allowedPath = allowedPolicyUrl.pathname.replace(/\/+$/, "") || "/";
+
+          if (parsed.origin === allowedPolicyUrl.origin && normalizedPath === allowedPath) {
+            const parts = rawText.split(candidate);
+            return (
+              <>
+                {parts[0]}
+                <a href="#privacy" onClick={(e) => { e.preventDefault(); if (onNavigate) onNavigate('privacy'); }} style={{ color: '#60a5fa', textDecoration: 'underline', cursor: 'pointer' }}>Privacy Policy</a>
+                {parts.slice(1).join(candidate)}
+              </>
+            );
+          }
+        } catch {
+          // Ignore invalid URL candidates
+        }
+      }
     }
     return rawText;
   };
