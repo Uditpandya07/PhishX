@@ -22,3 +22,8 @@ class BatchScanCreate(BaseModel):
 
 class BatchScanResponse(BaseModel):
     results: list[ScanResponse]
+
+class TaskResponse(BaseModel):
+    task_id: str
+    status: str
+    message: str
