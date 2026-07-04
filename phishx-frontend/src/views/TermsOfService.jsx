@@ -1,9 +1,9 @@
 "use client";
 import { motion } from "framer-motion";
-import { FaGavel, FaBan, FaHandshake, FaGlobe, FaBalanceScale } from "react-icons/fa";
+import { FaGavel, FaBan, FaHandshake, FaGlobe, FaBalanceScale, FaFileContract, FaEnvelope } from "react-icons/fa";
 import "./Legal.css";
 
-export default function TermsOfService() {
+export default function TermsOfService({ onContactSupport }) {
   return (
     <motion.div 
       className="legal-container"
@@ -66,7 +66,7 @@ export default function TermsOfService() {
         </section>
 
         <section>
-          <h3>6. Severability & Modifications</h3>
+          <h3><FaFileContract /> 6. Severability & Modifications</h3>
           <p>
             If any provision of these Terms is deemed unlawful or unenforceable, that provision shall be severed, 
             and the remaining provisions will remain in full force and effect. We reserve the right to modify these 
@@ -74,10 +74,13 @@ export default function TermsOfService() {
           </p>
         </section>
 
-        <section style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '30px', marginTop: '30px' }}>
+        <section style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '30px', marginTop: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
           <p style={{ fontSize: '0.85rem', color: '#64748b' }}>
-            Effective Date: April 23, 2026. PhishX is operated by Udit Pandya. For legal inquiries, please use the <strong>Contact Support</strong> button in the dashboard footer.
+            Effective Date: April 23, 2026. PhishX is operated by Udit Pandya.
           </p>
+          <a href="#" onClick={(e) => { e.preventDefault(); if (onContactSupport) onContactSupport(); }} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 24px', background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.4)', borderRadius: '12px', color: '#60a5fa', fontWeight: 700, fontSize: '0.9rem', textDecoration: 'none', cursor: 'pointer', transition: 'all 0.3s' }}>
+            <FaEnvelope /> Contact Support
+          </a>
         </section>
       </div>
     </motion.div>
