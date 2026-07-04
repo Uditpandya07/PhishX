@@ -3,7 +3,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.api import deps
-from app.schemas.scan import ScanCreate, ScanResponse, BatchScanCreate, BatchScanResponse
+from app.schemas.scan import ScanCreate, ScanResponse, BatchScanCreate, BatchScanResponse, TaskResponse
 from app.db.models import User, Scan
 import joblib
 import os
@@ -66,6 +66,23 @@ def analyze_url(url: str, model_instance) -> dict:
     domain = parsed.netloc
     if domain.startswith("www."):
         domain = domain[4:]
+
+    # Custom Whitelist for Creator Domains
+    is_phishx_app = domain == "phishx.vercel.app" or domain.endswith(".phishx.vercel.app")
+    is_phishtra = domain == "phishtra.vercel.app" or domain.endswith(".phishtra.vercel.app") or domain == "uditpandya07.github.io"
+    is_udit_domain = domain == "uditpandya.vercel.app" or domain.endswith(".uditpandya.vercel.app")
+    
+    if is_phishx_app or is_phishtra or is_udit_domain:
+        return {
+            "url": url, 
+            "prediction": "Safe", 
+            "risk_score": 0.0, 
+            "features": {
+                "top_10k_whitelist": True,
+                "is_phishx_app": is_phishx_app,
+                "is_creator_domain": True
+            }
+        }
 
     # 100% FREE PERMANENT FIX: Check Offline Top 10k List
     try:
@@ -161,58 +178,47 @@ def analyze_url(url: str, model_instance) -> dict:
             is_phishing = prediction == 1
         
         probability = model_instance.predict_proba([features])[0][phish_idx]
-        is_phishing = probability >= 0.70
+        
+        if probability >= 0.70:
+            final_prediction = "Phishing"
+        elif probability >= 0.40:
+            final_prediction = "Suspicious"
+        else:
+            final_prediction = "Safe"
+            
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"ML Error: {str(e)}")
 
     return {
         "url": url,
-        "prediction": "Phishing" if is_phishing else "Safe",
+        "prediction": final_prediction,
         "risk_score": float(round(probability * 100, 2)),
         "features": {"extracted_features": features}
     }
 
 from app.api.limiter import scan_limiter
 
-@router.post("/predict", response_model=ScanResponse, dependencies=[Depends(scan_limiter)])
+@router.post("/predict", response_model=TaskResponse, dependencies=[Depends(scan_limiter)])
 async def predict_url(
     *,
     db: Session = Depends(deps.get_db),
     scan_in: ScanCreate,
     current_user: User = Depends(deps.get_current_active_user),
 ) -> Any:
-    """Predict if a URL is phishing or safe."""
+    """Predict if a URL is phishing or safe using a background Celery task."""
     try:
-        ml_model = get_model()
+        from app.worker import process_url_scan
         
-        # 100% FREE PERMANENT FIX: Check dynamic community whitelist (Feedbacks)
-        from app.db.models import Feedback, Scan as DBScan
-        previous_fp = db.query(Feedback).join(DBScan).filter(
-            Feedback.feedback_type == "false_positive",
-            DBScan.url == scan_in.url
-        ).first()
-
-        if previous_fp:
-            result = {"url": scan_in.url, "prediction": "Safe", "risk_score": 0.0, "features": {"community_whitelist": True}}
-        else:
-            # Analyze - run CPU intensive task in threadpool
-            result = await run_in_threadpool(analyze_url, scan_in.url, ml_model)
+        # Dispatch to celery queue
+        task = process_url_scan.delay(scan_in.url, current_user.id)
         
-        # Save to DB
-        scan = Scan(
-            user_id=current_user.id,
-            url=scan_in.url,
-            prediction=result["prediction"],
-            risk_score=result["risk_score"],
-            features_json=result["features"]
-        )
-        db.add(scan)
-        db.commit()
-        db.refresh(scan)
-        
-        return scan
+        return {
+            "task_id": task.id,
+            "status": "QUEUED",
+            "message": "Scan dispatched to background worker"
+        }
     except Exception as e:
-        logger.error(f"Prediction Error: {e}", exc_info=True)
+        logger.error(f"Prediction Dispatch Error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal analysis engine error. Please try again later.")
 
 @router.get("/history", response_model=List[ScanResponse])

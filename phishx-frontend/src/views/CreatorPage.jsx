@@ -1,3 +1,4 @@
+"use client";
 import { motion } from "framer-motion";
 import { FaGraduationCap, FaLightbulb, FaRocket, FaCode, FaQuoteLeft, FaExternalLinkAlt } from "react-icons/fa";
 import "./Legal.css";

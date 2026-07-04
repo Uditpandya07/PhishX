@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { FaTimes, FaEye, FaEyeSlash, FaGoogle, FaGithub, FaEnvelope, FaLock, FaUser } from "react-icons/fa";
@@ -17,6 +18,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onLo
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   useEffect(() => {
     setIsLogin(initialMode === "login");
@@ -27,6 +29,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onLo
     setIsLoading(false);
     setShowPassword(false);
     setVerificationSent(false);
+    setAcceptedTerms(false);
   }, [initialMode, isOpen]);
 
   if (!isOpen) return null;
@@ -44,6 +47,9 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onLo
     if (!isLogin) {
       if (!hasLength || !hasUpper || !hasNumber || !hasSymbol) {
         return "Please meet all the password requirements.";
+      }
+      if (!acceptedTerms) {
+        return "You must read and accept the Privacy Policy and Terms of Service.";
       }
     }
     return null; 
@@ -214,12 +220,26 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onLo
               </div>
 
               {!isLogin && (
-                <div className="password-checklist">
-                  <span className={hasLength ? "valid" : "invalid"}>{hasLength ? "✔️" : "❌"} At least 8 characters</span>
-                  <span className={hasUpper ? "valid" : "invalid"}>{hasUpper ? "✔️" : "❌"} One uppercase letter</span>
-                  <span className={hasNumber ? "valid" : "invalid"}>{hasNumber ? "✔️" : "❌"} One number</span>
-                  <span className={hasSymbol ? "valid" : "invalid"}>{hasSymbol ? "✔️" : "❌"} One special symbol</span>
-                </div>
+                <>
+                  <div className="password-checklist">
+                    <span className={hasLength ? "valid" : "invalid"}>{hasLength ? "✔️" : "❌"} At least 8 characters</span>
+                    <span className={hasUpper ? "valid" : "invalid"}>{hasUpper ? "✔️" : "❌"} One uppercase letter</span>
+                    <span className={hasNumber ? "valid" : "invalid"}>{hasNumber ? "✔️" : "❌"} One number</span>
+                    <span className={hasSymbol ? "valid" : "invalid"}>{hasSymbol ? "✔️" : "❌"} One special symbol</span>
+                  </div>
+                  <div className="terms-checkbox" style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '15px', marginBottom: '10px' }}>
+                    <input 
+                      type="checkbox" 
+                      id="acceptTerms" 
+                      checked={acceptedTerms}
+                      onChange={(e) => setAcceptedTerms(e.target.checked)}
+                      style={{ marginTop: '4px', cursor: 'pointer' }}
+                    />
+                    <label htmlFor="acceptTerms" style={{ fontSize: '0.85rem', color: '#94a3b8', lineHeight: '1.4', cursor: 'pointer' }}>
+                      I have read and agree to the PhishX <a href="/#terms" onClick={(e) => { e.preventDefault(); onClose(); /* Handle navigation later if needed */ window.location.hash = "terms"; }} style={{ color: '#3b82f6', textDecoration: 'underline' }}>Terms of Service</a> and <a href="/#privacy" onClick={(e) => { e.preventDefault(); onClose(); window.location.hash = "privacy"; }} style={{ color: '#3b82f6', textDecoration: 'underline' }}>Privacy Policy</a>.
+                    </label>
+                  </div>
+                </>
               )}
               
               <button 

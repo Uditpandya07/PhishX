@@ -1,3 +1,4 @@
+"use client";
 import { motion } from "framer-motion";
 import { FaEye, FaHandshake, FaGlobeAmericas, FaShieldAlt } from "react-icons/fa";
 import "./Legal.css";

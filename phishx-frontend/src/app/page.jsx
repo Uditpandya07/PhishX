@@ -3,12 +3,10 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 import { FaShieldAlt, FaExclamationTriangle } from "react-icons/fa";
-import { API_URL, isConfigured } from "./config";
-import Landing from "./views/Landing";
-import Dashboard from "./views/Dashboard";
-
+import { API_URL, isConfigured } from "../config";
+import Landing from "../views/Landing";
+import Dashboard from "../views/Dashboard";
 axios.defaults.withCredentials = true;
-
 // ─── Config Error Screen ───────────────────────────────────────────────────
 function ConfigError() {
   return (
@@ -53,32 +51,26 @@ function ConfigError() {
     </div>
   );
 }
-
 // ─── Main App ──────────────────────────────────────────────────────────────
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [entered, setEntered] = useState(false);
   const [notification, setNotification] = useState(null);
-
   const triggerNotification = (msg) => {
     setNotification(msg);
     setTimeout(() => setNotification(null), 4000);
   };
-
   useEffect(() => {
     // If not configured, skip all auth checks
     if (!isConfigured) {
       setCheckingAuth(false);
       return;
     }
-
     // Fail-safe: ensure the app eventually stops loading even if network hangs
     const failSafe = setTimeout(() => setCheckingAuth(false), 3000);
-
     // The backend uses HttpOnly cookies for authentication.
     // axios.defaults.withCredentials = true is set globally at the top of this file.
-
     const checkAuth = async () => {
       try {
         await axios.get(`${API_URL}/api/v1/users/me`);
@@ -90,9 +82,7 @@ export default function App() {
         setCheckingAuth(false);
       }
     };
-
     checkAuth();
-
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get("verified") === "true") {
       triggerNotification("Email Verified Successfully! You can now access all features.");
@@ -101,15 +91,12 @@ export default function App() {
       triggerNotification("Verification failed or link expired. Please try again.");
       window.history.replaceState({}, document.title, "/");
     }
-
     return () => {
       clearTimeout(failSafe);
     };
   }, []);
-
   // Show full-screen config error if VITE_API_URL is missing/invalid
   if (!isConfigured) return <ConfigError />;
-
   if (checkingAuth) {
     return (
       <div style={{
@@ -127,7 +114,6 @@ export default function App() {
       </div>
     );
   }
-
   return (
     <>
       <AnimatePresence>
@@ -159,7 +145,6 @@ export default function App() {
           </motion.div>
         )}
       </AnimatePresence>
-
       <AnimatePresence mode="wait">
         {!entered ? (
           <motion.div key="landing" exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
@@ -191,3 +176,4 @@ export default function App() {
     </>
   );
 }
+

@@ -40,7 +40,7 @@
   <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white&labelColor=111111" alt="FastAPI" />
 </a>
 <a href="https://phishx-app.vercel.app/" target="_blank">
-  <img src="https://img.shields.io/badge/React_+_Vite-61DAFB?style=for-the-badge&logo=react&logoColor=black&labelColor=111111" alt="React Vite" />
+  <img src="https://img.shields.io/badge/Next.js_15-000000?style=for-the-badge&logo=nextdotjs&logoColor=white&labelColor=111111" alt="Next.js" />
 </a>
 <a href="https://phishx-app.vercel.app/" target="_blank">
   <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white&labelColor=111111" alt="PostgreSQL" />
@@ -54,8 +54,8 @@
 
 <br/><br/>
 
-> **PhishX** is a sophisticated, full-stack cybersecurity SaaS engineered to neutralize phishing threats in real-time.  
-> Combining a custom Machine Learning engine, a zero-latency FastAPI backend, and a seamless browser extension —  
+> **PhishX v2.0** is a sophisticated, full-stack cybersecurity platform engineered to neutralize phishing threats in real-time.
+> Now powered by **Next.js 15**, a real-time **WebSocket** scanning engine, **xAI** heuristic analysis, and a GDPR/DPDP compliant legal framework —
 > PhishX delivers enterprise-grade URL threat intelligence wrapped in a stunning, production-ready interface.
 
 </div>
@@ -171,16 +171,19 @@ The PhishX ecosystem is built as a set of **fully decoupled services**, each wit
 ```mermaid
 graph TD
     subgraph CLIENT["🖥️  CLIENT LAYER"]
-        A["⚛️ React + Vite\nFrontend\n(Vercel)"]
+        A["⚛️ Next.js 15\nFrontend\n(Vercel)"]
         B["🧩 Browser Extension\n(Chromium)"]
     end
 
-    subgraph BACKEND["⚙️  BACKEND LAYER  ·  FastAPI on Render"]
+    subgraph BACKEND["⚙️  BACKEND LAYER  ·  FastAPI"]
         C["🔐 Auth API\n/api/v1/auth"]
         D["🔍 Scan API\n/api/v1/scans"]
         E["👤 User API\n/api/v1/users"]
         F["💳 Payments API\n/api/v1/payments"]
         G["🛡️ Admin API\n/api/v1/admin"]
+        N["📡 News API\n/api/v1/news"]
+        CT["🎫 Contact API\n/api/v1/contact"]
+        WS["🔌 WebSocket\n/ws/scan"]
     end
 
     subgraph INTELLIGENCE["🤖  ML INTELLIGENCE LAYER  ·  Python"]
@@ -188,6 +191,7 @@ graph TD
         I["🧠 Phishing Classifier\n(Trained ML Model)"]
         J["📁 Dataset\nphishing_site_urls.csv"]
         W["⚡ Zero-Latency\nTop 10k & Feedback Whitelist"]
+        XAI["🔬 xAI Heuristics\n(Zero-Day Detection)"]
     end
 
     subgraph DATA["🗄️  DATA LAYER"]
@@ -196,9 +200,11 @@ graph TD
     end
 
     A -- "HTTPS REST" --> C & D & E & F
+    A -- "WebSocket" --> WS
     B -- "HTTPS REST" --> D
     D --> W --> H --> I --> J
-    C & D & E & F & G --> K
+    D --> XAI
+    C & D & E & F & G & N & CT --> K
     L --> K
 
     style CLIENT fill:#0d1117,stroke:#00E676,color:#ffffff
@@ -227,53 +233,52 @@ PhishX/
 │   ├── 📁 alembic/                      # Database migration scripts & env
 │   ├── 📁 app/
 │   │   ├── 📁 api/v1/                   # Versioned API Endpoints
-│   │   │   ├── auth.py                  #   → JWT Login / Register / Refresh
-│   │   │   ├── scans.py                 #   → URL Threat Scanning
-│   │   │   ├── users.py                 #   → User Profile Management
+│   │   │   ├── auth.py                  #   → JWT Login / Register / OAuth (Google)
+│   │   │   ├── scans.py                 #   → URL Threat Scanning (real-time + history)
+│   │   │   ├── users.py                 #   → User Profile & Settings
 │   │   │   ├── payments.py              #   → Subscription & Billing
-│   │   │   └── admin.py                 #   → Admin Operations
+│   │   │   ├── admin.py                 #   → Admin Operations & Safety Locks
+│   │   │   ├── contact.py               #   → In-App Support Ticketing (NEW v2)
+│   │   │   ├── news.py                  #   → CyberPulse News Proxy (NEW v2)
+│   │   │   └── ws.py                    #   → WebSocket Telemetry (NEW v2)
 │   │   ├── 📁 core/
 │   │   │   ├── config.py                #   → Pydantic Settings & Env Vars
 │   │   │   ├── security.py              #   → JWT, bcrypt, HttpOnly Cookies
 │   │   │   └── rate_limit.py            #   → Abuse Prevention
 │   │   ├── 📁 db/
-│   │   │   ├── models.py                #   → SQLAlchemy ORM Models
-│   │   │   ├── session.py               #   → Async DB Session Factory
+│   │   │   ├── models.py                #   → SQLAlchemy ORM Models (incl. ContactQuery)
+│   │   │   ├── session.py               #   → DB Session Factory
 │   │   │   └── seed.py                  #   → Database Seeder Script
 │   │   ├── 📁 schemas/                  # Pydantic Request/Response Contracts
 │   │   └── 📁 services/
 │   │       ├── feature_extractor.py     #   → ML Lexical Feature Pipeline
-│   │       └── whitelist.py             #   → Trusted Domain Registry
-│   ├── 📁 tests/                        # Pytest Suite (API + ML Extractor)
+│   │       ├── top_10k.py               #   → Trusted Domain Whitelist
+│   │       └── xai.py                   #   → Zero-Day Heuristic Analysis (NEW v2)
+│   ├── worker.py                        # Async Celery Worker (NEW v2)
 │   └── Dockerfile                       # Backend Container Image
 │
 ├── 📁 browser-extension/                # Chromium Real-Time Extension
-│   ├── background.js                    #   → Extension Service Worker
-│   ├── popup.html                       #   → Extension UI Shell
-│   ├── popup.js                         #   → Extension Logic & API Calls
-│   └── manifest.json                    #   → Extension Manifest V3 Config
 │
-├── 📁 model/                            # ML Training Datasets
-│   └── phishing_site_urls.csv           #   → Primary Labeled Dataset
-│
-├── 📁 phishx-frontend/                  # React + Vite Frontend
+├── 📁 phishx-frontend/                  # Next.js 15 Frontend (UPGRADED v2)
 │   ├── 📁 src/
+│   │   ├── 📁 app/                      #   → Next.js App Router
 │   │   ├── 📁 components/               #   → UI Components
-│   │   ├── 📁 pages/                    #   → Route-Level Views
-│   │   └── 📁 hooks/                    #   → Custom React Hooks
+│   │   │   ├── AdminPanel.jsx           #   → Admin Dashboard + Diagnostics
+│   │   │   ├── AuthModal.jsx            #   → Auth with Consent Checkbox (v2)
+│   │   │   ├── ContactModal.jsx         #   → In-App Support Form (NEW v2)
+│   │   │   ├── CookieBanner.jsx         #   → GDPR Cookie Consent (NEW v2)
+│   │   │   └── ScanPanel.jsx            #   → Real-time WebSocket Scanner
+│   │   └── 📁 views/                    #   → Page-level Views
 │   └── 📁 public/                       #   → Static Assets & Logos
 │
-├── 📁 .github/
-│   └── 📁 workflows/
-│       └── ci.yml                       # GitHub Actions CI/CD Pipeline
+├── 📁 terraform/                        # Infrastructure as Code (NEW v2)
+├── 📁 .github/workflows/                # CI/CD Pipelines
+│   ├── ci-pipeline.yml
+│   └── cd-pipeline.yml
 │
 ├── docker-compose.yml                   # Development Environment
-├── docker-compose.prod.yml              # Production Environment
-├── 📁 docs/                             # Project Documentation
-│   ├── DEPLOYMENT.md                    #   → Production Deployment Guide
-│   ├── JOURNEY.md                       #   → Architecture & Decision History
-│   ├── RULE_AUTHORING.md                #   → Threat Detection Rule Authoring
-│   └── RULE_PRECEDENCE.md               #   → Rule Evaluation Order Reference
+├── CHANGELOG_v2.md                      # v2.0.0 Full Release Notes
+└── README.md
 ```
 
 </details>

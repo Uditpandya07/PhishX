@@ -1,0 +1,42 @@
+.card-spotlight {
+  position: relative;
+  border-radius: 1.2rem;
+  border: 1px solid rgba(236, 72, 153, 0.2);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 1.5rem 2rem;
+  overflow: hidden;
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+  --spotlight-color: rgba(236, 72, 153, 0.15);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4), inset 0 0 20px rgba(236, 72, 153, 0.05);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.card-spotlight:hover {
+  transform: translateY(-6px) scale(1.02);
+  border-color: rgba(236, 72, 153, 0.6);
+  box-shadow: 0 15px 50px rgba(236, 72, 153, 0.25), 0 4px 15px rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(236, 72, 153, 0.1);
+}
+
+.card-spotlight::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), var(--spotlight-color), transparent 80%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.card-spotlight:hover::before,
+.card-spotlight:focus-within::before {
+  opacity: 0.6;
+}

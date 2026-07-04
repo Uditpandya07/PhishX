@@ -9999,4 +9999,6 @@ TOP_10K_DOMAINS = {
     "aliyundrive.com",
     "rac.co.uk",
     "idahostatesman.com",
-}
+    "uditpandya.vercel.app",
+    "uditpandya07.github.io/PHISHTRA-DEMO"
+    }

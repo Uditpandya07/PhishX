@@ -1,5 +1,7 @@
+"use client";
 import { useState, useEffect } from "react";
-import { FaGithub, FaTwitter, FaLinkedin, FaShieldAlt, FaBolt, FaRobot, FaLock, FaHistory, FaCode, FaChartLine, FaEnvelopeOpenText, FaSearch, FaExclamationTriangle, FaTerminal, FaInfoCircle, FaCrown, FaCog, FaSignOutAlt, FaSignInAlt, FaUserPlus, FaUserShield, FaTrashAlt, FaBars, FaTimes } from "react-icons/fa";
+import { FaGithub, FaTwitter, FaLinkedin, FaShieldAlt, FaBolt, FaRobot, FaLock, FaHistory, FaCode, FaChartLine, FaEnvelopeOpenText, FaSearch, FaExclamationTriangle, FaTerminal, FaInfoCircle, FaCrown, FaCog, FaSignOutAlt, FaSignInAlt, FaUserPlus, FaUserShield, FaTrashAlt, FaBars, FaTimes, FaNewspaper, FaGlobe } from "react-icons/fa";
+import { FiInfo, FiZap, FiGlobe, FiClock, FiActivity, FiStar, FiLogIn, FiUserPlus as FiUserPlusOutline, FiCpu, FiShield, FiDatabase, FiCode, FiLayers, FiBox, FiMonitor, FiLock } from "react-icons/fi";
 import { motion, useScroll, useSpring, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import Background from "../components/Background";
@@ -9,7 +11,9 @@ import SettingsModal from "../components/SettingsModal.jsx";
 import AdminPanel from "../components/AdminPanel.jsx";
 import PricingCards from "../components/PricingCards.jsx";
 import TechStack from "../components/TechStack.jsx";
-
+import ContactModal from "../components/ContactModal.jsx";
+import CookieBanner from "../components/CookieBanner.jsx";
+// import ThreatTicker from "../components/ThreatTicker.jsx";
 // New Pages
 import PrivacyPolicy from "./PrivacyPolicy";
 import TermsOfService from "./TermsOfService";
@@ -17,13 +21,16 @@ import CreatorPage from "./CreatorPage";
 import ComingSoon from "./ComingSoon";
 import Documentation from "./Documentation";
 import VisionPage from "./VisionPage";
+import NewsPage from "./NewsPage";
+import AnalyticsPage from "./AnalyticsPage";
 
 import "./Dashboard.css";
 
 export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEntered, triggerNotification }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [currentView, setCurrentView] = useState('main'); // 'main', 'admin', 'pricing', 'privacy', 'terms', 'creator', 'api', 'docs', 'vision'
+  const [isContactOpen, setIsContactOpen] = useState(false);
+  const [currentView, setCurrentView] = useState('main'); // 'main', 'admin', 'pricing', 'privacy', 'terms', 'creator', 'api', 'docs', 'vision', 'news', 'intel'
   const [user, setUser] = useState(null);
   const [authMode, setAuthMode] = useState("login");
   const [scanHistory, setScanHistory] = useState([]);
@@ -35,7 +42,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
     if (isLoggedIn) {
       const fetchHistory = async () => {
         try {
-          const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/scans/history`);
+          const res = await axios.get(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000")}/api/v1/scans/history`);
           const clearTimestamp = sessionStorage.getItem("history_clear_timestamp");
           const formattedHistory = res.data
             .filter(scan => !clearTimestamp || new Date(scan.timestamp) > new Date(parseInt(clearTimestamp)))
@@ -56,7 +63,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
       const fetchUser = async () => {
         try {
           if (isLoggedIn) {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/users/me`);
+            const res = await axios.get(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000")}/api/v1/users/me`);
             setUser(res.data);
           }
         } catch (err) {
@@ -95,7 +102,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
     
     try {
       const token = sessionStorage.getItem("token");
-      await axios.delete(`${import.meta.env.VITE_API_URL}/api/v1/scans/${scanId}`, {
+      await axios.delete(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000")}/api/v1/scans/${scanId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setScanHistory(prev => prev.filter(s => s.id !== scanId));
@@ -129,6 +136,10 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
         return <Documentation />;
       case 'vision':
         return <VisionPage />;
+      case 'news':
+        return <NewsPage />;
+      case 'intel':
+        return <AnalyticsPage />;
       default:
         return (
           <>
@@ -172,13 +183,19 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                   </div>
                 </div>
                 
-                <div style={{ padding: '40px 0' }}>
+                <motion.div 
+                  style={{ padding: '40px 0' }}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, type: 'spring', stiffness: 100 }}
+                >
                   <ScanPanel 
                     isLoggedIn={isLoggedIn} 
                     onAuthRequired={() => openModal("login")} 
                     onScanComplete={handleNewScan} 
+                    onNavigate={(view) => setCurrentView(view)}
                   />
-                </div>
+                </motion.div>
               </div>
             </section>
 
@@ -217,41 +234,134 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
               </div>
               <div className="grid-3">
                 <div className="feature-card-premium">
-                  <div className="feature-icon-wrapper" style={{ color: '#3b82f6' }}><FaRobot /></div>
-                  <h3>AI Classifier</h3>
-                  <p>Our Random Forest model is continuously trained on massive datasets to maintain elite-level precision.</p>
+                  <div className="feature-icon-wrapper">
+                    <FiCpu />
+                  </div>
+                  <h3 style={{ fontSize: '1.2rem', marginBottom: '10px' }}>AI Classifier</h3>
+                  <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                    Our Random Forest model is continuously trained on massive datasets to maintain elite-level precision.
+                  </p>
                 </div>
+
                 <div className="feature-card-premium">
-                  <div className="feature-icon-wrapper" style={{ color: '#4ade80' }}><FaBolt /></div>
-                  <h3>Millisecond Analysis</h3>
-                  <p>State-of-the-art backend infrastructure ensures that your threat intelligence is delivered in real-time.</p>
+                  <div className="feature-icon-wrapper">
+                    <FiZap />
+                  </div>
+                  <h3 style={{ fontSize: '1.2rem', marginBottom: '10px' }}>Millisecond Analysis</h3>
+                  <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                    State-of-the-art backend infrastructure ensures that your threat intelligence is delivered in real-time.
+                  </p>
                 </div>
+
                 <div className="feature-card-premium">
-                  <div className="feature-icon-wrapper" style={{ color: '#6366f1' }}><FaChartLine /></div>
-                  <h3>Threat Analytics</h3>
-                  <p>Identify recurring patterns and track threat originators across your entire digital footprint.</p>
+                  <div className="feature-icon-wrapper">
+                    <FiActivity />
+                  </div>
+                  <h3 style={{ fontSize: '1.2rem', marginBottom: '10px' }}>Threat Analytics</h3>
+                  <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                    Identify recurring patterns and track threat originators across your entire digital footprint.
+                  </p>
                 </div>
+
                 <div className="feature-card-premium">
-                  <div className="feature-icon-wrapper" style={{ color: '#f59e0b' }}><FaLock /></div>
-                  <h3>Secure Endpoint</h3>
-                  <p>All data processing happens in isolated environments, ensuring your browsing intent remains private.</p>
+                  <div className="feature-icon-wrapper">
+                    <FiLock />
+                  </div>
+                  <h3 style={{ fontSize: '1.2rem', marginBottom: '10px' }}>Secure Endpoint</h3>
+                  <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                    All data processing happens in isolated environments, ensuring your browsing intent remains private.
+                  </p>
                 </div>
+
                 <div className="feature-card-premium">
-                  <div className="feature-icon-wrapper" style={{ color: '#ec4899' }}><FaCode /></div>
-                  <h3>Developer API</h3>
-                  <p>Integrate our detection capabilities directly into your custom applications. (Coming Soon)</p>
+                  <div className="feature-icon-wrapper">
+                    <FiCode />
+                  </div>
+                  <h3 style={{ fontSize: '1.2rem', marginBottom: '10px' }}>Developer API</h3>
+                  <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                    Integrate our detection capabilities directly into your custom applications. (Coming Soon)
+                  </p>
                 </div>
+
                 <div className="feature-card-premium">
-                  <div className="feature-icon-wrapper" style={{ color: '#3b82f6' }}><FaEnvelopeOpenText /></div>
-                  <h3>Active Shield</h3>
-                  <p>The browser extension provides a second line of defense by intercepting links before interaction.</p>
+                  <div className="feature-icon-wrapper">
+                    <FiShield />
+                  </div>
+                  <h3 style={{ fontSize: '1.2rem', marginBottom: '10px' }}>Active Shield</h3>
+                  <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                    The browser extension provides a second line of defense by intercepting links before interaction.
+                  </p>
                 </div>
               </div>
             </section>
 
             {/* TECH STACK SECTION */}
             <section className="glass-section">
-              <TechStack />
+              <div className="tech-badge" style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '20px', background: 'rgba(15,23,42,0.4)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', transition: 'all 0.3s' }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = 'rgba(74,222,128,0.4)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3), 0 0 15px rgba(74,222,128,0.1)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.boxShadow = 'none' }}
+              >
+                <div style={{ background: 'rgba(74,222,128,0.1)', padding: '12px', borderRadius: '12px', color: '#4ade80' }}><FiZap size={24} /></div>
+                <div>
+                  <strong style={{ display: 'block', fontSize: '1.1rem' }}>FastAPI</strong>
+                  <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>High-performance backend engine</span>
+                </div>
+              </div>
+              
+              <div className="tech-badge" style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '20px', background: 'rgba(15,23,42,0.4)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', transition: 'all 0.3s' }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = 'rgba(74,222,128,0.4)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3), 0 0 15px rgba(74,222,128,0.1)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.boxShadow = 'none' }}
+              >
+                <div style={{ background: 'rgba(74,222,128,0.1)', padding: '12px', borderRadius: '12px', color: '#4ade80' }}><FiCpu size={24} /></div>
+                <div>
+                  <strong style={{ display: 'block', fontSize: '1.1rem' }}>Random Forest</strong>
+                  <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Optimized ML Classifier</span>
+                </div>
+              </div>
+
+              <div className="tech-badge" style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '20px', background: 'rgba(15,23,42,0.4)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', transition: 'all 0.3s' }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = 'rgba(74,222,128,0.4)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3), 0 0 15px rgba(74,222,128,0.1)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.boxShadow = 'none' }}
+              >
+                <div style={{ background: 'rgba(74,222,128,0.1)', padding: '12px', borderRadius: '12px', color: '#4ade80' }}><FiMonitor size={24} /></div>
+                <div>
+                  <strong style={{ display: 'block', fontSize: '1.1rem' }}>React 19</strong>
+                  <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Reactive & dynamic interface</span>
+                </div>
+              </div>
+
+              <div className="tech-badge" style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '20px', background: 'rgba(15,23,42,0.4)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', transition: 'all 0.3s' }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = 'rgba(74,222,128,0.4)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3), 0 0 15px rgba(74,222,128,0.1)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.boxShadow = 'none' }}
+              >
+                <div style={{ background: 'rgba(74,222,128,0.1)', padding: '12px', borderRadius: '12px', color: '#4ade80' }}><FiDatabase size={24} /></div>
+                <div>
+                  <strong style={{ display: 'block', fontSize: '1.1rem' }}>Neon Postgres</strong>
+                  <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Serverless relational database</span>
+                </div>
+              </div>
+
+              <div className="tech-badge" style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '20px', background: 'rgba(15,23,42,0.4)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', transition: 'all 0.3s' }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = 'rgba(74,222,128,0.4)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3), 0 0 15px rgba(74,222,128,0.1)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.boxShadow = 'none' }}
+              >
+                <div style={{ background: 'rgba(74,222,128,0.1)', padding: '12px', borderRadius: '12px', color: '#4ade80' }}><FiCode size={24} /></div>
+                <div>
+                  <strong style={{ display: 'block', fontSize: '1.1rem' }}>Python</strong>
+                  <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Data processing & feature extraction</span>
+                </div>
+              </div>
+
+              <div className="tech-badge" style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '20px', background: 'rgba(15,23,42,0.4)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', transition: 'all 0.3s' }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = 'rgba(74,222,128,0.4)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3), 0 0 15px rgba(74,222,128,0.1)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.boxShadow = 'none' }}
+              >
+                <div style={{ background: 'rgba(74,222,128,0.1)', padding: '12px', borderRadius: '12px', color: '#4ade80' }}><FiShield size={24} /></div>
+                <div>
+                  <strong style={{ display: 'block', fontSize: '1.1rem' }}>Secure API</strong>
+                  <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Protected endpoint infrastructure</span>
+                </div>
+              </div>
             </section>
 
             {/* RECENT ACTIVITY */}
@@ -285,7 +395,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                               </td>
                               <td style={{ color: '#64748b' }}>{scan.date}</td>
                               <td style={{ fontWeight: 700 }}>{scan.risk}%</td>
-                              <td><span className={`badge ${scan.status === "Safe" ? "safe" : "danger"}`}>{scan.status}</span></td>
+                              <td><span className={`badge ${scan.status === "Safe" ? "safe" : scan.status === "Suspicious" ? "suspicious" : "danger"}`}>{scan.status}</span></td>
                               <td>
                                 <button 
                                   onClick={() => handleDeleteScan(scan.id)}
@@ -335,6 +445,32 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
     restDelta: 0.001
   });
 
+  const handleNavClick = (e, viewName, targetId) => {
+    e.preventDefault();
+    setIsMobileMenuOpen(false);
+    
+    if (currentView === viewName) {
+      if (targetId) {
+        const el = document.getElementById(targetId);
+        if (el) {
+          const y = el.getBoundingClientRect().top + window.scrollY - 100;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }
+    } else {
+      setView(viewName);
+      if (targetId) {
+        setTimeout(() => {
+          const el = document.getElementById(targetId);
+          if (el) {
+            const y = el.getBoundingClientRect().top + window.scrollY - 100;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+          }
+        }, 350); // wait for AnimatePresence mode="wait" to exit old view
+      }
+    }
+  };
+
   return (
     <div className="dashboard-root">
       <motion.div className="scroll-progress-bar" style={{ scaleX }} />
@@ -353,40 +489,45 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
         >
           {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
         </button>
-
-        <div className={`nav-links ${isMobileMenuOpen ? "open" : ""}`}>
-          <a href="#about" onClick={() => { setView('main'); setIsMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <FaInfoCircle style={{ fontSize: '0.9rem', opacity: 0.8, color: '#3b82f6' }} /> About
+        <div className={`nav-links ${isMobileMenuOpen ? "open" : ""}`} style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '8px' }}>
+          <a href="#about" onClick={(e) => handleNavClick(e, 'main', 'about')} className={`nav-link-bento ${currentView === 'main' ? 'active' : ''}`}>
+            <div className="nav-icon-glass-neon"><FiInfo /></div> About
           </a>
-          <a href="#scan" onClick={() => { setView('main'); setIsMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <FaBolt style={{ fontSize: '0.9rem', opacity: 0.8, color: '#4ade80' }} /> Scanner
+          <a href="#scan" onClick={(e) => handleNavClick(e, 'main', 'scan')} className={`nav-link-bento ${currentView === 'main' ? 'active' : ''}`}>
+            <div className="nav-icon-glass-neon"><FiZap /></div> Scanner
           </a>
-          <a href="#history" onClick={() => { setView('main'); setIsMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <FaHistory style={{ fontSize: '0.9rem', opacity: 0.8, color: '#a855f7' }} /> History
+          <a href="#intel" onClick={(e) => handleNavClick(e, 'intel', null)} className={`nav-link-bento ${currentView === 'intel' ? 'active' : ''}`}>
+            <div className="nav-icon-glass-neon"><FiGlobe /></div> Intel
           </a>
-          <a href="#pricing" onClick={() => { setView('pricing'); setIsMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <FaCrown style={{ fontSize: '0.9rem', opacity: 0.8, color: '#fbbf24' }} /> Pricing
+          <a href="#history" onClick={(e) => handleNavClick(e, 'main', 'history')} className={`nav-link-bento ${currentView === 'main' ? 'active' : ''}`}>
+            <div className="nav-icon-glass-neon"><FiClock /></div> History
+          </a>
+          <a href="#news" onClick={(e) => handleNavClick(e, 'news', null)} className={`nav-link-bento ${currentView === 'news' ? 'active' : ''}`}>
+            <div className="nav-icon-glass-neon"><FiActivity /></div> CyberPulse
+          </a>
+          <a href="#pricing" onClick={(e) => handleNavClick(e, 'pricing', null)} className={`nav-link-bento ${currentView === 'pricing' ? 'active' : ''}`}>
+            <div className="nav-icon-glass-neon"><FiStar /></div> Pricing
           </a>
         </div>
 
         <div className={`auth-group ${isMobileMenuOpen ? "open" : ""}`}>
           {isLoggedIn ? (
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }} className="auth-btn-wrapper">
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'nowrap' }} className="auth-btn-wrapper">
               {user?.is_superuser && (
                 <button 
                   className="nav-btn" 
-                  style={{ background: currentView === 'admin' ? '#ef4444' : 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.4)', color: currentView === 'admin' ? '#fff' : '#ef4444', padding: '6px 14px', borderRadius: '100px', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+                  style={{ background: currentView === 'admin' ? '#ef4444' : 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.4)', color: currentView === 'admin' ? '#fff' : '#ef4444', padding: '6px 10px', borderRadius: '100px', fontWeight: 700, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}
                   onClick={() => { setView(currentView === 'admin' ? 'main' : 'admin'); setIsMobileMenuOpen(false); }}
                 >
-                  <FaUserShield style={{ fontSize: '0.9rem' }} /> {currentView === 'admin' ? "Exit" : "Admin"}
+                  <FaUserShield style={{ fontSize: '0.85rem' }} /> {currentView === 'admin' ? "Exit" : "Admin"}
                 </button>
               )}
-              <button className="login-btn" onClick={() => { setIsSettingsOpen(true); setIsMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '0.85rem' }}>
+              <button className="login-btn" onClick={() => { setIsSettingsOpen(true); setIsMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 10px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
                 <FaCog style={{ opacity: 0.8 }} /> Settings
               </button>
               <button className="primary-btn-nav" onClick={async () => { 
                 try {
-                  await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/auth/logout`);
+                  await axios.post(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000")}/api/v1/auth/logout`);
                 } catch (err) {
                   console.error("Logout failed:", err);
                 }
@@ -395,7 +536,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                 setView('main'); 
                 setIsMobileMenuOpen(false);
                 if (onLogout) onLogout(); 
-              }} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 16px', fontSize: '0.85rem' }}>
+              }} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 14px', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
                 <FaSignOutAlt /> Log Out
               </button>
             </div>
@@ -413,7 +554,17 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
       </nav>
 
       <div className="scroll-container">
-        {renderContent()}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentView}
+            initial={{ opacity: 0, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, filter: 'blur(10px)' }}
+            transition={{ duration: 0.3 }}
+          >
+            {renderContent()}
+          </motion.div>
+        </AnimatePresence>
 
         <footer className="footer-box" style={{ marginTop: '80px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '60px', marginBottom: '60px' }}>
@@ -423,13 +574,13 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                 Next-generation AI phishing detection. A non-commercial project dedicated to securing individuals and communities from digital threats.
               </p>
               <div style={{ display: 'flex', gap: '20px', marginTop: '30px' }}>
-                <a href="https://github.com/Uditpandya07" style={{ color: '#94a3b8', fontSize: '1.5rem' }}><FaGithub /></a>
+                <a href="https://github.com/Uditpandya07" target="_blank" rel="noopener noreferrer" style={{ color: '#94a3b8', fontSize: '1.5rem' }}><FaGithub /></a>
                 <a href="#" style={{ color: '#94a3b8', fontSize: '1.5rem' }}><FaTwitter /></a>
-                <a href="#" style={{ color: '#94a3b8', fontSize: '1.5rem' }}><FaLinkedin /></a>
+                <a href="https://www.linkedin.com/in/uditpandya07/" target="_blank" rel="noopener noreferrer" style={{ color: '#94a3b8', fontSize: '1.5rem' }}><FaLinkedin /></a>
               </div>
             </div>
             
-            <div style={{ display: 'flex', gap: '100px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '40px', flexWrap: 'wrap', flex: '1', justifyContent: 'space-around' }}>
               <div className="footer-col">
                 <h4 style={{ color: '#fff', marginBottom: '20px', fontSize: '1.1rem' }}>Product</h4>
                 <a href="#scan" onClick={() => setView('main')} style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>Scanner</a>
@@ -447,7 +598,15 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                 <h4 style={{ color: '#fff', marginBottom: '20px', fontSize: '1.1rem' }}>Legal</h4>
                 <a href="#" onClick={() => setView('privacy')} style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>Privacy Policy</a>
                 <a href="#" onClick={() => setView('terms')} style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>Terms of Service</a>
-                <a href="#" style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>Security</a>
+              </div>
+              <div className="footer-col">
+                <h4 style={{ color: '#fff', marginBottom: '20px', fontSize: '1.1rem' }}>Support</h4>
+                {isLoggedIn ? (
+                  <a href="#" onClick={(e) => { e.preventDefault(); setIsContactOpen(true); }} style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>Contact Support</a>
+                ) : (
+                  <a href="#" onClick={(e) => openModal("login", e)} style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>Contact Support</a>
+                )}
+                <a href="#" onClick={() => setView('security')} style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>Security</a>
               </div>
             </div>
           </div>
@@ -466,7 +625,12 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
         onClose={() => setIsSettingsOpen(false)} 
         user={user} 
         onClearHistory={handleClearLocalHistory}
+        setIsLoggedIn={setIsLoggedIn} 
+        onLogout={onLogout}
       />
+      <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} userToken={typeof window !== 'undefined' ? localStorage.getItem('token') : ''} />
+      
+      <CookieBanner />
 
       {/* Floating Status Indicator */}
       <motion.div
