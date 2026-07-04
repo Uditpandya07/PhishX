@@ -180,6 +180,11 @@
   box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
 }
 
+.warning-fill {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+}
+
 .safe-fill {
   background: linear-gradient(90deg, #4ade80, #34d399);
   box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
@@ -378,4 +383,8 @@
   .result-title {
     font-size: 1.8rem;
   }
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
 }

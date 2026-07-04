@@ -1,12 +1,69 @@
-import { useState } from "react";
+"use client";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { FaTimesCircle, FaSearch, FaCode, FaBrain, FaShieldAlt, FaCheckCircle, FaSpinner } from "react-icons/fa";
+import { FaTimesCircle, FaSearch, FaCode, FaBrain, FaShieldAlt, FaCheckCircle, FaSpinner, FaRobot } from "react-icons/fa";
+import { FiAlertTriangle, FiCheckCircle as FiCheckCircleIcon, FiShield, FiAlertCircle } from "react-icons/fi";
 import axios from "axios";
 import { API_URL, isConfigured } from "../config";
 import ElectricBorder from "./ElectricBorder";
 import "./ScanPanel.css";
 
-export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }) {
+const TypewriterText = ({ text, speed = 30, onNavigate }) => {
+  const [displayedText, setDisplayedText] = useState("");
+  const [isTyping, setIsTyping] = useState(true);
+  const textRef = useRef(text);
+  const currentIndex = useRef(0);
+
+  useEffect(() => {
+    // Reset state if text changes
+    setDisplayedText("");
+    setIsTyping(true);
+    currentIndex.current = 0;
+    textRef.current = text;
+    
+    if (!text) return;
+
+    const interval = setInterval(() => {
+      if (currentIndex.current < textRef.current.length) {
+        const char = textRef.current[currentIndex.current];
+        if (char !== undefined) {
+          setDisplayedText(prev => prev + char);
+        }
+        currentIndex.current += 1;
+      } else {
+        setIsTyping(false);
+        clearInterval(interval);
+      }
+    }, speed);
+
+    return () => clearInterval(interval);
+  }, [text, speed]);
+
+  const renderText = (rawText) => {
+    // Check if the privacy policy URL is typed out
+    const policyUrl = "https://phishx-app.vercel.app/legal";
+    if (rawText.includes(policyUrl)) {
+      const parts = rawText.split(policyUrl);
+      return (
+        <>
+          {parts[0]}
+          <a href="#privacy" onClick={(e) => { e.preventDefault(); if (onNavigate) onNavigate('privacy'); }} style={{ color: '#60a5fa', textDecoration: 'underline', cursor: 'pointer' }}>Privacy Policy</a>
+          {parts[1]}
+        </>
+      );
+    }
+    return rawText;
+  };
+
+  return (
+    <span>
+      {renderText(displayedText)}
+      {isTyping && <span className="blinking-cursor" style={{ opacity: 1, animation: 'blink 1s step-end infinite' }}>|</span>}
+    </span>
+  );
+};
+
+export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete, onNavigate }) {
   const [url, setUrl] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -17,23 +74,6 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }
   const [showFeedbackInput, setShowFeedbackInput] = useState(false);
   const [feedbackComment, setFeedbackComment] = useState("");
   const [activeFeedbackType, setActiveFeedbackType] = useState(null);
-
-  const getThreatIndicators = (features) => {
-    if (!features || !features.extracted_features) return [];
-    const f = features.extracted_features;
-    const indicators = [];
-    
-    if (f[14] === 1) indicators.push("Suspicious Redirection (//)");
-    if (f[6] === 1) indicators.push("Direct IP Access");
-    if (f[3] > 0) indicators.push("@ Symbol Trick");
-    if (f[10] === 1) indicators.push("Unreliable TLD (.xyz, .tk, etc.)");
-    if (f[13] === 1) indicators.push("URL Shortener Detected");
-    if (f[8] > 2) indicators.push("High Keyword Suspicion");
-    if (f[0] > 100) indicators.push("Abnormally Long URL");
-    if (f[5] === 0) indicators.push("Missing HTTPS");
-    
-    return indicators;
-  };
 
   const scan = async () => {
     if (!isLoggedIn) {
@@ -59,23 +99,10 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }
     setShowFeedbackInput(false);
     setFeedbackComment("");
 
-    // Simulate progress while scanning
-    const progressInterval = setInterval(() => {
-      setScanProgress(prev => {
-        const next = prev + Math.floor(Math.random() * 15) + 5;
-        if (next >= 95) {
-          clearInterval(progressInterval);
-          return 95;
-        }
-        return next;
-      });
-    }, 200);
-
     try {
       const token = sessionStorage.getItem("token");
 
       if (!isConfigured) {
-        clearInterval(progressInterval);
         setLoading(false);
         setScanProgress(0);
         alert("The PhishX backend URL is not configured. Please contact the administrator.");
@@ -85,31 +112,71 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }
       const res = await axios.post(`${API_URL}/api/v1/scans/predict`, { 
         url: url.trim() 
       }, {
+        withCredentials: true,
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       
-      clearInterval(progressInterval);
-      setScanProgress(100);
+      const taskId = res.data.task_id;
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const backendDomain = API_URL.replace(/^https?:\/\//, '');
+      const wsUrl = `${wsProtocol}//${backendDomain}/api/v1/ws/scans/${taskId}`;
       
-      setTimeout(() => {
-        setResult(res.data);
-        const risk = Math.round(res.data.risk_score);
-        const isDanger = risk >= 70;
+      const ws = new WebSocket(wsUrl);
+      
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.progress) {
+            setScanProgress(data.progress);
+        }
         
-        const newHistoryItem = {
-          id: res.data.id || Date.now(),
-          url: url.trim(),
-          date: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }),
-          risk: risk,
-          status: isDanger ? "Phishing" : "Safe"
-        };
+        if (data.status === 'COMPLETED') {
+          ws.close();
+          setScanProgress(100);
+          
+          setTimeout(() => {
+            if (data.result && data.result.error) {
+              console.error("Backend task completed with error result:", data.result.error);
+              setLoading(false);
+              setScanProgress(0);
+              alert(`Deep Analysis Engine Error: ${data.result.error}`);
+              return;
+            }
+            
+            setResult(data.result);
+            const risk = Math.round(data.result.risk_score);
+            const isDanger = risk >= 70;
+            
+            const newHistoryItem = {
+              id: data.result.id || Date.now(),
+              url: url.trim(),
+              date: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }),
+              risk: risk,
+              status: isDanger ? "Phishing" : "Safe"
+            };
 
-        if (onScanComplete) onScanComplete(newHistoryItem);
-        setLoading(false);
-      }, 500);
+            if (onScanComplete) onScanComplete(newHistoryItem);
+            setLoading(false);
+          }, 500);
+        } else if (data.status === 'FAILED') {
+          ws.close();
+          clearInterval(progressInterval);
+          setScanProgress(100);
+          
+          setTimeout(() => {
+            console.error("Backend task failed:", data.error);
+            setLoading(false);
+            setScanProgress(0);
+            alert(`Deep Analysis Engine Error: ${data.error}`);
+          }, 500);
+        }
+      };
+      
+      ws.onerror = (err) => {
+          console.error("WebSocket error", err);
+          setLoading(false);
+      };
 
     } catch (err) {
-      clearInterval(progressInterval);
       setScanProgress(100);
       
       setTimeout(() => {
@@ -117,7 +184,6 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }
         console.error("Backend failed:", errorMsg);
         setLoading(false);
         setScanProgress(0);
-        // Show the actual error so we know why it's failing
         alert(`Deep Analysis Engine Error: ${errorMsg}`);
       }, 500);
     }
@@ -132,11 +198,12 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }
     setFeedbackLoading(true);
     try {
       const token = sessionStorage.getItem("token");
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/feedback/`, {
+      await axios.post(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000")}/api/v1/feedback/`, {
         scan_id: result.id,
         feedback_type: activeFeedbackType,
         comment: feedbackComment || "Submitted via Quick Action"
       }, {
+        withCredentials: true,
         headers: { Authorization: `Bearer ${token}` }
       });
       setFeedbackSent(true);
@@ -150,12 +217,20 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }
   };
 
   const risk = result ? Math.round(result.risk_score) : 0;
-  const isDanger = risk > 50;
+  const isDanger = risk >= 70;
+  const isSuspicious = risk >= 40 && risk < 70;
+  
+  let borderColor = "#4ade80";
+  if (isError) borderColor = "#ef4444";
+  else if (result) {
+    if (isDanger) borderColor = "#ef4444";
+    else if (isSuspicious) borderColor = "#f59e0b";
+  }
 
   return (
     <div className={`scan-section-container ${isError ? "shake" : ""}`}>
       <ElectricBorder
-        color={isError ? "#ef4444" : "#4ade80"}
+        color={borderColor}
         speed={2}
         chaos={0.25}
         borderRadius={24}
@@ -238,35 +313,60 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }
 
           {result && (
             <motion.div
-              className={`result ${isDanger ? "danger" : "safe"}`}
+              className={`result ${isDanger ? "danger" : isSuspicious ? "suspicious" : "safe"}`}
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35 }}
             >
-              <h3 className="result-title">
-                {isDanger ? "🚨 High Risk URL" : "✅ Safe URL"}
+              <h3 className="result-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
+                {isDanger ? (
+                  <>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '40px', height: '40px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '12px', boxShadow: '0 0 15px rgba(239, 68, 68, 0.2)' }}>
+                      <FiAlertTriangle style={{ color: '#ef4444', fontSize: '1.4rem' }} />
+                    </span>
+                    High Risk URL
+                  </>
+                ) : isSuspicious ? (
+                  <>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '40px', height: '40px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '12px', boxShadow: '0 0 15px rgba(245, 158, 11, 0.2)' }}>
+                      <FiAlertCircle style={{ color: '#f59e0b', fontSize: '1.4rem' }} />
+                    </span>
+                    Suspicious URL
+                  </>
+                ) : (
+                  <>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '40px', height: '40px', background: 'rgba(74, 222, 128, 0.1)', border: '1px solid rgba(74, 222, 128, 0.3)', borderRadius: '12px', boxShadow: '0 0 15px rgba(74, 222, 128, 0.2)' }}>
+                      <FiCheckCircleIcon style={{ color: '#4ade80', fontSize: '1.4rem' }} />
+                    </span>
+                    Safe URL
+                  </>
+                )}
               </h3>
               <div className="risk-meter">
                 <div className="risk-label">Risk Level: {risk}%</div>
                 <div className="risk-bar-container">
                   <div 
-                    className={`risk-bar ${isDanger ? "danger-fill" : "safe-fill"}`} 
+                    className={`risk-bar ${isDanger ? "danger-fill" : isSuspicious ? "warning-fill" : "safe-fill"}`} 
                     style={{ width: `${risk}%` }}
                   ></div>
                 </div>
               </div>
 
-              {isDanger && (
-                <div className="threat-indicators">
-                  <h4>Threat Indicators Found:</h4>
-                  <div className="indicator-tags">
-                    {getThreatIndicators(result.features_json).map((text, i) => (
-                      <span key={i} className="indicator-tag">🚩 {text}</span>
-                    ))}
-                    {getThreatIndicators(result.features_json).length === 0 && (
-                      <span className="indicator-tag gray">Pattern Anomaly</span>
-                    )}
-                  </div>
+              {(result.features?.ai_explanation || result.features_json?.ai_explanation) && (
+                <div className="ai-explanation-box" style={{
+                  background: 'rgba(59, 130, 246, 0.1)',
+                  border: '1px solid rgba(59, 130, 246, 0.3)',
+                  padding: '1rem',
+                  borderRadius: '12px',
+                  marginTop: '1rem',
+                  textAlign: 'left'
+                }}>
+                  <h4 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#60a5fa', marginBottom: '8px', fontSize: '0.9rem', textTransform: 'uppercase' }}>
+                    <FaRobot /> AI Threat Intelligence
+                  </h4>
+                  <p style={{ color: '#e2e8f0', fontSize: '0.95rem', lineHeight: '1.5', minHeight: '60px' }}>
+                    <TypewriterText text={result.features?.ai_explanation || result.features_json?.ai_explanation} speed={12} onNavigate={onNavigate} />
+                  </p>
                 </div>
               )}
 
@@ -284,7 +384,21 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }
                             setShowFeedbackInput(true);
                           }}
                         >
-                          {isDanger ? "🚨 Report False Positive" : "🛡️ Report Missed Threat"}
+                          {isDanger ? (
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ display: 'inline-flex', padding: '4px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '6px' }}>
+                                <FiAlertTriangle style={{ color: '#ef4444' }} />
+                              </span>
+                              Report False Positive
+                            </span>
+                          ) : (
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ display: 'inline-flex', padding: '4px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '6px' }}>
+                                <FiShield style={{ color: '#3b82f6' }} />
+                              </span>
+                              Report Missed Threat
+                            </span>
+                          )}
                         </button>
                       ) : (
                         <motion.div 
@@ -337,7 +451,12 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete }
                       animate={{ scale: 1 }}
                       style={{ color: '#4ade80', fontSize: '0.9rem', fontWeight: '700' }}
                     >
-                      ✅ Intelligence Logged. Thank you for contributing!
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ display: 'inline-flex', padding: '4px', background: 'rgba(74, 222, 128, 0.1)', border: '1px solid rgba(74, 222, 128, 0.3)', borderRadius: '6px', boxShadow: '0 0 10px rgba(74, 222, 128, 0.2)' }}>
+                          <FiCheckCircleIcon style={{ color: '#4ade80', fontSize: '1.2rem' }} />
+                        </span>
+                        Intelligence Logged. Thank you for contributing!
+                      </span>
                     </motion.span>
                   )}
                 </div>
