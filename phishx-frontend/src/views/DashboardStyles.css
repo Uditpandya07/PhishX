@@ -1,0 +1,167 @@
+/* --- HERO ENHANCEMENTS --- */
+.hero-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  background: rgba(123, 97, 255, 0.1);
+  border: 1px solid rgba(123, 97, 255, 0.3);
+  border-radius: 100px;
+  color: #7B61FF;
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+
+.hero-subtext {
+  max-width: 700px !important;
+  margin: 0 auto 30px auto !important;
+  font-size: 1.1rem !important;
+  line-height: 1.6 !important;
+}
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 50px;
+}
+
+.h-stat {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+
+.h-stat strong {
+  font-size: 1.5rem;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+/* --- TRUST BAR --- */
+.trust-bar {
+  padding: 40px 0;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(15, 23, 42, 0.2);
+}
+
+.trust-bar p {
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  color: #64748b;
+  margin-bottom: 25px;
+}
+
+.trust-logos {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  opacity: 0.5;
+  flex-wrap: wrap;
+}
+
+.trust-logo {
+  font-weight: 900;
+  font-size: 1.2rem;
+  color: #94a3b8;
+  letter-spacing: -1px;
+}
+
+/* --- HOW IT WORKS --- */
+.how-it-works {
+  padding: 100px 0;
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 40px;
+  margin-top: 50px;
+}
+
+.step-card {
+  position: relative;
+  padding: 40px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border-radius: 20px;
+  border: 1px solid var(--glass-border);
+  transition: all 0.3s;
+}
+
+.step-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  transform: translateY(-5px);
+}
+
+.step-number {
+  font-size: 3rem;
+  font-weight: 900;
+  color: rgba(123, 97, 255, 0.1);
+  position: absolute;
+  top: 10px;
+  right: 20px;
+}
+
+.step-card h3 {
+  font-size: 1.3rem;
+  margin-bottom: 15px;
+  color: #fff;
+}
+
+.step-card p {
+  font-size: 0.95rem;
+  color: #94a3b8;
+  line-height: 1.6;
+}
+
+/* --- FEATURES GRID OVERRIDE --- */
+.feature-icon {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+/* --- FAQ SECTION --- */
+.faq-section {
+  padding: 80px;
+  margin-top: 100px;
+}
+
+.faq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 40px;
+  margin-top: 40px;
+}
+
+.faq-item h3 {
+  font-size: 1.1rem;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.faq-item p {
+  font-size: 0.95rem;
+  color: #94a3b8;
+  line-height: 1.6;
+}
+
+/* --- SCROLL CONTAINER CONNECTIVITY --- */
+.scroll-container > section {
+  position: relative;
+  overflow: visible;
+}
+
+.scroll-container > section::after {
+  content: '';
+  position: absolute;
+  bottom: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 50px;
+  background: linear-gradient(180deg, rgba(123, 97, 255, 0.3) 0%, transparent 100%);
+}
