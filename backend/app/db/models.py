@@ -121,3 +121,14 @@ class DeletionRequest(Base):
     processed_at = Column(DateTime(timezone=True), nullable=True)
 
     user = relationship("User", backref="deletion_requests")
+
+class ContactQuery(Base):
+    __tablename__ = "contact_queries"
+
+    id = Column(Uuid, primary_key=True, default=uuid.uuid4, index=True)
+    user_id = Column(Uuid, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    query_text = Column(String(1000), nullable=False)
+    status = Column(String, default="pending") # pending, resolved
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User", backref="contact_queries")
