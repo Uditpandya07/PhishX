@@ -253,7 +253,7 @@ export default function AdminPanel() {
         <div className="pulse-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <FaMicrochip style={{ color: '#a855f7', fontSize: '1.5rem' }} />
-            <h2 style={{ fontSize: '1.4rem', fontWeight: '700' }}>System Pulse</h2>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: '700', margin: 0 }}>System Pulse</h2>
           </div>
           <button 
             className={`pulse-btn ${isPulseRunning ? 'running' : ''}`}
@@ -384,7 +384,7 @@ export default function AdminPanel() {
         <div className="chart-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <FaChartBar style={{ color: '#3b82f6', fontSize: '1.5rem' }} />
-            <h2>Scan Activity Metrics</h2>
+            <h2 style={{ margin: 0 }}>Scan Activity Metrics</h2>
           </div>
           <div className="chart-legend">
             <div className="legend-item">
@@ -428,7 +428,7 @@ export default function AdminPanel() {
       <section className="admin-feedback-section glass-section">
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '35px' }}>
           <FaUserShield style={{ color: '#ef4444', fontSize: '1.5rem' }} />
-          <h2>User Departure Oversight</h2>
+          <h2 style={{ margin: 0 }}>User Departure Oversight</h2>
         </div>
         
         <div className="table-responsive">
@@ -481,7 +481,7 @@ export default function AdminPanel() {
       <section className="admin-feedback-section glass-section">
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '35px' }}>
           <FaHistory style={{ color: '#3b82f6', fontSize: '1.5rem' }} />
-          <h2>Community Intelligence Logs</h2>
+          <h2 style={{ margin: 0 }}>Community Intelligence Logs</h2>
         </div>
         
         <div className="table-responsive">
@@ -525,7 +525,7 @@ export default function AdminPanel() {
       <section className="admin-feedback-section glass-section" style={{ marginTop: '40px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '35px' }}>
           <FaCommentDots style={{ color: '#8b5cf6', fontSize: '1.5rem' }} />
-          <h2>Support & Contact Queries</h2>
+          <h2 style={{ margin: 0 }}>Support & Contact Queries</h2>
         </div>
         
         <div className="table-responsive">
