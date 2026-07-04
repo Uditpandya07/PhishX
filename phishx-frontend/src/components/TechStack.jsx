@@ -1,3 +1,4 @@
+"use client";
 import { motion } from "framer-motion";
 import { FaPython, FaReact, FaDatabase, FaShieldAlt } from "react-icons/fa";
 import { SiFastapi, SiScikitlearn, SiPostgresql, SiVite } from "react-icons/si";

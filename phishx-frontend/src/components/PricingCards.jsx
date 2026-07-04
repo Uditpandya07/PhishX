@@ -1,3 +1,4 @@
+"use client";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { FaCheck } from "react-icons/fa";

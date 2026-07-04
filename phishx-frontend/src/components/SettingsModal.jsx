@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { FaTimes, FaKey, FaUserShield, FaCopy, FaUser, FaLock, FaTrashAlt, FaEyeSlash } from "react-icons/fa";
@@ -20,7 +21,7 @@ export default function SettingsModal({ isOpen, onClose, user, onClearHistory })
     const newValue = !toggleAI;
     setToggleAI(newValue); // Optimistic update
     try {
-      const baseUrl = import.meta.env.VITE_API_URL;
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
       const token = sessionStorage.getItem("token");
       await axios.put(`${baseUrl}/api/v1/users/me`, 
         { ai_training_enabled: newValue },
@@ -42,7 +43,7 @@ export default function SettingsModal({ isOpen, onClose, user, onClearHistory })
     }
     setLoading(true);
     try {
-      const baseUrl = import.meta.env.VITE_API_URL;
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
       const token = sessionStorage.getItem("token");
       await axios.put(`${baseUrl}/api/v1/users/me`, 
         { password },
@@ -60,7 +61,7 @@ export default function SettingsModal({ isOpen, onClose, user, onClearHistory })
   const generateApiKey = async () => {
     setLoading(true);
     try {
-      const baseUrl = import.meta.env.VITE_API_URL;
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
       const token = sessionStorage.getItem("token");
       const res = await axios.post(`${baseUrl}/api/v1/users/api-keys`, {}, {
         headers: { Authorization: `Bearer ${token}` }
@@ -218,7 +219,7 @@ export default function SettingsModal({ isOpen, onClose, user, onClearHistory })
                       if (window.confirm("Are you sure? This will send a permanent deletion request for your account and all associated data.")) {
                         setLoading(true);
                         try {
-                          const baseUrl = import.meta.env.VITE_API_URL;
+                          const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
                           const token = sessionStorage.getItem("token");
                           await axios.post(`${baseUrl}/api/v1/users/delete-request`, {}, {
                             headers: { Authorization: `Bearer ${token}` }
