@@ -7,8 +7,8 @@ on:
     branches: [ "main" ]
 
 jobs:
-  backend-tests:
-    name: Backend PyTest & Quality
+  test-backend:
+    name: test-backend
     runs-on: ubuntu-latest
     
     services:
@@ -105,8 +105,6 @@ jobs:
           
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
-        with:
-          upload: true
 
   build-frontend:
     name: build-frontend
