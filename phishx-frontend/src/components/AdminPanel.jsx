@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaUsers, FaSearch, FaExclamationTriangle, FaCommentDots, FaChartBar, FaHistory, FaUserShield, FaGlobe, FaDatabase, FaShieldAlt, FaKey, FaRss, FaCheckCircle, FaTimesCircle, FaSyncAlt, FaMicrochip } from "react-icons/fa";
@@ -8,8 +9,10 @@ export default function AdminPanel() {
   const [stats, setStats] = useState(null);
   const [feedback, setFeedback] = useState([]);
   const [deletionRequests, setDeletionRequests] = useState([]);
+  const [contactQueries, setContactQueries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isPulseRunning, setIsPulseRunning] = useState(false);
+  const [diagnosticLogs, setDiagnosticLogs] = useState([]);
   const [pulseTests, setPulseTests] = useState([
     { id: 'api', name: 'API Gateway', status: 'pending', message: 'Idle' },
     { id: 'db', name: 'Neural Database', status: 'pending', message: 'Idle' },
@@ -19,29 +22,29 @@ export default function AdminPanel() {
     { id: 'storage', name: 'Storage Integrity', status: 'pending', message: 'Idle' },
     { id: 'cors', name: 'CORS Handshake', status: 'pending', message: 'Idle' },
     { id: 'oauth', name: 'Google Bridge', status: 'pending', message: 'Idle' },
-    { id: 'logic', name: 'Logic Core', status: 'pending', message: 'Idle' }
+    { id: 'logic', name: 'Logic Core', status: 'pending', message: 'Idle' },
+    { id: 'contact', name: 'Support Tickets', status: 'pending', message: 'Idle' },
+    { id: 'news', name: 'CyberPulse Feed', status: 'pending', message: 'Idle' }
   ]);
 
   const fetchData = async () => {
-    const baseUrl = import.meta.env.VITE_API_URL;
-    const token = sessionStorage.getItem("token");
-    const headers = { Authorization: `Bearer ${token}` };
+    const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
 
     // Fetch Stats
     try {
-      const res = await axios.get(`${baseUrl}/api/v1/admin/stats`, { headers });
+      const res = await axios.get(`${baseUrl}/api/v1/admin/stats`);
       setStats(res.data);
     } catch (err) { console.error("Stats fetch failed:", err); }
 
     // Fetch Feedback
     try {
-      const res = await axios.get(`${baseUrl}/api/v1/feedback/`, { headers });
+      const res = await axios.get(`${baseUrl}/api/v1/feedback/`);
       setFeedback(res.data);
     } catch (err) { console.error("Feedback fetch failed:", err); }
 
     // Fetch Deletion Requests
     try {
-      const res = await axios.get(`${baseUrl}/api/v1/admin/deletion-requests`, { headers });
+      const res = await axios.get(`${baseUrl}/api/v1/admin/deletion-requests`);
       // Map the data to ensure email is accessible
       const mapped = res.data.map(req => ({
         ...req,
@@ -50,17 +53,27 @@ export default function AdminPanel() {
       setDeletionRequests(mapped);
     } catch (err) { console.error("Deletion requests fetch failed:", err); }
 
+    // Fetch Contact Queries
+    try {
+      const res = await axios.get(`${baseUrl}/api/v1/contact/admin/queries`);
+      setContactQueries(res.data);
+    } catch (err) { console.error("Contact queries fetch failed:", err); }
+
     setLoading(false);
   };
 
   const runDiagnostics = async () => {
     setIsPulseRunning(true);
-    const baseUrl = import.meta.env.VITE_API_URL;
-    const token = sessionStorage.getItem("token");
-    const headers = { Authorization: `Bearer ${token}` };
+    setDiagnosticLogs([]);
+    const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
 
     const updateTest = (id, status, message) => {
       setPulseTests(prev => prev.map(t => t.id === id ? { ...t, status, message } : t));
+    };
+
+    const addLog = (service, errorMsg) => {
+      const timestamp = new Date().toLocaleTimeString();
+      setDiagnosticLogs(prev => [...prev, `[${timestamp}] [${service.toUpperCase()}] FAILED: ${errorMsg}`]);
     };
 
     // Reset tests
@@ -68,87 +81,120 @@ export default function AdminPanel() {
 
     // 1. API Gateway Test
     try {
-      await axios.get(`${baseUrl}/`, { headers });
+      await axios.get(`${baseUrl}/`);
       updateTest('api', 'success', 'Live');
-    } catch { updateTest('api', 'error', 'Offline'); }
+    } catch (err) { 
+      updateTest('api', 'error', 'Offline'); 
+      addLog('API Gateway', err.message);
+    }
 
     // 2. Database Test
     try {
       const start = performance.now();
-      await axios.get(`${baseUrl}/api/v1/admin/stats`, { headers });
+      await axios.get(`${baseUrl}/api/v1/admin/stats`);
       const end = performance.now();
       updateTest('db', 'success', 'Connected');
       updateTest('latency', 'success', `${Math.round(end - start)}ms`);
-    } catch { 
+    } catch (err) { 
       updateTest('db', 'error', 'Refused');
       updateTest('latency', 'error', 'Timed Out');
+      addLog('Database', err.message);
     }
 
     // 3. Scanner Test
     try {
-      await axios.get(`${baseUrl}/api/v1/scans/history`, { headers });
+      await axios.get(`${baseUrl}/api/v1/scans/history`);
       updateTest('scanner', 'success', 'Ready');
-    } catch { updateTest('scanner', 'error', 'Fault'); }
+    } catch (err) { 
+      updateTest('scanner', 'error', 'Fault'); 
+      addLog('Intelligence Engine', err.message);
+    }
 
     // 4. Auth Test
     try {
-      await axios.get(`${baseUrl}/api/v1/users/me`, { headers });
+      await axios.get(`${baseUrl}/api/v1/users/me`);
       updateTest('auth', 'success', 'Secured');
-    } catch { updateTest('auth', 'error', 'Expired'); }
+    } catch (err) { 
+      updateTest('auth', 'error', 'Expired'); 
+      addLog('Auth Vault', err.message);
+    }
 
     // 5. Storage Integrity
     try {
       sessionStorage.setItem('diag_test', 'true');
       const val = sessionStorage.getItem('diag_test');
       if (val === 'true') updateTest('storage', 'success', 'Writable');
-      else throw new Error();
-    } catch { updateTest('storage', 'error', 'Locked'); }
+      else throw new Error("Storage validation failed");
+    } catch (err) { 
+      updateTest('storage', 'error', 'Locked'); 
+      addLog('Storage Integrity', err.message || "Unknown error");
+    }
 
     // 6. CORS & OAuth Bridge
     try {
       // We use a simple fetch to see if the endpoint is responsive
       // If it redirects (307), it's working!
+      const headers = { Authorization: `Bearer ${sessionStorage.getItem("token") || ""}` };
       const res = await axios.get(`${baseUrl}/api/v1/auth/google/login`, { headers });
       updateTest('cors', 'success', 'Passing');
       updateTest('oauth', 'success', 'Responsive');
     } catch (err) {
-      // In browser, a redirect to a different domain (Google) might cause a CORS error in AXIOS,
-      // but that actually means the backend successfully told the browser to go to Google!
       if (err.message.includes('Network Error') || err.response?.status === 307 || !err.response) {
         updateTest('cors', 'success', 'Passing');
         updateTest('oauth', 'success', 'Responsive');
       } else {
         updateTest('cors', 'error', 'Blocked');
         updateTest('oauth', 'error', 'Unreachable');
+        addLog('CORS/OAuth', err.message);
       }
     }
     
     // 7. Logic Core (Minute Function Test)
     try {
-      // Perform a 'Circuit Check' on the internal state engine
+      const headers = { Authorization: `Bearer ${sessionStorage.getItem("token") || ""}` };
       const res = await axios.get(`${baseUrl}/api/v1/users/me`, { headers });
       const userData = res.data;
       
-      // Verify that 'Minute' fields like ai_training_enabled are present and typed correctly
       if (typeof userData.ai_training_enabled === 'boolean') {
         updateTest('logic', 'success', 'Valid');
       } else {
         throw new Error("Logic drift detected: Boolean missing");
       }
     } catch (err) {
-      updateTest('logic', 'error', 'Drift');
+      updateTest('logic', 'error', 'Corrupted');
+      addLog('Logic Core', err.message);
     }
 
-    // 8. Database Deep Health
+    // 8. DB Deep Ping
     try {
-      const res = await axios.get(`${baseUrl}/api/v1/admin/health`, { headers });
-      if (res.data.status === "healthy") {
+      const res = await axios.get(`${baseUrl}/api/v1/admin/health`);
+      if (res.data.database === 'connected') {
         updateTest('db', 'success', 'Optimized');
       } else {
         updateTest('db', 'error', res.data.database || 'Congested');
+        addLog('Database Health Ping', res.data.database || 'Congested');
       }
     } catch (err) {
       updateTest('db', 'error', 'Disconnected');
+      addLog('Database Health Ping', err.message);
+    }
+
+    // 9. Contact Support Ticket Test
+    try {
+      await axios.get(`${baseUrl}/api/v1/contact/admin/queries`);
+      updateTest('contact', 'success', 'Tracking');
+    } catch (err) {
+      updateTest('contact', 'error', 'Failure');
+      addLog('Support Tickets', err.message);
+    }
+
+    // 10. CyberPulse News Test
+    try {
+      await axios.get(`${baseUrl}/api/v1/news/`);
+      updateTest('news', 'success', 'Syncing');
+    } catch (err) {
+      updateTest('news', 'error', 'Offline');
+      addLog('CyberPulse Feed', err.message);
     }
 
     setIsPulseRunning(false);
@@ -168,7 +214,7 @@ export default function AdminPanel() {
     if (!window.confirm(`Are you sure you want to ${action} this deletion request?`)) return;
     
     try {
-      const baseUrl = import.meta.env.VITE_API_URL;
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
       const token = sessionStorage.getItem("token");
       await axios.post(`${baseUrl}/api/v1/admin/deletion-requests/${id}/${action}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
@@ -236,7 +282,7 @@ export default function AdminPanel() {
               if (window.confirm("Attempt to repair and synchronize all database tables?")) {
                 try {
                   const token = sessionStorage.getItem("token");
-                  const baseUrl = import.meta.env.VITE_API_URL;
+                  const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
                   await axios.post(`${baseUrl}/api/v1/admin/repair-db`, {}, {
                     headers: { Authorization: `Bearer ${token}` }
                   });
@@ -288,11 +334,27 @@ export default function AdminPanel() {
                 fontWeight: '700', 
                 color: test.status === 'success' ? '#10b981' : test.status === 'error' ? '#ef4444' : '#fff' 
               }}>
-                {test.message}
+                <span style={{ fontSize: '0.85rem', fontWeight: '700', color: test.status === 'success' ? '#10b981' : test.status === 'error' ? '#ef4444' : '#94a3b8' }}>
+                  {test.message}
+                </span>
               </div>
             </div>
           ))}
         </div>
+
+        {/* Diagnostic Logs Terminal Output */}
+        {diagnosticLogs.length > 0 && (
+          <div style={{ marginTop: '25px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '15px' }}>
+            <h4 style={{ color: '#ef4444', marginBottom: '10px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FaExclamationTriangle /> Diagnostic Warning Logs
+            </h4>
+            <div style={{ background: '#000', padding: '10px', borderRadius: '4px', maxHeight: '150px', overflowY: 'auto', fontFamily: 'monospace', fontSize: '0.85rem', color: '#fca5a5' }}>
+              {diagnosticLogs.map((log, i) => (
+                <div key={i} style={{ marginBottom: '4px' }}>{log}</div>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
       
       <div className="stats-grid">
@@ -452,6 +514,48 @@ export default function AdminPanel() {
                     <td style={{ color: '#94a3b8', fontWeight: 600 }}>{item.user?.email || 'Anonymous'}</td>
                     <td className="comment-cell">{item.comment}</td>
                     <td style={{ color: '#64748b' }}>{new Date(item.timestamp).toLocaleDateString()}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="admin-feedback-section glass-section" style={{ marginTop: '40px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '35px' }}>
+          <FaCommentDots style={{ color: '#8b5cf6', fontSize: '1.5rem' }} />
+          <h2>Support & Contact Queries</h2>
+        </div>
+        
+        <div className="table-responsive">
+          <table className="history-table">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>User Email</th>
+                <th>Message</th>
+                <th>Date Submitted</th>
+              </tr>
+            </thead>
+            <tbody>
+              {contactQueries.length === 0 ? (
+                <tr>
+                  <td colSpan="4" style={{ textAlign: 'center', padding: '60px', color: '#64748b' }}>
+                    No support queries have been submitted.
+                  </td>
+                </tr>
+              ) : (
+                contactQueries.map((q) => (
+                  <tr key={q.id}>
+                    <td>
+                      <span className={`badge ${q.status === 'pending' ? 'warning' : 'safe'}`}>
+                        {q.status.toUpperCase()}
+                      </span>
+                    </td>
+                    <td style={{ color: '#94a3b8', fontWeight: 600 }}>{q.user_email}</td>
+                    <td className="comment-cell" style={{ maxWidth: '400px', whiteSpace: 'pre-wrap' }}>{q.query_text}</td>
+                    <td style={{ color: '#64748b' }}>{new Date(q.timestamp).toLocaleString()}</td>
                   </tr>
                 ))
               )}
