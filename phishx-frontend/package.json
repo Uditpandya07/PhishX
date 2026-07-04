@@ -1,13 +1,14 @@
 {
   "name": "phishx-frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "next dev -p 5173",
     "build": "next build",
     "start": "next start -p 5173",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "echo 'No tests configured' && exit 0"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.2",
