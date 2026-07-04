@@ -15,5 +15,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# We'll run alembic migrations before starting the app via a script or command
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Copy start script
+COPY start.sh .
+RUN chmod +x start.sh
+
+# Run both Celery and FastAPI
+CMD ["./start.sh"]
