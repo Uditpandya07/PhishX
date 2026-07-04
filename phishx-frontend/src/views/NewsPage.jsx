@@ -95,7 +95,7 @@ export default function NewsPage() {
     <motion.main 
       initial={{ opacity: 0 }} 
       animate={{ opacity: 1 }} 
-      style={{ minHeight: '80vh', padding: '40px', background: 'transparent' }}
+      style={{ minHeight: '80vh', padding: 'clamp(15px, 4vw, 40px)', background: 'transparent' }}
     >
       <header style={{ textAlign: 'left', marginBottom: '50px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -104,7 +104,7 @@ export default function NewsPage() {
           </div>
           <div>
             <h1 style={{ 
-              fontSize: '3rem', 
+              fontSize: 'clamp(2rem, 8vw, 3rem)', 
               fontWeight: 900, 
               color: '#fff', 
               margin: 0, 
