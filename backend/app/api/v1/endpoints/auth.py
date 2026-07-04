@@ -112,17 +112,17 @@ def register_user(
         email=user_in.email,
         password_hash=security.get_password_hash(user_in.password),
         name=user_in.name,
-        is_verified=False # Start unverified
+        is_verified=True # Automatically verified for now
     )
     db.add(user)
     db.commit()
     db.refresh(user)
 
     # Send verification email if SendGrid is configured
-    from app.services.email import email_service
+    # from app.services.email import email_service
     # Generate a temporary verification token (reusing the access token logic for simplicity)
-    verify_token = security.create_access_token(user.id, expires_delta=timedelta(hours=24))
-    email_service.send_verification_email(user.email, user.name, verify_token)
+    # verify_token = security.create_access_token(user.id, expires_delta=timedelta(hours=24))
+    # email_service.send_verification_email(user.email, user.name, verify_token)
     
     return user
 
