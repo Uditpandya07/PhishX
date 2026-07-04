@@ -205,16 +205,31 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete, 
   };
 
   const submitFeedback = async () => {
-    if (!result || !result.id) {
-      console.warn("Feedback failed: Scan result has no database ID (likely a simulated result).");
-      alert("Cannot report results from simulated scans. Please ensure your backend is connected and you are logged in.");
-      return;
-    }
+    if (!result) return;
+    
     setFeedbackLoading(true);
     try {
       const token = sessionStorage.getItem("token");
-      await axios.post(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000")}/api/v1/feedback/`, {
-        scan_id: result.id,
+      let scanId = result.id;
+      
+      // If the scan result doesn't have a DB ID, fetch it from history
+      if (!scanId) {
+        const historyRes = await axios.get(`${API_URL}/api/v1/scans/history?limit=5`, {
+          withCredentials: true,
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        const match = historyRes.data.find(s => s.url === url.trim());
+        if (match) scanId = match.id;
+      }
+      
+      if (!scanId) {
+        setFeedbackLoading(false);
+        alert("Could not find scan record. Please try scanning again.");
+        return;
+      }
+
+      await axios.post(`${API_URL}/api/v1/feedback/`, {
+        scan_id: scanId,
         feedback_type: activeFeedbackType,
         comment: feedbackComment || "Submitted via Quick Action"
       }, {
