@@ -37,6 +37,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
   const [visibleCount, setVisibleCount] = useState(5);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isWarningOpen, setIsWarningOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('about');
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -127,7 +128,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
       case 'privacy':
         return <PrivacyPolicy />;
       case 'terms':
-        return <TermsOfService />;
+        return <TermsOfService onContactSupport={() => setIsContactOpen(true)} />;
       case 'creator':
         return <CreatorPage />;
       case 'api':
@@ -167,7 +168,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
 
             {/* SCANNER CENTERPIECE */}
             <section id="scan" className="scanner-container">
-              <div className="glass-section scan-box-wrapper" style={{ border: '2px solid rgba(59, 130, 246, 0.2)' }}>
+              <div className="glass-section scan-box-wrapper">
                 <div className="scan-stats-grid">
                   <div className="scan-stat-card">
                     <span>Analysis Performed</span>
@@ -203,12 +204,12 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
             <section id="about" className="glass-section">
               <div className="about-grid">
                 <div className="about-text">
-                  <h2 className="about-title" style={{ fontWeight: 900, marginBottom: '20px', lineHeight: 1.1 }}>Intelligent <br/> Threat Detection.</h2>
+                  <h2 className="about-title" style={{ fontWeight: 900, marginBottom: '20px', lineHeight: 1.1, fontSize: 'clamp(2.5rem, 4vw, 3.5rem)' }}>Intelligent <br/> Threat Detection.</h2>
                   <p style={{ color: '#94a3b8', fontSize: '1.2rem', lineHeight: 1.8 }}>
                     Modern phishing attacks evolve every hour. Our engine analyzes 15+ lexical features—including entropy, 
                     suspicious keywords, and redirection patterns—to identify the DNA of a threat before it reaches your inbox.
                   </p>
-                  <div className="about-stats" style={{ marginTop: '40px', display: 'flex' }}>
+                  <div className="about-stats" style={{ marginTop: '40px', display: 'flex', gap: '40px' }}>
                     <div>
                       <strong style={{ display: 'block', fontSize: '2rem', color: '#3b82f6' }}>15+</strong>
                       <span style={{ color: '#64748b', fontSize: '1rem', fontWeight: 600 }}>Feature Indicators</span>
@@ -297,7 +298,8 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
 
             {/* TECH STACK SECTION */}
             <section className="glass-section">
-              <div className="tech-badge" style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '20px', background: 'rgba(15,23,42,0.4)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', transition: 'all 0.3s' }}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+                <div className="tech-badge" style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '20px', background: 'rgba(15,23,42,0.8)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', transition: 'all 0.3s' }}
                 onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = 'rgba(74,222,128,0.4)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3), 0 0 15px rgba(74,222,128,0.1)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.boxShadow = 'none' }}
               >
@@ -308,7 +310,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                 </div>
               </div>
               
-              <div className="tech-badge" style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '20px', background: 'rgba(15,23,42,0.4)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', transition: 'all 0.3s' }}
+              <div className="tech-badge" style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '20px', background: 'rgba(15,23,42,0.8)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', transition: 'all 0.3s' }}
                 onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = 'rgba(74,222,128,0.4)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3), 0 0 15px rgba(74,222,128,0.1)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.boxShadow = 'none' }}
               >
@@ -319,7 +321,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                 </div>
               </div>
 
-              <div className="tech-badge" style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '20px', background: 'rgba(15,23,42,0.4)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', transition: 'all 0.3s' }}
+              <div className="tech-badge" style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '20px', background: 'rgba(15,23,42,0.8)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', transition: 'all 0.3s' }}
                 onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = 'rgba(74,222,128,0.4)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3), 0 0 15px rgba(74,222,128,0.1)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.boxShadow = 'none' }}
               >
@@ -330,7 +332,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                 </div>
               </div>
 
-              <div className="tech-badge" style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '20px', background: 'rgba(15,23,42,0.4)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', transition: 'all 0.3s' }}
+              <div className="tech-badge" style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '20px', background: 'rgba(15,23,42,0.8)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', transition: 'all 0.3s' }}
                 onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = 'rgba(74,222,128,0.4)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3), 0 0 15px rgba(74,222,128,0.1)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.boxShadow = 'none' }}
               >
@@ -341,7 +343,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                 </div>
               </div>
 
-              <div className="tech-badge" style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '20px', background: 'rgba(15,23,42,0.4)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', transition: 'all 0.3s' }}
+              <div className="tech-badge" style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '20px', background: 'rgba(15,23,42,0.8)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', transition: 'all 0.3s' }}
                 onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = 'rgba(74,222,128,0.4)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3), 0 0 15px rgba(74,222,128,0.1)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.boxShadow = 'none' }}
               >
@@ -352,7 +354,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                 </div>
               </div>
 
-              <div className="tech-badge" style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '20px', background: 'rgba(15,23,42,0.4)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', transition: 'all 0.3s' }}
+              <div className="tech-badge" style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '20px', background: 'rgba(15,23,42,0.8)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', transition: 'all 0.3s' }}
                 onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = 'rgba(74,222,128,0.4)'; e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3), 0 0 15px rgba(74,222,128,0.1)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.boxShadow = 'none' }}
               >
@@ -361,6 +363,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                   <strong style={{ display: 'block', fontSize: '1.1rem' }}>Secure API</strong>
                   <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Protected endpoint infrastructure</span>
                 </div>
+              </div>
               </div>
             </section>
 
@@ -371,7 +374,6 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                     <FaHistory style={{ color: '#3b82f6', fontSize: '1.5rem' }} />
                     <h3 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Recent Activity</h3>
                   </div>
-                  <span style={{ color: '#3b82f6', fontWeight: 600, cursor: 'pointer' }}>Detailed Logs &rarr;</span>
                 </div>
                
                {scanHistory.length === 0 ? (
@@ -448,6 +450,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
   const handleNavClick = (e, viewName, targetId) => {
     e.preventDefault();
     setIsMobileMenuOpen(false);
+    if (targetId) setActiveSection(targetId);
     
     if (currentView === viewName) {
       if (targetId) {
@@ -490,16 +493,16 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
           {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
         </button>
         <div className={`nav-links ${isMobileMenuOpen ? "open" : ""}`} style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '8px' }}>
-          <a href="#about" onClick={(e) => handleNavClick(e, 'main', 'about')} className={`nav-link-bento ${currentView === 'main' ? 'active' : ''}`}>
+          <a href="#about" onClick={(e) => handleNavClick(e, 'main', 'about')} className={`nav-link-bento ${currentView === 'main' && activeSection === 'about' ? 'active' : ''}`}>
             <div className="nav-icon-glass-neon"><FiInfo /></div> About
           </a>
-          <a href="#scan" onClick={(e) => handleNavClick(e, 'main', 'scan')} className={`nav-link-bento ${currentView === 'main' ? 'active' : ''}`}>
+          <a href="#scan" onClick={(e) => handleNavClick(e, 'main', 'scan')} className={`nav-link-bento ${currentView === 'main' && activeSection === 'scan' ? 'active' : ''}`}>
             <div className="nav-icon-glass-neon"><FiZap /></div> Scanner
           </a>
           <a href="#intel" onClick={(e) => handleNavClick(e, 'intel', null)} className={`nav-link-bento ${currentView === 'intel' ? 'active' : ''}`}>
             <div className="nav-icon-glass-neon"><FiGlobe /></div> Intel
           </a>
-          <a href="#history" onClick={(e) => handleNavClick(e, 'main', 'history')} className={`nav-link-bento ${currentView === 'main' ? 'active' : ''}`}>
+          <a href="#history" onClick={(e) => handleNavClick(e, 'main', 'history')} className={`nav-link-bento ${currentView === 'main' && activeSection === 'history' ? 'active' : ''}`}>
             <div className="nav-icon-glass-neon"><FiClock /></div> History
           </a>
           <a href="#news" onClick={(e) => handleNavClick(e, 'news', null)} className={`nav-link-bento ${currentView === 'news' ? 'active' : ''}`}>
@@ -515,37 +518,51 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'nowrap' }} className="auth-btn-wrapper">
               {user?.is_superuser && (
                 <button 
-                  className="nav-btn" 
-                  style={{ background: currentView === 'admin' ? '#ef4444' : 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.4)', color: currentView === 'admin' ? '#fff' : '#ef4444', padding: '6px 10px', borderRadius: '100px', fontWeight: 700, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}
+                  className={`header-action-btn danger ${currentView === 'admin' ? 'active' : ''}`}
                   onClick={() => { setView(currentView === 'admin' ? 'main' : 'admin'); setIsMobileMenuOpen(false); }}
                 >
-                  <FaUserShield style={{ fontSize: '0.85rem' }} /> {currentView === 'admin' ? "Exit" : "Admin"}
+                  <FaUserShield style={{ fontSize: '0.9rem' }} /> {currentView === 'admin' ? "Exit Admin" : "Admin"}
                 </button>
               )}
-              <button className="login-btn" onClick={() => { setIsSettingsOpen(true); setIsMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 10px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
-                <FaCog style={{ opacity: 0.8 }} /> Settings
+              <button 
+                className="nav-icon-glass-neon" 
+                onClick={() => { setIsSettingsOpen(true); setIsMobileMenuOpen(false); }}
+                style={{ width: '36px', height: '36px', cursor: 'pointer', padding: 0 }}
+                title="Settings"
+              >
+                <FaCog style={{ fontSize: '1.2rem' }} />
               </button>
-              <button className="primary-btn-nav" onClick={async () => { 
-                try {
-                  await axios.post(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000")}/api/v1/auth/logout`);
-                } catch (err) {
-                  console.error("Logout failed:", err);
-                }
-                setIsLoggedIn(false); 
-                setUser(null); 
-                setView('main'); 
-                setIsMobileMenuOpen(false);
-                if (onLogout) onLogout(); 
-              }} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 14px', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+              <button 
+                className="header-action-btn primary" 
+                onClick={async () => { 
+                  try {
+                    await axios.post(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000")}/api/v1/auth/logout`);
+                  } catch (err) {
+                    console.error("Logout failed:", err);
+                  }
+                  setIsLoggedIn(false); 
+                  setUser(null); 
+                  setView('main'); 
+                  setIsMobileMenuOpen(false);
+                  if (onLogout) onLogout(); 
+                }}
+              >
                 <FaSignOutAlt /> Log Out
               </button>
             </div>
           ) : (
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }} className="auth-btn-wrapper">
-              <a href="#login" className="login-btn" onClick={(e) => { openModal("login", e); setIsMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '0.85rem' }}>
+              <a 
+                href="#login" 
+                className="header-action-btn secondary" 
+                onClick={(e) => { openModal("login", e); setIsMobileMenuOpen(false); }}
+              >
                 <FaSignInAlt style={{ opacity: 0.8 }} /> Log In
               </a>
-              <button className="primary-btn-nav" onClick={(e) => { openModal("signup", e); setIsMobileMenuOpen(false); }} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 16px', fontSize: '0.85rem' }}>
+              <button 
+                className="header-action-btn primary" 
+                onClick={(e) => { openModal("signup", e); setIsMobileMenuOpen(false); }}
+              >
                 <FaUserPlus /> Sign Up
               </button>
             </div>
@@ -561,6 +578,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
             animate={{ opacity: 1, filter: 'blur(0px)' }}
             exit={{ opacity: 0, filter: 'blur(10px)' }}
             transition={{ duration: 0.3 }}
+            style={{ display: 'flex', flexDirection: 'column', gap: '60px' }}
           >
             {renderContent()}
           </motion.div>
@@ -569,7 +587,10 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
         <footer className="footer-box" style={{ marginTop: '80px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '60px', marginBottom: '60px' }}>
             <div style={{ maxWidth: '400px' }}>
-              <img src="/logo.png" alt="PhishX Logo" style={{ height: '60px', marginBottom: '25px' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '25px' }}>
+                <img src="/logo-icon.png" alt="PhishX Icon" style={{ height: '45px' }} />
+                <img src="/brand-text.png" alt="PhishX" style={{ height: '45px' }} />
+              </div>
               <p style={{ color: '#94a3b8', lineHeight: 1.8, fontSize: '1rem' }}>
                 Next-generation AI phishing detection. A non-commercial project dedicated to securing individuals and communities from digital threats.
               </p>
