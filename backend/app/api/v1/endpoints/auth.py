@@ -23,8 +23,8 @@ COOKIE_SECURE = os.getenv("COOKIE_SECURE", "true").lower() == "true"
 
 @router.post("/logout")
 def logout(response: Response):
-    """Clear the authentication cookie."""
-    response.delete_cookie(key="access_token", httponly=True, secure=COOKIE_SECURE, samesite="none")
+    samesite_policy = "none" if COOKIE_SECURE else "lax"
+    response.delete_cookie(key="access_token", httponly=True, secure=COOKIE_SECURE, samesite=samesite_policy)
     return {"message": "Logged out successfully"}
 
 @router.get("/verify")
@@ -84,12 +84,13 @@ def login_access_token(
     
     from fastapi.responses import JSONResponse
     response = JSONResponse(content=return_data)
+    samesite_policy = "none" if COOKIE_SECURE else "lax"
     response.set_cookie(
         key="access_token", 
         value=access_token, 
         httponly=True, 
         secure=COOKIE_SECURE, 
-        samesite="none",
+        samesite=samesite_policy,
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
     )
     return response
@@ -207,12 +208,13 @@ async def google_callback(
     
     # 5. Redirect to frontend with the cookie set
     response = RedirectResponse(url=settings.FRONTEND_URL)
+    samesite_policy = "none" if COOKIE_SECURE else "lax"
     response.set_cookie(
         key="access_token", 
         value=phishx_token, 
         httponly=True, 
         secure=COOKIE_SECURE, 
-        samesite="none",
+        samesite=samesite_policy,
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
     )
     return response
