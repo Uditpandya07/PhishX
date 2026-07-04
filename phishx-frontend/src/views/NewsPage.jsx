@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { FaSatelliteDish, FaExternalLinkAlt, FaClock, FaUser, FaStar, FaSpinner } from 'react-icons/fa';
 import axios from 'axios';
 import SpotlightCard from '../components/SpotlightCard';
+import { API_URL } from '../config';
 
 export default function NewsPage() {
   const [stories, setStories] = useState([]);
@@ -18,7 +19,7 @@ export default function NewsPage() {
       try {
         if (!isBackgroundRefresh) setLoading(true);
         // Fetch top stories from our own Backend Proxy to bypass all AdBlockers and CORS issues!
-        const res = await axios.get('http://localhost:8000/api/v1/news/');
+        const res = await axios.get(`${API_URL}/api/v1/news/`);
         
         if (res.data.status === 'success') {
           setStories(res.data.data.filter(story => story && story.url));
