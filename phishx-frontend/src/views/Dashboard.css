@@ -28,6 +28,30 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.nav-link-bento {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-link-bento:hover,
+.nav-link-bento.active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-link-bento.active {
+  color: var(--secondary);
+}
+
 .nav-link-bento:hover .nav-icon-glass-neon, .nav-link-bento.active .nav-icon-glass-neon {
   transform: scale(1.1);
   border-color: rgba(74, 222, 128, 0.5);
@@ -151,7 +175,7 @@
 }
 
 .hero-title {
-  font-size: 5.5rem;
+  font-size: clamp(3rem, 6vw, 4.5rem);
   font-weight: 900;
   letter-spacing: -3px;
   line-height: 1.1;
@@ -191,7 +215,7 @@
 
 .scan-box-wrapper {
   padding: 30px;
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(15, 23, 42, 0.9);
   backdrop-filter: blur(24px);
   border-radius: 40px;
   border: 1px solid rgba(255, 255, 255, 0.08); 
@@ -281,7 +305,7 @@
 
 .feature-card-premium {
   padding: 40px;
-  background: rgba(15, 23, 42, 0.4);
+  background: rgba(15, 23, 42, 0.8);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 24px;
@@ -398,20 +422,96 @@
   width: 60%;
 }
 
+/* --- HEADER ACTION BUTTONS --- */
+.header-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 100px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.header-action-btn:hover {
+  transform: translateY(-2px);
+}
+
+.header-action-btn.primary {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.1);
+}
+
+.header-action-btn.primary:hover {
+  background: rgba(59, 130, 246, 0.2);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
+  border-color: rgba(59, 130, 246, 0.6);
+}
+
+.header-action-btn.secondary {
+  background: rgba(255, 255, 255, 0.03);
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.header-action-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.header-action-btn.danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.header-action-btn.danger.active {
+  background: #ef4444;
+  color: white;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+}
+
+.header-action-btn.danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.header-action-btn.danger.active:hover {
+  background: #dc2626;
+}
+
+/* Also keep primary-btn-nav in case it's used elsewhere (e.g. Landing/Creator Page) */
 .primary-btn-nav {
-  background: linear-gradient(90deg, var(--primary), var(--secondary));
-  color: #0f172a;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.4);
   padding: 12px 28px;
   border-radius: 100px;
   font-weight: 700;
   text-decoration: none;
   transition: all 0.3s;
-  box-shadow: 0 4px 15px var(--secondary-glow);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .primary-btn-nav:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px var(--primary-glow);
+  background: rgba(59, 130, 246, 0.2);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
+  border-color: rgba(59, 130, 246, 0.6);
 }
 
 /* RECENT ACTIVITY ENHANCEMENTS */
@@ -428,6 +528,8 @@
 
 .history-table td {
   padding: 20px;
+  font-size: 0.95rem;
+  color: #e2e8f0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
 
@@ -616,7 +718,7 @@
 
   /* Hero Section */
   .hero-section {
-    padding: 40px 0 20px 0;
+    padding: 30px 0 10px 0;
   }
 
   .hero-badge {
@@ -625,7 +727,7 @@
   }
 
   .hero-title {
-    font-size: 2.8rem;
+    font-size: 2.2rem;
     line-height: 1.2;
     letter-spacing: -1px;
   }
