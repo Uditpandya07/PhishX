@@ -61,7 +61,9 @@ def process_url_scan(url: str, user_id: int):
         )
         db.add(scan_db)
         db.commit()
+        db.refresh(scan_db)
         
+        result["id"] = str(scan_db.id)
         return result
     except Exception as e:
         logger.error(f"Error in Celery background task: {e}")

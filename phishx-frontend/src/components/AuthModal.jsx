@@ -97,8 +97,17 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onLo
             password,
             name
           });
-          setVerificationSent(true);
-          triggerNotification && triggerNotification("Verification email sent! Please check your inbox.");
+          
+          // Auto login after registration
+          const loginRes = await axios.post(`${API_URL}/api/v1/auth/login`, 
+            new URLSearchParams({
+              username: email,
+              password: password
+            }),
+            { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, withCredentials: true }
+          );
+          if (onLoginSuccess) onLoginSuccess(loginRes.data.user || { email });
+          if (triggerNotification) triggerNotification("Successfully registered and logged in!");
         }
       } catch (err) {
         let errorMsg = "Authentication failed.";

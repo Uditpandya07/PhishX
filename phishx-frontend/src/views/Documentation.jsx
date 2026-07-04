@@ -58,7 +58,7 @@ export default function Documentation() {
 
         <section style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '30px', marginTop: '30px' }}>
           <p style={{ fontSize: '0.9rem', color: '#64748b' }}>
-            Version: 1.0.4-beta • Build: 2026.04.23
+            Version: 2.0.0 • Build: 2026.07.05
           </p>
         </section>
       </div>

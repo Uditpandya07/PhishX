@@ -40,6 +40,15 @@ app = FastAPI(
 origins = [str(origin) for origin in settings.BACKEND_CORS_ORIGINS] if settings.BACKEND_CORS_ORIGINS else []
 if settings.FRONTEND_URL not in origins:
     origins.append(settings.FRONTEND_URL)
+# Add common local development IPs to prevent CORS issues
+origins.extend([
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://localhost:3000"
+])
+# Remove duplicates
+origins = list(set(origins))
 
 
 @app.middleware("http")
