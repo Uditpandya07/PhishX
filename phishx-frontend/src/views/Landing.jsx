@@ -7,7 +7,7 @@ export default function Landing({ onEnter }) {
     <div
       onClick={onEnter}
       style={{
-        height: "100vh",
+        height: "100dvh",
         width: "100vw",
         position: "relative",
         overflow: "hidden",
