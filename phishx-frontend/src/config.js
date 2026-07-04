@@ -1,11 +1,11 @@
 /**
  * Central configuration & environment validation for PhishX frontend.
  *
- * VITE_API_URL must be set in your deployment environment (e.g. Vercel).
+ * NEXT_PUBLIC_API_URL must be set in your deployment environment (e.g. Vercel).
  * Example: https://your-render-service.onrender.com
  */
 
-const rawApiUrl = import.meta.env.VITE_API_URL;
+const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 function isValidUrl(val) {
   if (!val || val === "undefined" || val === "null" || val === "") return false;

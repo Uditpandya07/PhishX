@@ -1,10 +1,11 @@
+"use client";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 import { FaShieldAlt, FaExclamationTriangle } from "react-icons/fa";
 import { API_URL, isConfigured } from "./config";
-import Landing from "./pages/Landing";
-import Dashboard from "./pages/Dashboard";
+import Landing from "./views/Landing";
+import Dashboard from "./views/Dashboard";
 
 axios.defaults.withCredentials = true;
 
