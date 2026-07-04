@@ -1,3 +1,4 @@
+"use client";
 import DotGrid from "./DotGrid";
 
 export default function Background() {
