@@ -741,16 +741,20 @@
   }
 
   .nav-menu-wrapper.open .auth-btn-wrapper {
-    flex-direction: column !important;
+    flex-direction: row !important;
+    flex-wrap: wrap;
     width: 100%;
-    align-items: stretch !important;
+    align-items: center !important;
   }
 
-  .nav-menu-wrapper.open .auth-btn-wrapper button,
-  .nav-menu-wrapper.open .auth-btn-wrapper a {
-    width: 100%;
+  .nav-menu-wrapper.open .auth-btn-wrapper button.danger {
+    width: 100%; /* Admin button */
     justify-content: center;
-    text-align: center;
+  }
+  
+  .nav-menu-wrapper.open .auth-btn-wrapper button.primary {
+    flex: 1; /* Logout button */
+    justify-content: center;
   }
 
   /* Hero Section */
