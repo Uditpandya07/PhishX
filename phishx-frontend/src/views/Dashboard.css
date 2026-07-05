@@ -915,5 +915,8 @@
 
 .status-pill-text {
   font-size: 0.7rem;
-}. s e t t i n g s - t e x t   {   d i s p l a y :   n o n e ;   }  
- 
+}
+
+.settings-text {
+  display: none;
+}
