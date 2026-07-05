@@ -12,6 +12,10 @@ export const metadata = {
     siteName: "PhishX",
     type: "website",
   },
+  icons: {
+    icon: '/logo-icon.png',
+    apple: '/logo-icon.png',
+  },
   robots: {
     index: true,
     follow: true,

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell,
-  BarChart, Bar
+  BarChart, Bar, LabelList
 } from 'recharts';
 import { FaGlobe, FaShieldAlt, FaChartLine } from 'react-icons/fa';
 
@@ -85,13 +85,13 @@ export default function AnalyticsPage() {
       animate={{ opacity: 1 }} 
       style={{ minHeight: '80vh', padding: '40px', background: 'transparent', maxWidth: '1400px', margin: '0 auto', position: 'relative' }}
     >
-      {/* Simulation Badge */}
-      <div style={{ position: 'absolute', top: '20px', right: '40px', display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '6px 12px', borderRadius: '20px', color: '#fcd34d', fontSize: '0.8rem', fontWeight: 600, backdropFilter: 'blur(10px)' }}>
-        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b', boxShadow: '0 0 10px #f59e0b', animation: 'pulse 2s infinite' }}></div>
-        SIMULATION MODE
-      </div>
-
       <header style={{ textAlign: 'center', marginBottom: '50px' }}>
+        {/* Simulation Badge */}
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '6px 12px', borderRadius: '20px', color: '#fcd34d', fontSize: '0.8rem', fontWeight: 600, backdropFilter: 'blur(10px)', marginBottom: '25px' }}>
+          <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b', boxShadow: '0 0 10px #f59e0b', animation: 'pulse 2s infinite' }}></div>
+          SIMULATION MODE
+        </div>
+        <br/>
         <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '80px', height: '80px', borderRadius: '24px', background: 'linear-gradient(135deg, rgba(59,130,246,0.2) 0%, rgba(59,130,246,0.05) 100%)', border: '1px solid rgba(59,130,246,0.3)', boxShadow: '0 8px 32px rgba(59,130,246,0.2)', marginBottom: '20px', backdropFilter: 'blur(10px)' }}>
           <FaGlobe style={{ fontSize: '2.5rem', color: '#60a5fa' }} aria-hidden="true" />
         </div>
@@ -104,7 +104,7 @@ export default function AnalyticsPage() {
       </header>
 
       {/* Top Stats Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '20px', marginBottom: '40px' }}>
         <div style={{ background: 'rgba(15, 20, 40, 0.5)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '30px', textAlign: 'center', boxShadow: '0 4px 30px rgba(0,0,0,0.2)' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '56px', height: '56px', borderRadius: '16px', background: 'linear-gradient(135deg, rgba(16,185,129,0.2) 0%, rgba(16,185,129,0.05) 100%)', border: '1px solid rgba(16,185,129,0.3)', marginBottom: '15px' }}>
             <FaShieldAlt style={{ fontSize: '1.8rem', color: '#34d399' }} />
@@ -127,10 +127,10 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Charts Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '30px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: '30px' }}>
         
         {/* Line Chart */}
-        <div style={{ background: 'rgba(15, 20, 40, 0.5)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '25px', boxShadow: '0 4px 30px rgba(0,0,0,0.2)' }}>
+        <div style={{ background: 'rgba(15, 20, 40, 0.5)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '25px', boxShadow: '0 4px 30px rgba(0,0,0,0.2)', minWidth: 0 }}>
           <h3 style={{ fontSize: '1.2rem', fontWeight: 600, color: '#fff', marginBottom: '20px' }}>Live Attack Volume (Global)</h3>
           <div style={{ width: '100%', height: '300px' }}>
             <ResponsiveContainer>
@@ -155,7 +155,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Pie Chart */}
-        <div style={{ background: 'rgba(15, 20, 40, 0.5)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '25px', boxShadow: '0 4px 30px rgba(0,0,0,0.2)' }}>
+        <div style={{ background: 'rgba(15, 20, 40, 0.5)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '25px', boxShadow: '0 4px 30px rgba(0,0,0,0.2)', minWidth: 0 }}>
           <h3 style={{ fontSize: '1.2rem', fontWeight: 600, color: '#fff', marginBottom: '20px' }}>Targeted Sectors (Last 24h)</h3>
           <div style={{ width: '100%', height: '300px' }}>
             <ResponsiveContainer>
@@ -189,23 +189,23 @@ export default function AnalyticsPage() {
                 />
               </PieChart>
             </ResponsiveContainer>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap', marginTop: '-10px' }}>
-              {sectorData.map((entry, index) => (
-                <div key={entry.name} style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.85rem', color: '#f8fafc', fontWeight: 500 }}>
-                  <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: `linear-gradient(135deg, ${COLORS[index % COLORS.length]}, ${COLORS[(index + 1) % COLORS.length]})` }}></div>
-                  {entry.name}
-                </div>
-              ))}
-            </div>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap', marginTop: '15px' }}>
+            {sectorData.map((entry, index) => (
+              <div key={entry.name} style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.85rem', color: '#f8fafc', fontWeight: 500 }}>
+                <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: `linear-gradient(135deg, ${COLORS[index % COLORS.length]}, ${COLORS[(index + 1) % COLORS.length]})` }}></div>
+                {entry.name}
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Bar Chart */}
-        <div style={{ background: 'rgba(15, 20, 40, 0.5)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '25px', boxShadow: '0 4px 30px rgba(0,0,0,0.2)', gridColumn: '1 / -1' }}>
+        <div style={{ background: 'rgba(15, 20, 40, 0.5)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '25px', boxShadow: '0 4px 30px rgba(0,0,0,0.2)', minWidth: 0, gridColumn: '1 / -1' }}>
           <h3 style={{ fontSize: '1.2rem', fontWeight: 600, color: '#fff', marginBottom: '20px' }}>Top Threat Origins</h3>
           <div style={{ width: '100%', height: '300px' }}>
             <ResponsiveContainer>
-              <BarChart data={geoData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
+              <BarChart data={geoData} layout="vertical" margin={{ top: 5, right: 50, left: 0, bottom: 5 }}>
                 <defs>
                   {geoData.map((entry, index) => (
                     <linearGradient key={`grad-bar-${index}`} id={`colorBar${index}`} x1="0" y1="0" x2="1" y2="0">
@@ -216,7 +216,7 @@ export default function AnalyticsPage() {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={true} vertical={false} />
                 <XAxis type="number" stroke="#94a3b8" fontSize={12} />
-                <YAxis dataKey="name" type="category" stroke="#f8fafc" fontSize={12} fontWeight={500} />
+                <YAxis dataKey="name" type="category" stroke="#f8fafc" fontSize={12} fontWeight={500} width={120} />
                 <Tooltip 
                   cursor={{ fill: 'rgba(255,255,255,0.04)' }}
                   contentStyle={{ background: 'rgba(15,20,40,0.9)', backdropFilter: 'blur(10px)', border: '1px solid rgba(59,130,246,0.3)', borderRadius: '8px', color: '#fff', boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
@@ -225,6 +225,7 @@ export default function AnalyticsPage() {
                   {geoData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={`url(#colorBar${index})`} style={{ filter: `drop-shadow(0 0 6px ${COLORS[(index + 1) % COLORS.length]}50)` }} />
                   ))}
+                  <LabelList dataKey="value" position="right" fill="#94a3b8" fontSize={12} fontWeight={600} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>

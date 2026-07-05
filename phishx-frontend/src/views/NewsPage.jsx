@@ -13,6 +13,7 @@ export default function NewsPage() {
 
   useEffect(() => {
     // SEO: Update the document title dynamically when the user opens this page
+    const originalTitle = document.title;
     document.title = "CyberPulse - Live Tech & Cybersecurity News | PhishX";
     
     const fetchNews = async (isBackgroundRefresh = false) => {
@@ -43,8 +44,11 @@ export default function NewsPage() {
       fetchNews(true);
     }, 300000);
 
-    // Cleanup interval when user leaves the page
-    return () => clearInterval(intervalId);
+    // Cleanup interval and title when user leaves the page
+    return () => {
+      document.title = originalTitle;
+      clearInterval(intervalId);
+    };
   }, []);
 
   const timeAgo = (unixTimestamp) => {
