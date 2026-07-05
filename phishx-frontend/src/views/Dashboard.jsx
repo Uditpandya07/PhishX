@@ -526,12 +526,12 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                   </button>
                 )}
                 <button 
-                  className="nav-icon-glass-neon" 
+                  className="header-action-btn glass" 
                   onClick={() => { setIsSettingsOpen(true); setIsMobileMenuOpen(false); }}
-                  style={{ width: '36px', height: '36px', cursor: 'pointer', padding: 0 }}
                   title="Settings"
+                  style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}
                 >
-                  <FaCog style={{ fontSize: '1.2rem' }} />
+                  <FaCog style={{ fontSize: '1.2rem' }} /> <span className="settings-text">Settings</span>
                 </button>
                 <button 
                   className="header-action-btn primary" 

@@ -741,20 +741,19 @@
   }
 
   .nav-menu-wrapper.open .auth-btn-wrapper {
-    flex-direction: row !important;
-    flex-wrap: wrap;
+    flex-direction: column !important;
     width: 100%;
-    align-items: center !important;
+    align-items: stretch !important;
   }
 
-  .nav-menu-wrapper.open .auth-btn-wrapper button.danger {
-    width: 100%; /* Admin button */
+  .nav-menu-wrapper.open .auth-btn-wrapper button {
+    width: 100% !important; /* All buttons equal full width */
     justify-content: center;
+    flex: none !important;
   }
   
-  .nav-menu-wrapper.open .auth-btn-wrapper button.primary {
-    flex: 1; /* Logout button */
-    justify-content: center;
+  .settings-text {
+    display: inline;
   }
 
   /* Hero Section */
@@ -916,4 +915,5 @@
 
 .status-pill-text {
   font-size: 0.7rem;
-}
+}. s e t t i n g s - t e x t   {   d i s p l a y :   n o n e ;   }  
+ 
