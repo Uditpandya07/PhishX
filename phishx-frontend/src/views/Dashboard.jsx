@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { FaGithub, FaTwitter, FaLinkedin, FaShieldAlt, FaBolt, FaRobot, FaLock, FaHistory, FaCode, FaChartLine, FaEnvelopeOpenText, FaSearch, FaExclamationTriangle, FaTerminal, FaInfoCircle, FaCrown, FaCog, FaSignOutAlt, FaSignInAlt, FaUserPlus, FaUserShield, FaTrashAlt, FaBars, FaTimes, FaNewspaper, FaGlobe } from "react-icons/fa";
+import { FaGithub, FaTwitter, FaLinkedin, FaShieldAlt, FaBolt, FaRobot, FaLock, FaHistory, FaCode, FaChartLine, FaEnvelopeOpenText, FaSearch, FaExclamationTriangle, FaTerminal, FaInfoCircle, FaCrown, FaCog, FaSignOutAlt, FaSignInAlt, FaUserPlus, FaUserShield, FaTrashAlt, FaBars, FaTimes, FaNewspaper, FaGlobe, FaSatelliteDish } from "react-icons/fa";
 import { FiInfo, FiZap, FiGlobe, FiClock, FiActivity, FiStar, FiLogIn, FiUserPlus as FiUserPlusOutline, FiCpu, FiShield, FiDatabase, FiCode, FiLayers, FiBox, FiMonitor, FiLock } from "react-icons/fi";
 import { motion, useScroll, useSpring, AnimatePresence } from "framer-motion";
 import axios from "axios";
@@ -254,13 +254,13 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                   </p>
                 </div>
 
-                <div className="feature-card-premium">
-                  <div className="feature-icon-wrapper">
-                    <FiActivity />
+                <div className="feature-card-premium" onClick={() => setView('news')} style={{ cursor: 'pointer' }}>
+                  <div className="feature-icon-wrapper" style={{ border: '1px solid rgba(236,72,153,0.3)', background: 'rgba(236,72,153,0.1)', boxShadow: '0 0 20px rgba(236,72,153,0.2)' }}>
+                    <FaSatelliteDish style={{ color: '#f472b6' }} />
                   </div>
-                  <h3 style={{ fontSize: '1.2rem', marginBottom: '10px' }}>Threat Analytics</h3>
+                  <h3 style={{ fontSize: '1.2rem', marginBottom: '10px' }}>CyberPulse</h3>
                   <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                    Identify recurring patterns and track threat originators across your entire digital footprint.
+                    Live tracking of global cyberattack vectors, threat origins, and breaking cybersecurity news.
                   </p>
                 </div>
 
@@ -492,81 +492,83 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
         >
           {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
         </button>
-        <div className={`nav-links ${isMobileMenuOpen ? "open" : ""}`} style={{ flex: 1, display: 'flex', justifyContent: 'center', gap: '8px' }}>
-          <a href="#about" onClick={(e) => handleNavClick(e, 'main', 'about')} className={`nav-link-bento ${currentView === 'main' && activeSection === 'about' ? 'active' : ''}`}>
-            <div className="nav-icon-glass-neon"><FiInfo /></div> About
-          </a>
-          <a href="#scan" onClick={(e) => handleNavClick(e, 'main', 'scan')} className={`nav-link-bento ${currentView === 'main' && activeSection === 'scan' ? 'active' : ''}`}>
-            <div className="nav-icon-glass-neon"><FiZap /></div> Scanner
-          </a>
-          <a href="#intel" onClick={(e) => handleNavClick(e, 'intel', null)} className={`nav-link-bento ${currentView === 'intel' ? 'active' : ''}`}>
-            <div className="nav-icon-glass-neon"><FiGlobe /></div> Intel
-          </a>
-          <a href="#history" onClick={(e) => handleNavClick(e, 'main', 'history')} className={`nav-link-bento ${currentView === 'main' && activeSection === 'history' ? 'active' : ''}`}>
-            <div className="nav-icon-glass-neon"><FiClock /></div> History
-          </a>
-          <a href="#news" onClick={(e) => handleNavClick(e, 'news', null)} className={`nav-link-bento ${currentView === 'news' ? 'active' : ''}`}>
-            <div className="nav-icon-glass-neon"><FiActivity /></div> CyberPulse
-          </a>
-          <a href="#pricing" onClick={(e) => handleNavClick(e, 'pricing', null)} className={`nav-link-bento ${currentView === 'pricing' ? 'active' : ''}`}>
-            <div className="nav-icon-glass-neon"><FiStar /></div> Pricing
-          </a>
-        </div>
+        <div className={`nav-menu-wrapper ${isMobileMenuOpen ? "open" : ""}`}>
+          <div className="nav-links">
+            <a href="#about" onClick={(e) => handleNavClick(e, 'main', 'about')} className={`nav-link-bento ${currentView === 'main' && activeSection === 'about' ? 'active' : ''}`}>
+              <div className="nav-icon-glass-neon"><FiInfo /></div> About
+            </a>
+            <a href="#scan" onClick={(e) => handleNavClick(e, 'main', 'scan')} className={`nav-link-bento ${currentView === 'main' && activeSection === 'scan' ? 'active' : ''}`}>
+              <div className="nav-icon-glass-neon"><FiZap /></div> Scanner
+            </a>
+            <a href="#intel" onClick={(e) => handleNavClick(e, 'intel', null)} className={`nav-link-bento ${currentView === 'intel' ? 'active' : ''}`}>
+              <div className="nav-icon-glass-neon"><FiGlobe /></div> Intel
+            </a>
+            <a href="#history" onClick={(e) => handleNavClick(e, 'main', 'history')} className={`nav-link-bento ${currentView === 'main' && activeSection === 'history' ? 'active' : ''}`}>
+              <div className="nav-icon-glass-neon"><FiClock /></div> History
+            </a>
+            <a href="#news" onClick={(e) => handleNavClick(e, 'news', null)} className={`nav-link-bento ${currentView === 'news' ? 'active' : ''}`}>
+              <div className="nav-icon-glass-neon"><FiActivity /></div> CyberPulse
+            </a>
+            <a href="#pricing" onClick={(e) => handleNavClick(e, 'pricing', null)} className={`nav-link-bento ${currentView === 'pricing' ? 'active' : ''}`}>
+              <div className="nav-icon-glass-neon"><FiStar /></div> Pricing
+            </a>
+          </div>
 
-        <div className={`auth-group ${isMobileMenuOpen ? "open" : ""}`}>
-          {isLoggedIn ? (
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'nowrap' }} className="auth-btn-wrapper">
-              {user?.is_superuser && (
+          <div className="auth-group">
+            {isLoggedIn ? (
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'nowrap' }} className="auth-btn-wrapper">
+                {user?.is_superuser && (
+                  <button 
+                    className={`header-action-btn danger ${currentView === 'admin' ? 'active' : ''}`}
+                    onClick={() => { setView(currentView === 'admin' ? 'main' : 'admin'); setIsMobileMenuOpen(false); }}
+                  >
+                    <FaUserShield style={{ fontSize: '0.9rem' }} /> {currentView === 'admin' ? "Exit Admin" : "Admin"}
+                  </button>
+                )}
                 <button 
-                  className={`header-action-btn danger ${currentView === 'admin' ? 'active' : ''}`}
-                  onClick={() => { setView(currentView === 'admin' ? 'main' : 'admin'); setIsMobileMenuOpen(false); }}
+                  className="nav-icon-glass-neon" 
+                  onClick={() => { setIsSettingsOpen(true); setIsMobileMenuOpen(false); }}
+                  style={{ width: '36px', height: '36px', cursor: 'pointer', padding: 0 }}
+                  title="Settings"
                 >
-                  <FaUserShield style={{ fontSize: '0.9rem' }} /> {currentView === 'admin' ? "Exit Admin" : "Admin"}
+                  <FaCog style={{ fontSize: '1.2rem' }} />
                 </button>
-              )}
-              <button 
-                className="nav-icon-glass-neon" 
-                onClick={() => { setIsSettingsOpen(true); setIsMobileMenuOpen(false); }}
-                style={{ width: '36px', height: '36px', cursor: 'pointer', padding: 0 }}
-                title="Settings"
-              >
-                <FaCog style={{ fontSize: '1.2rem' }} />
-              </button>
-              <button 
-                className="header-action-btn primary" 
-                onClick={async () => { 
-                  try {
-                    await axios.post(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000")}/api/v1/auth/logout`);
-                  } catch (err) {
-                    console.error("Logout failed:", err);
-                  }
-                  setIsLoggedIn(false); 
-                  setUser(null); 
-                  setView('main'); 
-                  setIsMobileMenuOpen(false);
-                  if (onLogout) onLogout(); 
-                }}
-              >
-                <FaSignOutAlt /> Log Out
-              </button>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }} className="auth-btn-wrapper">
-              <a 
-                href="#login" 
-                className="header-action-btn secondary" 
-                onClick={(e) => { openModal("login", e); setIsMobileMenuOpen(false); }}
-              >
-                <FaSignInAlt style={{ opacity: 0.8 }} /> Log In
-              </a>
-              <button 
-                className="header-action-btn primary" 
-                onClick={(e) => { openModal("signup", e); setIsMobileMenuOpen(false); }}
-              >
-                <FaUserPlus /> Sign Up
-              </button>
-            </div>
-          )}
+                <button 
+                  className="header-action-btn primary" 
+                  onClick={async () => { 
+                    try {
+                      await axios.post(`${(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000")}/api/v1/auth/logout`);
+                    } catch (err) {
+                      console.error("Logout failed:", err);
+                    }
+                    setIsLoggedIn(false); 
+                    setUser(null); 
+                    setView('main'); 
+                    setIsMobileMenuOpen(false);
+                    if (onLogout) onLogout(); 
+                  }}
+                >
+                  <FaSignOutAlt /> Log Out
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }} className="auth-btn-wrapper">
+                <a 
+                  href="#login" 
+                  className="header-action-btn secondary" 
+                  onClick={(e) => { openModal("login", e); setIsMobileMenuOpen(false); }}
+                >
+                  <FaSignInAlt style={{ opacity: 0.8 }} /> Log In
+                </a>
+                <button 
+                  className="header-action-btn primary" 
+                  onClick={(e) => { openModal("signup", e); setIsMobileMenuOpen(false); }}
+                >
+                  <FaUserPlus /> Sign Up
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </nav>
 
@@ -634,7 +636,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
           
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '30px', textAlign: 'center' }}>
             <p style={{ color: '#475569', fontSize: '0.95rem' }}>
-              &copy; 2026 PhishX Platform. Developed by <strong style={{ color: '#94a3b8', cursor: 'pointer' }} onClick={() => setView('creator')}>Udit Pandya</strong> • B.Tech CSE.
+              &copy; 2026 PhishX Platform. Developed by <strong style={{ color: '#94a3b8', cursor: 'pointer', whiteSpace: 'nowrap' }} onClick={() => setView('creator')}>Udit Pandya</strong> • B.Tech CSE.
             </p>
           </div>
         </footer>

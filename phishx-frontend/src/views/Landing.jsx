@@ -53,9 +53,9 @@ export default function Landing({ onEnter }) {
           animate={{ opacity: [0.3, 1, 0.3] }}
           transition={{ repeat: Infinity, duration: 2.5 }}
           style={{
-            marginTop: 60,
-            fontSize: "clamp(12px, 4vw, 15px)",
-            letterSpacing: "2px",
+            marginTop: 40,
+            fontSize: "clamp(9px, 2.5vw, 12px)",
+            letterSpacing: "1.5px",
             color: "#888",
             textAlign: "center",
             padding: "0 20px"
