@@ -1,4 +1,4 @@
-<div align="center">
+Fsa<div align="center">
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <!--                        HERO SECTION                           -->
@@ -110,7 +110,9 @@
     </td>
     <td align="center" width="33%">
       <br/>
-      <img src="https://img.icons8.com/fluency/64/000000/dollar-coin.png" width="52" alt="SaaS"/>
+      <img src="https://img.icons8.com/?size=100&id=RnMbj3WtSucc&format=svg&color=FFFFFF"
+     width="52"
+     alt="SaaS"/>
       <br/><br/>
       <strong>💳 SaaS-Ready Payments</strong>
       <br/><br/>
