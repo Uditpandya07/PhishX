@@ -51,12 +51,18 @@ Fsa<div align="center">
 <a href="https://phishx-app.vercel.app/" target="_blank">
   <img src="https://img.shields.io/badge/Python_ML-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=111111" alt="Python ML" />
 </a>
+<a href="https://phishx-app.vercel.app/" target="_blank">
+  <img src="https://img.shields.io/badge/Celery-37814A?style=for-the-badge&logo=celery&logoColor=white&labelColor=111111" alt="Celery Worker" />
+</a>
+<a href="https://phishx-app.vercel.app/" target="_blank">
+  <img src="https://img.shields.io/badge/WebSockets-010101?style=for-the-badge&logo=socketdotio&logoColor=white&labelColor=111111" alt="WebSockets" />
+</a>
 
 <br/><br/>
 
 > **PhishX v2.0** is a sophisticated, full-stack cybersecurity platform engineered to neutralize phishing threats in real-time.
-> Now powered by **Next.js 15**, a real-time **WebSocket** scanning engine, **xAI** heuristic analysis, and a GDPR/DPDP compliant legal framework —
-> PhishX delivers enterprise-grade URL threat intelligence wrapped in a stunning, production-ready interface.
+> Now powered by **Next.js 15**, a real-time **WebSocket** scanning engine, **xAI** heuristic analysis, **Celery** distributed task queues, and a GDPR/DPDP compliant legal framework —
+> PhishX delivers enterprise-grade URL threat intelligence wrapped in a stunning, fully-responsive production-ready interface optimized for mobile and desktop.
 
 </div>
 
