@@ -22,8 +22,7 @@ export default function PrivacyPolicy() {
             PhishX ("Platform", "we", "us") operates strictly on a "Privacy By Design" framework. We act as a 
             <strong> Data Fiduciary</strong> (under the India DPDP Act 2023) and a <strong>Data Controller</strong> 
             (under GDPR) only for the minimal account creation data (Name, Email). We only process the specific 
-            URLs you submit for analysis. We do not track cross-site browsing history, IP addresses of non-registered 
-            users, or collect any other Personally Identifiable Information (PII).
+            URLs you submit for analysis. We do not track cross-site browsing history or collect unnecessary Personally Identifiable Information (PII). We log IP addresses of non-registered users strictly for security, rate-limiting, and abuse prevention purposes.
           </p>
         </section>
 
