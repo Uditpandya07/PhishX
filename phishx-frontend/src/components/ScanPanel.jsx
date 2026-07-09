@@ -92,8 +92,12 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete, 
 
   const scan = async () => {
     if (!isLoggedIn) {
-      onAuthRequired();
-      return;
+      const freeScansUsed = parseInt(localStorage.getItem("freeScansUsed") || "0", 10);
+      if (freeScansUsed >= 1) {
+        onAuthRequired();
+        return;
+      }
+      localStorage.setItem("freeScansUsed", (freeScansUsed + 1).toString());
     }
 
     // 🔥 THE 100% FREEZE-PROOF REGEX
@@ -396,6 +400,15 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete, 
                   </h4>
                   <p style={{ color: '#e2e8f0', fontSize: '0.95rem', lineHeight: '1.5', minHeight: '60px' }}>
                     <TypewriterText text={result.features?.ai_explanation || result.features_json?.ai_explanation} speed={12} onNavigate={onNavigate} />
+                  </p>
+                </div>
+              )}
+
+              {/* GUEST LIMIT BANNER */}
+              {!isLoggedIn && (
+                <div style={{ marginTop: '1.5rem', textAlign: 'center', padding: '15px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '12px' }}>
+                  <p style={{ color: '#e2e8f0', fontSize: '0.95rem', margin: 0 }}>
+                    You have used your 1 free scan. To scan more URLs and unlock full threat intelligence, please <a href="#" onClick={(e) => { e.preventDefault(); onAuthRequired(); }} style={{ color: '#60a5fa', textDecoration: 'underline', fontWeight: 'bold' }}>Sign Up or Log In</a>.
                   </p>
                 </div>
               )}
