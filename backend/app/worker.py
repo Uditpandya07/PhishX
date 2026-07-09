@@ -21,8 +21,10 @@ celery_app.conf.update(
 )
 
 # Background task for ML prediction & XAI processing
+from typing import Optional
+
 @celery_app.task(name="process_url_scan")
-def process_url_scan(url: str, user_id: int):
+def process_url_scan(url: str, user_id: Optional[str] = None):
     """
     Perform deep ML and XAI analysis in the background.
     """
@@ -52,18 +54,23 @@ def process_url_scan(url: str, user_id: int):
         result["features"]["ai_explanation"] = explanation
         
         # Save to DB
-        scan_db = Scan(
-            user_id=user_id,
-            url=url,
-            prediction=result["prediction"],
-            risk_score=result["risk_score"],
-            features_json=result["features"]
-        )
-        db.add(scan_db)
-        db.commit()
-        db.refresh(scan_db)
-        
-        result["id"] = str(scan_db.id)
+        if user_id:
+            scan_db = Scan(
+                user_id=user_id,
+                url=url,
+                prediction=result["prediction"],
+                risk_score=result["risk_score"],
+                features_json=result["features"]
+            )
+            db.add(scan_db)
+            db.commit()
+            db.refresh(scan_db)
+            
+            result["id"] = str(scan_db.id)
+        else:
+            import uuid
+            result["id"] = str(uuid.uuid4())
+            
         return result
     except Exception as e:
         logger.error(f"Error in Celery background task: {e}")

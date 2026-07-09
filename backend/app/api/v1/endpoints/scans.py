@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Optional
 import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -212,14 +212,16 @@ async def predict_url(
     *,
     db: Session = Depends(deps.get_db),
     scan_in: ScanCreate,
-    current_user: User = Depends(deps.get_current_active_user),
+    current_user: Optional[User] = Depends(deps.get_optional_user),
+    _: None = Depends(deps.check_free_scan_limit),
 ) -> Any:
     """Predict if a URL is phishing or safe using a background Celery task."""
     try:
         from app.worker import process_url_scan
         
+        user_id = current_user.id if current_user else None
         # Dispatch to celery queue
-        task = process_url_scan.delay(scan_in.url, current_user.id)
+        task = process_url_scan.delay(scan_in.url, user_id)
         
         return {
             "task_id": task.id,
