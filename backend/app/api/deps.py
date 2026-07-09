@@ -71,6 +71,27 @@ def get_current_user(
         
     return user
 
+def get_optional_user(
+    request: Request,
+    db: Session = Depends(get_db), 
+    token_from_header: Optional[str] = Depends(reusable_oauth2)
+) -> Optional[User]:
+    token = request.cookies.get("access_token") or token_from_header
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=["HS256"]
+        )
+        user_id = payload.get("sub")
+        if not user_id:
+            return None
+    except Exception:
+        return None
+        
+    user = db.query(User).filter(User.id == uuid.UUID(user_id)).first()
+    return user
+
 def get_current_active_user(
     current_user: User = Depends(get_current_user),
 ) -> User:
@@ -86,3 +107,13 @@ def get_current_active_superuser(
             status_code=400, detail="The user doesn't have enough privileges"
         )
     return current_user
+
+from app.api.limiter import RateLimiter
+free_scan_limiter = RateLimiter(requests_limit=1, window_seconds=31536000, resource_name="free_scans")
+
+async def check_free_scan_limit(
+    request: Request,
+    current_user: Optional[User] = Depends(get_optional_user)
+):
+    if not current_user:
+        await free_scan_limiter(request)
