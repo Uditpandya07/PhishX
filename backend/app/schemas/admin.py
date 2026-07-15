@@ -3,15 +3,12 @@ from pydantic import BaseModel
 from uuid import UUID
 from datetime import datetime
 
-class DeletionRequestUser(BaseModel):
-    email: str
-
-class DeletionRequestResponse(BaseModel):
+class DeletedAccountLog(BaseModel):
+    """Audit log entry for a self-deleted account."""
     id: UUID
-    user_id: UUID
-    status: str
-    timestamp: datetime
-    user: Optional[DeletionRequestUser] = None
+    user_email: str          # denormalized — survives after user row is gone
+    deleted_at: datetime
+    reason: Optional[str] = None
 
     class Config:
         from_attributes = True

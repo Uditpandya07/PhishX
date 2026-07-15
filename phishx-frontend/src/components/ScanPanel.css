@@ -357,23 +357,39 @@
     margin-bottom: 30px !important;
     letter-spacing: 2px;
   }
+  .scan-input-wrapper {
+    flex-direction: column;
+    gap: 15px;
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+  
   .large-input {
     padding: 16px 20px;
     padding-right: 50px;
     font-size: 1.05rem;
     border-radius: 16px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 100%;
   }
+
   .clear-icon-inner {
     right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
     font-size: 1.2rem;
   }
+
   .large-button {
-    margin-top: 30px !important;
+    margin-top: 0px !important;
     padding: 18px;
     font-size: 1.15rem;
+    width: 100%;
     border-radius: 16px;
-    letter-spacing: 2px;
   }
+
   .result {
     padding: 20px 15px;
     border-radius: 16px;

@@ -71,28 +71,45 @@ def generate_api_key(
     
     return {"id": str(new_key.id), "key_value": raw_key}
 
-@router.post("/delete-request")
-def request_account_deletion(
+@router.delete("/me")
+def delete_own_account(
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_active_user),
 ):
-    """Save account deletion request to DB."""
+    """
+    Permanently delete the authenticated user's account and all their data.
+    No admin approval required — deletion is immediate and irreversible.
+    An audit log entry (with the user's email) is written before deletion
+    so administrators can see who deleted their account.
+    """
     from app.db.models import DeletionRequest
-    
-    # Check if a pending request already exists
-    existing = db.query(DeletionRequest).filter(
-        DeletionRequest.user_id == current_user.id,
-        DeletionRequest.status == "pending"
-    ).first()
-    
-    if existing:
-        raise HTTPException(status_code=400, detail="A deletion request is already pending.")
 
-    new_request = DeletionRequest(user_id=current_user.id)
-    db.add(new_request)
+    # Safety: prevent the last superuser from deleting themselves
+    if current_user.is_superuser:
+        from sqlalchemy import func as _func
+        admin_count = db.query(_func.count(User.id)).filter(User.is_superuser == True).scalar()
+        if admin_count <= 1:
+            raise HTTPException(
+                status_code=400,
+                detail="Cannot delete the last administrator account."
+            )
+
+    # 1. Capture email BEFORE deletion (user row will be gone after)
+    email_snapshot = current_user.email
+
+    # 2. Write audit log — SET NULL FK means this row survives the user deletion
+    audit_entry = DeletionRequest(
+        user_id=current_user.id,
+        user_email=email_snapshot,
+        status="deleted",
+    )
+    db.add(audit_entry)
+
+    # 3. Delete the user — cascade handles scans, api_keys, feedbacks, etc.
+    db.delete(current_user)
+
+    # 4. Commit both operations atomically
     db.commit()
-    
-    # Still print to console for visibility
-    logger.info(f"NEW DELETION REQUEST from user: {current_user.email}")
-    
-    return {"detail": "Deletion request received. Our team will process it shortly."}
+
+    logger.info(f"ACCOUNT SELF-DELETED: {email_snapshot}")
+    return {"detail": "Your account and all associated data have been permanently deleted."}

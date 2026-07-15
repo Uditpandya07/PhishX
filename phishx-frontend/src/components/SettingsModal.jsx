@@ -211,23 +211,24 @@ export default function SettingsModal({ isOpen, onClose, user, onClearHistory })
                 <div className="danger-zone" style={{ marginTop: '30px', borderTop: '1px solid rgba(239, 68, 68, 0.2)', paddingTop: '20px' }}>
                   <h4 style={{ color: '#ef4444', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '15px' }}>Danger Zone</h4>
                   <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '15px' }}>
-                    Warning: Deleting your account is permanent and cannot be undone.
+                    Warning: Deleting your account is permanent and cannot be undone. All your scan history and data will be erased immediately.
                   </p>
                   <button 
                     className="danger-btn" 
                     onClick={async () => {
-                      if (window.confirm("Are you sure? This will send a permanent deletion request for your account and all associated data.")) {
+                      if (window.confirm("Are you absolutely sure? This will IMMEDIATELY and PERMANENTLY delete your account and all associated data. This cannot be undone.")) {
                         setLoading(true);
                         try {
                           const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
                           const token = sessionStorage.getItem("token");
-                          await axios.post(`${baseUrl}/api/v1/users/delete-request`, {}, {
+                          await axios.delete(`${baseUrl}/api/v1/users/me`, {
                             headers: { Authorization: `Bearer ${token}` }
                           });
-                          setMessage("✅ Deletion request sent. Our team will process it within 24 hours.");
+                          // Account is gone — clear session and redirect
+                          sessionStorage.removeItem("token");
+                          window.location.href = "/";
                         } catch (err) {
-                          setMessage("❌ Failed to send request. Please contact support@phishx.com");
-                        } finally {
+                          setMessage("❌ Failed to delete account. Please contact support@phishx.com");
                           setLoading(false);
                         }
                       }
@@ -235,10 +236,11 @@ export default function SettingsModal({ isOpen, onClose, user, onClearHistory })
                     disabled={loading}
                     style={{ width: '100%', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', color: '#ef4444', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontWeight: '700' }}
                   >
-                    {loading ? "Processing..." : "Delete Account & All Data"}
+                    {loading ? "Deleting..." : "Delete Account & All Data"}
                   </button>
                 </div>
               )}
+
             </div>
           )}
         </div>

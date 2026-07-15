@@ -53,3 +53,7 @@ desktop.ini
 # Frontend specific
 phishx-frontend/dist/
 phishx-frontend/node_modules/
+
+# Stress test generated output (keep scripts, ignore reports)
+stress_test/reports/
+stress_test/__pycache__/

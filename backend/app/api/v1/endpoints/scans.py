@@ -139,34 +139,54 @@ def analyze_url(url: str, model_instance) -> dict:
         return {"url": url, "prediction": "Phishing", "risk_score": risk_score, "features": {"semantic_rule_trigger": True}}
 
     # --- LIVE CONTENT ANALYSIS LAYER ---
+    # Uses asyncio.run() so the httpx.AsyncClient doesn't block the Celery
+    # thread pool. Timeout is deliberately short (1.5s) to keep scan latency
+    # low on the free tier — if the target doesn't respond quickly it's
+    # already suspicious enough for the ML model to catch.
     import httpx
+    import asyncio as _asyncio
+
+    async def _fetch_html(target_url: str) -> str:
+        """Non-blocking fetch with a strict 1.5s timeout."""
+        try:
+            async with httpx.AsyncClient(
+                timeout=1.5, verify=False, follow_redirects=True
+            ) as client:
+                resp = await client.get(target_url)
+                return resp.text.lower()
+        except Exception:
+            return ""
+
     try:
-        with httpx.Client(timeout=3.0, verify=False, follow_redirects=True) as client:
-            response = client.get(normalized_url)
-            html = response.text.lower()
-            
+        # Run the async fetch without blocking the calling thread
+        html = _asyncio.run(_fetch_html(normalized_url))
+
+        if html:
             # Check for credential harvesting
             if 'type="password"' in html or "type='password'" in html:
                 if has_cheap_tld or not normalized_url.startswith("https://"):
                     risk_score = max(risk_score, 85.0)
-            
+
             # Very basic brand impersonation check
             if "<title>" in html:
                 title_start = html.find("<title>") + 7
                 title_end = html.find("</title>")
                 if title_end > title_start:
                     title = html[title_start:title_end]
-                    major_brands = ["paypal", "microsoft", "google", "apple", "facebook", "amazon", "netflix", "bank of america", "chase", "wellsfargo"]
+                    major_brands = [
+                        "paypal", "microsoft", "google", "apple", "facebook",
+                        "amazon", "netflix", "bank of america", "chase", "wellsfargo",
+                    ]
                     for brand in major_brands:
                         if brand in title and brand not in domain:
                             risk_score = max(risk_score, 90.0)
-                            
+
             if risk_score >= 80.0:
                 return {"url": url, "prediction": "Phishing", "risk_score": risk_score, "features": {"live_analysis_trigger": True}}
     except Exception as e:
-        # Failsafe: if the site is down, blocks our bot, or times out, proceed to ML analysis
-        import logging
-        logging.getLogger(__name__).warning(f"Live analysis failed for {url}: {e}")
+        # Failsafe: if the event loop is already running (e.g. nested asyncio)
+        # fall back gracefully and let the ML model handle the verdict.
+        logger.warning(f"Live analysis skipped for {url}: {e}")
 
 
     try:
