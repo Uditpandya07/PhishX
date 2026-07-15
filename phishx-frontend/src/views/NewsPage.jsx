@@ -99,7 +99,7 @@ export default function NewsPage() {
     <motion.main 
       initial={{ opacity: 0 }} 
       animate={{ opacity: 1 }} 
-      style={{ minHeight: '80vh', padding: 'clamp(15px, 4vw, 40px)', background: 'transparent' }}
+      style={{ minHeight: '80vh', padding: '120px 20px 60px', background: 'transparent', maxWidth: '1200px', margin: '0 auto', boxSizing: 'border-box', width: '100%' }}
     >
       <header style={{ textAlign: 'left', marginBottom: '50px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -134,6 +134,11 @@ export default function NewsPage() {
             </div>
           </div>
         </div>
+        <p style={{ color: '#94a3b8', fontSize: '1.05rem', lineHeight: 1.6, maxWidth: '800px', marginTop: '25px', marginBottom: '10px' }}>
+          <strong>CyberPulse</strong> is your live intelligence hub for global cybersecurity events. 
+          Powered by NESA AI and real-time news aggregators, CyberPulse tracks emerging threat vectors, 
+          active phishing campaigns, and critical zero-day vulnerabilities as they happen around the world.
+        </p>
       </header>
 
       {loading ? (
