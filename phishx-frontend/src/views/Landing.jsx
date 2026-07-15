@@ -42,7 +42,7 @@ export default function Landing({ onEnter }) {
           alt="PhishX"
           style={{
             width: "100%",
-            maxWidth: 280,
+            maxWidth: "clamp(200px, 55vw, 280px)",
             padding: "0 30px",
             boxSizing: "border-box",
             filter: "drop-shadow(0 0 80px rgba(168,85,247,0.8))"
@@ -53,7 +53,7 @@ export default function Landing({ onEnter }) {
           animate={{ opacity: [0.3, 1, 0.3] }}
           transition={{ repeat: Infinity, duration: 2.5 }}
           style={{
-            marginTop: 40,
+            marginTop: "clamp(15px, 3vh, 40px)",
             fontSize: "clamp(9px, 2.5vw, 12px)",
             letterSpacing: "1.5px",
             color: "#888",
