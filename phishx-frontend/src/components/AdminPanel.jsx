@@ -42,16 +42,12 @@ export default function AdminPanel() {
       setFeedback(res.data);
     } catch (err) { console.error("Feedback fetch failed:", err); }
 
-    // Fetch Deletion Requests
+    // Fetch Deleted Accounts audit log
     try {
-      const res = await axios.get(`${baseUrl}/api/v1/admin/deletion-requests`);
-      // Map the data to ensure email is accessible
-      const mapped = res.data.map(req => ({
-        ...req,
-        user_email: req.user?.email || "Pending Sync..."
-      }));
-      setDeletionRequests(mapped);
-    } catch (err) { console.error("Deletion requests fetch failed:", err); }
+      const res = await axios.get(`${baseUrl}/api/v1/admin/deleted-accounts`);
+      setDeletionRequests(res.data);
+    } catch (err) { console.error("Deleted accounts fetch failed:", err); }
+
 
     // Fetch Contact Queries
     try {
@@ -434,50 +430,39 @@ export default function AdminPanel() {
         </div>
       </section>
 
+      {/* ── Deleted Accounts Audit Log ─────────────────────────────── */}
       <section className="admin-feedback-section glass-section">
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '35px' }}>
           <FaUserShield style={{ color: '#ef4444', fontSize: '1.5rem' }} />
-          <h2 style={{ margin: 0 }}>User Departure Oversight</h2>
+          <h2 style={{ margin: 0 }}>Deleted Accounts Log</h2>
+          <span style={{ marginLeft: 'auto', fontSize: '0.75rem', color: '#64748b', background: 'rgba(239,68,68,0.1)', padding: '4px 10px', borderRadius: '999px', border: '1px solid rgba(239,68,68,0.2)' }}>
+            READ-ONLY · Self-deletions only
+          </span>
         </div>
-        
+
         <div className="table-responsive">
           <table className="history-table">
             <thead>
               <tr>
-                <th>User Identity</th>
-                <th>Request Date</th>
-                <th>Status</th>
-                <th>Administrative Actions</th>
+                <th>User Email</th>
+                <th>Deleted On</th>
+                <th>Reason</th>
               </tr>
             </thead>
             <tbody>
               {deletionRequests.length === 0 ? (
                 <tr>
-                  <td colSpan="4" style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
-                    No pending account deletion requests at this time.
+                  <td colSpan="3" style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+                    No accounts have been self-deleted yet.
                   </td>
                 </tr>
               ) : (
-                deletionRequests.map((req) => (
-                  <tr key={req.id}>
-                    <td style={{ fontWeight: 600 }}>{req.user_email || "User Account"}</td>
-                    <td style={{ color: '#64748b' }}>{new Date(req.timestamp).toLocaleDateString()}</td>
-                    <td><span className="badge danger">PENDING DELETION</span></td>
-                    <td style={{ display: 'flex', gap: '10px' }}>
-                      <button 
-                        className="action-btn-approve" 
-                        onClick={() => handleAction(req.id, 'approve')}
-                        style={{ background: '#10b981', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontWeight: '600' }}
-                      >
-                        Approve Delete
-                      </button>
-                      <button 
-                        className="action-btn-deny" 
-                        onClick={() => handleAction(req.id, 'deny')}
-                        style={{ background: 'rgba(255,255,255,0.1)', color: '#94a3b8', border: '1px solid rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontWeight: '600' }}
-                      >
-                        Deny
-                      </button>
+                deletionRequests.map((log) => (
+                  <tr key={log.id}>
+                    <td data-label="User Email" style={{ fontWeight: 600, color: '#f87171' }}>{log.user_email}</td>
+                    <td data-label="Deleted On" style={{ color: '#64748b' }}>{new Date(log.deleted_at).toLocaleString()}</td>
+                    <td data-label="Reason" style={{ color: '#94a3b8', fontStyle: log.reason ? 'normal' : 'italic' }}>
+                      {log.reason || 'No reason provided'}
                     </td>
                   </tr>
                 ))
@@ -514,15 +499,15 @@ export default function AdminPanel() {
               ) : (
                 feedback.map((item) => (
                   <tr key={item.id}>
-                    <td>
+                    <td data-label="Classification">
                       <span className={`badge ${item.feedback_type === 'false_positive' ? 'danger' : 'safe'}`}>
                         {item.feedback_type === 'false_positive' ? 'FALSE POSITIVE' : 'MISSED THREAT'}
                       </span>
                     </td>
-                    <td className="url-cell" title={item.scan?.url}>{item.scan?.url || 'N/A'}</td>
-                    <td style={{ color: '#94a3b8', fontWeight: 600 }}>{item.user?.email || 'Anonymous'}</td>
-                    <td className="comment-cell">{item.comment}</td>
-                    <td style={{ color: '#64748b' }}>{new Date(item.timestamp).toLocaleDateString()}</td>
+                    <td data-label="Target URL" className="url-cell" title={item.scan?.url}>{item.scan?.url || 'N/A'}</td>
+                    <td data-label="Reporter Email" style={{ color: '#94a3b8', fontWeight: 600 }}>{item.user?.email || 'Anonymous'}</td>
+                    <td data-label="Contributor Comment" className="comment-cell">{item.comment}</td>
+                    <td data-label="Discovery Date" style={{ color: '#64748b' }}>{new Date(item.timestamp).toLocaleDateString()}</td>
                   </tr>
                 ))
               )}
@@ -557,14 +542,14 @@ export default function AdminPanel() {
               ) : (
                 contactQueries.map((q) => (
                   <tr key={q.id}>
-                    <td>
+                    <td data-label="Status">
                       <span className={`badge ${q.status === 'pending' ? 'warning' : 'safe'}`}>
                         {q.status.toUpperCase()}
                       </span>
                     </td>
-                    <td style={{ color: '#94a3b8', fontWeight: 600 }}>{q.user_email}</td>
-                    <td className="comment-cell" style={{ maxWidth: '400px', whiteSpace: 'pre-wrap' }}>{q.query_text}</td>
-                    <td style={{ color: '#64748b' }}>{new Date(q.timestamp).toLocaleString()}</td>
+                    <td data-label="User Email" style={{ color: '#94a3b8', fontWeight: 600 }}>{q.user_email}</td>
+                    <td data-label="Message" className="comment-cell" style={{ maxWidth: '400px', whiteSpace: 'pre-wrap' }}>{q.query_text}</td>
+                    <td data-label="Date Submitted" style={{ color: '#64748b' }}>{new Date(q.timestamp).toLocaleString()}</td>
                   </tr>
                 ))
               )}
