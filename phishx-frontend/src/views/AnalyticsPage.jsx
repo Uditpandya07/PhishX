@@ -83,7 +83,7 @@ export default function AnalyticsPage() {
     <motion.main 
       initial={{ opacity: 0 }} 
       animate={{ opacity: 1 }} 
-      style={{ minHeight: '80vh', padding: '40px', background: 'transparent', maxWidth: '1400px', margin: '0 auto', position: 'relative' }}
+      style={{ minHeight: '80vh', padding: '120px 20px 60px', background: 'transparent', maxWidth: '1200px', margin: '0 auto', position: 'relative', boxSizing: 'border-box', width: '100%' }}
     >
       <header style={{ textAlign: 'center', marginBottom: '50px' }}>
         {/* Simulation Badge */}
