@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, text
 from app.api import deps
-from app.schemas.admin import GlobalStats, DeletionRequestResponse
+from app.schemas.admin import GlobalStats, DeletedAccountLog
 from app.db.models import User, Scan, Feedback, ApiKey, DeletionRequest
 
 router = APIRouter()
@@ -78,62 +78,21 @@ def get_global_stats(
         "scans_over_time": time_series,
     }
 
-@router.get("/deletion-requests", response_model=List[DeletionRequestResponse])
-def get_deletion_requests(
+@router.get("/deleted-accounts", response_model=List[DeletedAccountLog])
+def get_deleted_accounts(
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_active_superuser),
 ) -> Any:
-    """Get all pending deletion requests with user info."""
-    requests = db.query(DeletionRequest).options(joinedload(DeletionRequest.user)).filter(DeletionRequest.status == "pending").all()
-    return requests
+    """
+    Return audit log of all self-deleted accounts.
+    Shows the email, deletion timestamp, and any reason provided.
+    Records persist permanently even after the user row is gone.
+    """
+    logs = (
+        db.query(DeletionRequest)
+        .filter(DeletionRequest.status == "deleted")
+        .order_by(DeletionRequest.deleted_at.desc())
+        .all()
+    )
+    return logs
 
-@router.post("/deletion-requests/{request_id}/approve")
-def approve_deletion(
-    request_id: str,
-    db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_superuser),
-) -> Any:
-    """Approve deletion: Delete the user and all their data."""
-    req = db.query(DeletionRequest).filter(DeletionRequest.id == request_id).first()
-    if not req:
-        raise HTTPException(status_code=404, detail="Request not found")
-    
-    target_user = db.query(User).filter(User.id == req.user_id).first()
-    if target_user:
-        # Loophole Fix 1: Cannot delete the LAST admin
-        if target_user.is_superuser:
-            admin_count = db.query(func.count(User.id)).filter(User.is_superuser == True).scalar()
-            if admin_count <= 1:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST, 
-                    detail="Critical System Safety: Cannot delete the final administrator account."
-                )
-        
-        # Loophole Fix 2: Admin cannot approve their OWN deletion (prevents accidental clicks)
-        if target_user.id == current_user.id:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, 
-                detail="Safety Lock: Administrators cannot approve their own deletion. Please have another admin process this request."
-            )
-
-        db.delete(target_user) # Cascade will handle scans/feedback
-    
-    db.delete(req)
-    db.commit()
-    return {"detail": "User and all associated data permanently deleted."}
-
-@router.post("/deletion-requests/{request_id}/deny")
-def deny_deletion(
-    request_id: str,
-    db: Session = Depends(deps.get_db),
-    current_user: User = Depends(deps.get_current_active_superuser),
-) -> Any:
-    """Deny deletion: Keep the user."""
-    req = db.query(DeletionRequest).filter(DeletionRequest.id == request_id).first()
-    if not req:
-        raise HTTPException(status_code=404, detail="Request not found")
-    
-    req.status = "denied"
-    req.processed_at = datetime.now(timezone.utc)
-    db.commit()
-    return {"detail": "Deletion request denied. User remains active."}
