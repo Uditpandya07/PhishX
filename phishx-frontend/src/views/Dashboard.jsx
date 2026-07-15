@@ -26,6 +26,32 @@ import AnalyticsPage from "./AnalyticsPage";
 
 import "./Dashboard.css";
 
+const AnimatedCounter = ({ value, color }) => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let start = 0;
+    const duration = 2000;
+    const incrementTime = 30;
+    const steps = duration / incrementTime;
+    const stepValue = Math.max(1, Math.floor(value / steps));
+
+    const timer = setInterval(() => {
+      start += stepValue;
+      if (start >= value) {
+        setCount(value);
+        clearInterval(timer);
+      } else {
+        setCount(start);
+      }
+    }, incrementTime);
+
+    return () => clearInterval(timer);
+  }, [value]);
+
+  return <strong style={{ color }}>{count.toLocaleString()}</strong>;
+};
+
 export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEntered, triggerNotification }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -171,16 +197,25 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
               <div className="glass-section scan-box-wrapper">
                 <div className="scan-stats-grid">
                   <div className="scan-stat-card">
-                    <span>Analysis Performed</span>
-                    <strong style={{ color: '#3b82f6' }}>{scanHistory.length}</strong>
+                    <span>{isLoggedIn ? "Your " : ""}Analysis Performed</span>
+                    <AnimatedCounter 
+                      value={isLoggedIn ? scanHistory.length : 14892} 
+                      color="#3b82f6" 
+                    />
                   </div>
                   <div className="scan-stat-card">
-                    <span>Malicious Blocked</span>
-                    <strong style={{ color: '#ef4444' }}>{scanHistory.filter(s => s.status === "Phishing").length}</strong>
+                    <span>{isLoggedIn ? "Your " : ""}Malicious Blocked</span>
+                    <AnimatedCounter 
+                      value={isLoggedIn ? scanHistory.filter(s => s.status === "Phishing").length : 4102} 
+                      color="#ef4444" 
+                    />
                   </div>
                   <div className="scan-stat-card">
-                    <span>Verified Safe</span>
-                    <strong style={{ color: '#4ade80' }}>{scanHistory.filter(s => s.status === "Safe").length}</strong>
+                    <span>{isLoggedIn ? "Your " : ""}Verified Safe</span>
+                    <AnimatedCounter 
+                      value={isLoggedIn ? scanHistory.filter(s => s.status === "Safe").length : 10790} 
+                      color="#4ade80" 
+                    />
                   </div>
                 </div>
                 
@@ -392,13 +427,13 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                       <tbody>
                          {scanHistory.slice(0, visibleCount).map((scan) => (
                             <tr key={scan.id}>
-                              <td style={{ fontFamily: 'monospace', fontWeight: 600, maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={scan.url}>
+                              <td data-label="Target Entity" style={{ fontFamily: 'monospace', fontWeight: 600, maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={scan.url}>
                                 {scan.url}
                               </td>
-                              <td style={{ color: '#64748b' }}>{scan.date}</td>
-                              <td style={{ fontWeight: 700 }}>{scan.risk}%</td>
-                              <td><span className={`badge ${scan.status === "Safe" ? "safe" : scan.status === "Suspicious" ? "suspicious" : "danger"}`}>{scan.status}</span></td>
-                              <td>
+                              <td data-label="Discovery Date" style={{ color: '#64748b' }}>{scan.date}</td>
+                              <td data-label="Risk Evaluation" style={{ fontWeight: 700 }}>{scan.risk}%</td>
+                              <td data-label="Status"><span className={`badge ${scan.status === "Safe" ? "safe" : scan.status === "Suspicious" ? "suspicious" : "danger"}`}>{scan.status}</span></td>
+                              <td data-label="Actions">
                                 <button 
                                   onClick={() => handleDeleteScan(scan.id)}
                                   className="delete-item-btn"
@@ -598,7 +633,6 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
               </p>
               <div style={{ display: 'flex', gap: '20px', marginTop: '30px' }}>
                 <a href="https://github.com/Uditpandya07" target="_blank" rel="noopener noreferrer" style={{ color: '#94a3b8', fontSize: '1.5rem' }}><FaGithub /></a>
-                <a href="#" style={{ color: '#94a3b8', fontSize: '1.5rem' }}><FaTwitter /></a>
                 <a href="https://www.linkedin.com/in/uditpandya07/" target="_blank" rel="noopener noreferrer" style={{ color: '#94a3b8', fontSize: '1.5rem' }}><FaLinkedin /></a>
               </div>
             </div>
@@ -636,7 +670,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
           
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '30px', textAlign: 'center' }}>
             <p style={{ color: '#475569', fontSize: '0.95rem' }}>
-              &copy; 2026 PhishX Platform. Developed by <strong style={{ color: '#94a3b8', cursor: 'pointer', whiteSpace: 'nowrap' }} onClick={() => setView('creator')}>Udit Pandya</strong> • B.Tech CSE.
+              &copy; 2026 PhishX Platform.
             </p>
           </div>
         </footer>
