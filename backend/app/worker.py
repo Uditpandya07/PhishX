@@ -1,4 +1,5 @@
 import asyncio
+import os
 from celery import Celery
 from app.core.config import settings
 import logging
@@ -18,6 +19,7 @@ celery_app.conf.update(
     result_serializer="json",
     timezone="UTC",
     enable_utc=True,
+    task_always_eager=True if "redis" in settings.REDIS_URL and os.getenv("PHISHX_ENV", "development") == "development" else False
 )
 
 # Background task for ML prediction & XAI processing
