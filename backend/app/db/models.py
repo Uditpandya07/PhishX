@@ -111,16 +111,21 @@ class Feedback(Base):
 
 
 class DeletionRequest(Base):
+    """
+    Immutable audit log entry created when a user self-deletes their account.
+    The user_email is captured BEFORE deletion so the record persists
+    even after the users row is gone.
+    """
     __tablename__ = "deletion_requests"
 
     id = Column(Uuid, primary_key=True, default=uuid.uuid4, index=True)
-    user_id = Column(Uuid, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    status = Column(String, default="pending") # "pending", "approved", "denied"
+    user_id = Column(Uuid, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)  # SET NULL so log survives
+    user_email = Column(String, nullable=False, index=True)   # captured before deletion
+    status = Column(String, default="deleted")                # always "deleted" for self-deletes
     reason = Column(Text, nullable=True)
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
-    processed_at = Column(DateTime(timezone=True), nullable=True)
+    deleted_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    user = relationship("User", backref="deletion_requests")
 
 class ContactQuery(Base):
     __tablename__ = "contact_queries"
