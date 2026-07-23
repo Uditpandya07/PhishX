@@ -328,7 +328,23 @@
 
 .spin-icon {
   animation: spin 1s linear infinite;
+}
+
+.active-icon {
+  color: #95fb40;
+  animation: iconPulse 1.5s infinite;
+  filter: drop-shadow(0 0 5px rgba(149, 251, 64, 0.4));
+}
+
+.done-icon {
   color: #3b82f6;
+  filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.4));
+}
+
+@keyframes iconPulse {
+  0% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(149, 251, 64, 0.4)); }
+  50% { transform: scale(1.2); filter: drop-shadow(0 0 15px rgba(149, 251, 64, 0.8)); }
+  100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(149, 251, 64, 0.4)); }
 }
 
 @keyframes spin {
