@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { FaGithub, FaTwitter, FaLinkedin, FaShieldAlt, FaBolt, FaRobot, FaLock, FaHistory, FaCode, FaChartLine, FaEnvelopeOpenText, FaSearch, FaExclamationTriangle, FaTerminal, FaInfoCircle, FaCrown, FaCog, FaSignOutAlt, FaSignInAlt, FaUserPlus, FaUserShield, FaTrashAlt, FaBars, FaTimes, FaNewspaper, FaGlobe, FaSatelliteDish } from "react-icons/fa";
+import { FaGithub, FaTwitter, FaLinkedin, FaProductHunt, FaShieldAlt, FaBolt, FaRobot, FaLock, FaHistory, FaCode, FaChartLine, FaEnvelopeOpenText, FaSearch, FaExclamationTriangle, FaTerminal, FaInfoCircle, FaCrown, FaCog, FaSignOutAlt, FaSignInAlt, FaUserPlus, FaUserShield, FaTrashAlt, FaBars, FaTimes, FaNewspaper, FaGlobe, FaSatelliteDish } from "react-icons/fa";
 import { FiInfo, FiZap, FiGlobe, FiClock, FiActivity, FiStar, FiLogIn, FiUserPlus as FiUserPlusOutline, FiCpu, FiShield, FiDatabase, FiCode, FiLayers, FiBox, FiMonitor, FiLock, FiBell } from "react-icons/fi";
 import { motion, useScroll, useSpring, AnimatePresence } from "framer-motion";
 import { STATUS } from "react-joyride";
@@ -709,9 +709,12 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
               <p style={{ color: '#94a3b8', lineHeight: 1.8, fontSize: '1rem' }}>
                 Next-generation AI phishing detection. A non-commercial project dedicated to securing individuals and communities from digital threats.
               </p>
-              <div style={{ display: 'flex', gap: '20px', marginTop: '30px' }}>
+              <div style={{ display: 'flex', gap: '20px', marginTop: '30px', alignItems: 'center' }}>
                 <a href="https://github.com/Uditpandya07" target="_blank" rel="noopener noreferrer" style={{ color: '#94a3b8', fontSize: '1.5rem' }}><FaGithub /></a>
                 <a href="https://www.linkedin.com/in/uditpandya07/" target="_blank" rel="noopener noreferrer" style={{ color: '#94a3b8', fontSize: '1.5rem' }}><FaLinkedin /></a>
+                <a href="https://www.producthunt.com/products/phishx?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-phishx" target="_blank" rel="noopener noreferrer">
+                  <img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1202596&theme=dark&t=1784838124091" alt="PhishX - AI-powered phishing analysis engine | Product Hunt" style={{ width: '250px', height: '54px' }} width="250" height="54" />
+                </a>
               </div>
             </div>
 

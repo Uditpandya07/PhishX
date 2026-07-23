@@ -152,16 +152,17 @@ Fsa<div align="center">
       <sub>Integrated API-level rate limiting prevents brute-force attacks and endpoint abuse. Alembic-managed database migrations ensure schema integrity across all environments.</sub>
       <br/><br/>
     </td>
-  <tr>
     <td align="center" width="33%">
       <br/>
-      <img src="https://img.icons8.com/fluency/64/000000/slack-new.png" width="52" alt="Webhooks"/>
+      <img src="https://img.icons8.com/fluency/64/000000/slack.png" width="52" alt="Webhooks"/>
       <br/><br/>
       <strong>🔔 Instant SecOps Alerts</strong>
       <br/><br/>
       <sub>Native Slack and Microsoft Teams Webhook integration instantly broadcasts high-risk phishing detections directly to your security channels for immediate threat mitigation.</sub>
       <br/><br/>
     </td>
+  </tr>
+  <tr>
     <td align="center" width="33%">
       <br/>
       <img src="https://img.icons8.com/fluency/64/000000/settings.png" width="52" alt="Privacy"/>
