@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaUsers, FaSearch, FaExclamationTriangle, FaCommentDots, FaChartBar, FaHistory, FaUserShield, FaGlobe, FaDatabase, FaShieldAlt, FaKey, FaRss, FaCheckCircle, FaTimesCircle, FaSyncAlt, FaMicrochip } from "react-icons/fa";
+import { showErrorPopup } from "../utils/errorHandler";
 import axios from "axios";
 import "./AdminPanel.css";
 
@@ -227,7 +228,7 @@ export default function AdminPanel() {
       alert(`Request ${action}ed successfully.`);
       fetchData(); // Refresh
     } catch (err) {
-      alert("Action failed. Please try again.");
+      showErrorPopup("Action failed. Please try again.");
     }
   };
 
@@ -294,7 +295,7 @@ export default function AdminPanel() {
                   alert("✅ Neural Database Repaired & Optimized.");
                   runDiagnostics();
                 } catch (err) {
-                  alert("❌ Repair failed. Check backend logs.");
+                  showErrorPopup("❌ Repair failed. Check backend logs.");
                 }
               }
             }}
@@ -410,8 +411,9 @@ export default function AdminPanel() {
               <div key={i} className="chart-column">
                 <motion.div 
                   className="chart-bar-fill" 
-                  initial={{ height: 0 }}
-                  animate={{ height: `${(day.count / maxCount) * 100}%` }}
+                  initial={{ scaleY: 0 }}
+                  animate={{ scaleY: maxCount > 0 ? day.count / maxCount : 0 }}
+                  style={{ transformOrigin: "bottom", height: "100%" }}
                   transition={{ duration: 1, delay: i * 0.1 }}
                 >
                   <span className="bar-tooltip">{day.count} Total Scans</span>
