@@ -91,7 +91,7 @@ def process_url_scan(url: str, user_id: Optional[str] = None):
             
         return result
     except Exception as e:
-        logger.error(f"Error in Celery background task: {e}")
-        return {"error": str(e), "url": url}
+        logger.error(f"Error in Celery background task: {e}", exc_info=True)
+        return {"error": "Internal analysis error", "url": url}
     finally:
         db.close()
