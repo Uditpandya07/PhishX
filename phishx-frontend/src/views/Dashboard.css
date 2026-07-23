@@ -574,6 +574,15 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
 
+.target-url-cell {
+  font-family: monospace;
+  font-weight: 600;
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -727,6 +736,13 @@
     text-align: left;
     font-weight: 600;
     color: #94a3b8;
+  }
+
+  .target-url-cell {
+    max-width: none;
+    white-space: normal;
+    word-break: break-all;
+    line-height: 1.4;
   }
 
   /* Responsive Navbar Menu */
