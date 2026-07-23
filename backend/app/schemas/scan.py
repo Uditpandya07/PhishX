@@ -23,7 +23,10 @@ class BatchScanCreate(BaseModel):
 class BatchScanResponse(BaseModel):
     results: list[ScanResponse]
 
+from typing import Optional, Any
+
 class TaskResponse(BaseModel):
     task_id: str
     status: str
     message: str
+    result: Optional[Any] = None

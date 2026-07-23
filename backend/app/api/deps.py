@@ -109,7 +109,7 @@ def get_current_active_superuser(
     return current_user
 
 from app.api.limiter import RateLimiter
-free_scan_limiter = RateLimiter(requests_limit=1, window_seconds=31536000, resource_name="free_scans")
+free_scan_limiter = RateLimiter(requests_limit=10, window_seconds=60, resource_name="free_scans")
 
 async def check_free_scan_limit(
     request: Request,

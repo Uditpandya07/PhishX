@@ -37,7 +37,7 @@ def process_url_scan(url: str, user_id: Optional[str] = None):
     from app.api.v1.endpoints.scans import get_model, analyze_url
     from app.services.xai import generate_xai_report
     from app.db.session import SessionLocal
-    from app.db.models import Scan
+    from app.db.models import Scan, User
     import json
     
     db = SessionLocal()
@@ -69,13 +69,29 @@ def process_url_scan(url: str, user_id: Optional[str] = None):
             db.refresh(scan_db)
             
             result["id"] = str(scan_db.id)
+
+            # --- Slack/Teams Webhook Integration ---
+            if result["prediction"] == "Phishing":
+                user = db.query(User).filter(User.id == user_id).first()
+                if user and user.slack_webhook_url:
+                    try:
+                        import requests
+                        payload = {
+                            "text": f"🚨 *PhishX Alert:* A high-risk phishing URL was detected!\n\n"
+                                    f"*URL:* {url}\n"
+                                    f"*Risk Score:* {result['risk_score']}%\n"
+                                    f"*AI Explanation:* {result['features'].get('ai_explanation', 'N/A')}"
+                        }
+                        requests.post(user.slack_webhook_url, json=payload, timeout=5)
+                    except Exception as e:
+                        logger.error(f"Failed to send Slack webhook for user {user_id}: {e}")
         else:
             import uuid
             result["id"] = str(uuid.uuid4())
             
         return result
     except Exception as e:
-        logger.error(f"Error in Celery background task: {e}")
-        return {"error": str(e), "url": url}
+        logger.error(f"Error in Celery background task: {e}", exc_info=True)
+        return {"error": "Internal analysis error", "url": url}
     finally:
         db.close()

@@ -9,6 +9,7 @@ import DotGrid from "./DotGrid";
 import "./AuthModal.css";
 
 export default function AuthModal({ isOpen, onClose, initialMode = "login", onLoginSuccess }) {
+  const [mounted, setMounted] = useState(false);
   const [isLogin, setIsLogin] = useState(initialMode === "login");
 
   const [name, setName] = useState("");
@@ -19,6 +20,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onLo
   const [showPassword, setShowPassword] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     setIsLogin(initialMode === "login");
@@ -270,29 +275,12 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onLo
           <span>or continue with</span>
         </div>
         <div className="social-buttons" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <button 
+          <button
             type="button" 
             className="social-btn google-login-btn" 
             onClick={() => {
               window.location.href = `${API_URL}/api/v1/auth/google/login`;
             }}
-            style={{ 
-              width: "100%", 
-              display: "flex", 
-              alignItems: "center", 
-              justifyContent: "center", 
-              gap: "12px", 
-              background: "rgba(255, 255, 255, 0.1)", 
-              color: "#fff", 
-              fontWeight: "600",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              padding: "12px",
-              cursor: "pointer",
-              borderRadius: "8px",
-              transition: "all 0.3s ease"
-            }}
-            onMouseOver={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.2)"}
-            onMouseOut={(e) => e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)"}
           >
             <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style={{ height: "20px" }} />
             {isLogin ? "Sign in with Google" : "Sign up with Google"}
@@ -310,5 +298,6 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onLo
   );
 
   // 🔥 NEW: Render the modal directly onto the document body so nothing can block it!
+  if (!mounted) return null;
   return createPortal(modalContent, document.body);
 }

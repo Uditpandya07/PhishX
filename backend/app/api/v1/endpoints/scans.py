@@ -238,16 +238,34 @@ async def predict_url(
     """Predict if a URL is phishing or safe using a background Celery task."""
     try:
         from app.worker import process_url_scan
+        from app.core.config import settings
+        import os
+        import uuid
         
         user_id = current_user.id if current_user else None
-        # Dispatch to celery queue
-        task = process_url_scan.delay(scan_in.url, user_id)
+        is_local = os.getenv("PHISHX_ENV", "development") == "development"
+        has_redis = "redis" in str(settings.REDIS_URL)
+        use_eager = True if has_redis and is_local else False
         
-        return {
-            "task_id": task.id,
-            "status": "QUEUED",
-            "message": "Scan dispatched to background worker"
-        }
+        print(f"DEBUG: is_local={is_local}, has_redis={has_redis}, REDIS_URL={settings.REDIS_URL}")
+        
+        if use_eager:
+            # Bypass Celery entirely if we are falling back to local sync mode
+            result = process_url_scan(scan_in.url, user_id)
+            return {
+                "task_id": str(uuid.uuid4()),
+                "status": "COMPLETED",
+                "message": "Scan completed immediately",
+                "result": result
+            }
+        else:
+            # Dispatch to celery queue
+            task = process_url_scan.delay(scan_in.url, user_id)
+            return {
+                "task_id": task.id,
+                "status": "QUEUED",
+                "message": "Scan dispatched to background worker"
+            }
     except Exception as e:
         logger.error(f"Prediction Dispatch Error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal analysis engine error. Please try again later.")

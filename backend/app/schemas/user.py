@@ -9,6 +9,7 @@ class UserBase(BaseModel):
     is_active: Optional[bool] = True
     is_superuser: bool = False
     ai_training_enabled: bool = True
+    slack_webhook_url: Optional[str] = None
 
 class UserCreate(UserBase):
     password: str
@@ -19,6 +20,7 @@ class UserUpdate(BaseModel):
     password: Optional[str] = None
     is_active: Optional[bool] = None
     ai_training_enabled: Optional[bool] = None
+    slack_webhook_url: Optional[str] = None
 
 class UserInDBBase(UserBase):
     id: UUID

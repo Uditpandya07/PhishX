@@ -6,6 +6,13 @@ This release includes a complete architectural overhaul to Next.js, asynchronous
 
 ---
 
+## 🚀 0. PhishX v2.1.0 - DevSecOps Webhooks & Security Patches
+- **Slack/Teams Webhooks:** Integrated real-time alerting payloads in the Celery worker (`worker.py`), firing instant SecOps alerts when high-risk URLs are detected.
+- **Data Sovereignty:** Added an `ai_training_enabled` opt-out toggle in the user settings, enforcing absolute GDPR/DPDP privacy compliance.
+- **Eager Task Execution (`use_eager`):** Re-architected the `scans.py` endpoint to gracefully fallback to synchronous inference when Redis is offline in local dev environments.
+- **HttpOnly JWT Authentication Fix:** Eliminated local storage vulnerabilities by ensuring the Next.js `SettingsModal.jsx` correctly sends `withCredentials: true` with all API requests, maintaining complete HttpOnly cookie integrity.
+- **TaskResponse Schema Patch:** Prevented FastAPI from silently stripping the `result` field during synchronous execution, resolving the frontend loader crash.
+
 ## 🚀 1. Complete Next.js & Architecture Migration
 - **Framework Upgrade:** Fully migrated the frontend from Vite to **Next.js 15 (App Router)**, completely transforming routing, SEO, and SSR capabilities.
 - **Component Restructure:** Re-organized all core views into the `src/app/` and `src/views/` directory patterns.

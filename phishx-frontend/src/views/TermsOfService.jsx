@@ -57,7 +57,17 @@ export default function TermsOfService({ onContactSupport }) {
         </section>
         
         <section>
-          <h3><FaBalanceScale /> 5. Governing Law and Jurisdiction</h3>
+          <h3><FaBalanceScale /> 5. Webhook Integrations & Liability</h3>
+          <p>
+            By utilizing the SecOps Webhook feature to integrate with third-party services (e.g., Slack, Microsoft Teams), 
+            you represent that you have the lawful right and authorization to transmit data to the designated endpoints. 
+            PhishX is not liable for data breaches, data loss, or unauthorized access occurring on third-party platforms, 
+            nor for any misconfiguration of webhook URLs by the user.
+          </p>
+        </section>
+
+        <section>
+          <h3><FaFileContract /> 6. Governing Law and Jurisdiction</h3>
           <p>
             These Terms of Service and any separate agreements whereby we provide you Services shall be governed by 
             and construed in accordance with the laws of India. Any disputes arising under or in connection with these 
@@ -66,7 +76,7 @@ export default function TermsOfService({ onContactSupport }) {
         </section>
 
         <section>
-          <h3><FaFileContract /> 6. Severability & Modifications</h3>
+          <h3><FaFileContract /> 7. Severability & Modifications</h3>
           <p>
             If any provision of these Terms is deemed unlawful or unenforceable, that provision shall be severed, 
             and the remaining provisions will remain in full force and effect. We reserve the right to modify these 

@@ -111,7 +111,7 @@ Fsa<div align="center">
       <br/><br/>
       <strong>🔐 Hardened Authentication</strong>
       <br/><br/>
-      <sub>End-to-end local JWT authentication with HttpOnly cookie sessions and bcrypt password hashing. Zero dependency on third-party auth providers — your data stays sovereign.</sub>
+      <sub>End-to-end local JWT authentication with strict `HttpOnly` cookie sessions and bcrypt password hashing. Zero dependency on third-party auth providers — your data stays sovereign.</sub>
       <br/><br/>
     </td>
     <td align="center" width="33%">
@@ -150,6 +150,25 @@ Fsa<div align="center">
       <strong>🛡️ Rate Limiting & Abuse Guard</strong>
       <br/><br/>
       <sub>Integrated API-level rate limiting prevents brute-force attacks and endpoint abuse. Alembic-managed database migrations ensure schema integrity across all environments.</sub>
+      <br/><br/>
+    </td>
+  <tr>
+    <td align="center" width="33%">
+      <br/>
+      <img src="https://img.icons8.com/fluency/64/000000/slack-new.png" width="52" alt="Webhooks"/>
+      <br/><br/>
+      <strong>🔔 Instant SecOps Alerts</strong>
+      <br/><br/>
+      <sub>Native Slack and Microsoft Teams Webhook integration instantly broadcasts high-risk phishing detections directly to your security channels for immediate threat mitigation.</sub>
+      <br/><br/>
+    </td>
+    <td align="center" width="33%">
+      <br/>
+      <img src="https://img.icons8.com/fluency/64/000000/settings.png" width="52" alt="Privacy"/>
+      <br/><br/>
+      <strong>🛑 Data Sovereignty</strong>
+      <br/><br/>
+      <sub>Absolute control over your data footprint. Users can explicitly opt-out of all AI Model Training pipelines via the Settings dashboard, ensuring DPDP and GDPR compliance.</sub>
       <br/><br/>
     </td>
     <td align="center" width="33%">
@@ -260,7 +279,7 @@ PhishX/
 │   │       ├── feature_extractor.py     #   → ML Lexical Feature Pipeline
 │   │       ├── top_10k.py               #   → Trusted Domain Whitelist
 │   │       └── xai.py                   #   → Zero-Day Heuristic Analysis (NEW v2)
-│   ├── worker.py                        # Async Celery Worker (NEW v2)
+│   ├── worker.py                        # Async Celery Worker w/ Slack Webhooks
 │   └── Dockerfile                       # Backend Container Image
 │
 ├── 📁 browser-extension/                # Chromium Real-Time Extension
@@ -357,6 +376,8 @@ uvicorn app.main:app --reload
 ```
 
 The API will be available at `http://localhost:8000`.
+
+> **Note on Redis:** If you are running locally without a Redis instance, the backend will intelligently detect the connection failure and fallback to a synchronous `use_eager` mode, allowing URL scans to complete without requiring the Celery worker queue!
 
 </details>
 

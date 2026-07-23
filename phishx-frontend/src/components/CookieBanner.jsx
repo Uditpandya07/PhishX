@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaCookieBite, FaTimes } from 'react-icons/fa';
 import './CookieBanner.css';
 
-export default function CookieBanner() {
+export default function CookieBanner({ onResolve }) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -15,17 +15,21 @@ export default function CookieBanner() {
         setIsVisible(true);
       }, 1000);
       return () => clearTimeout(timer);
+    } else {
+      if (onResolve) onResolve();
     }
-  }, []);
+  }, [onResolve]);
 
   const handleAccept = () => {
     localStorage.setItem('phishx_cookie_consent', 'accepted');
     setIsVisible(false);
+    if (onResolve) onResolve();
   };
 
   const handleDecline = () => {
     localStorage.setItem('phishx_cookie_consent', 'declined');
     setIsVisible(false);
+    if (onResolve) onResolve();
   };
 
   return (

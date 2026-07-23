@@ -11,7 +11,7 @@ export default function Documentation() {
       animate={{ opacity: 1, x: 0 }}
     >
       <div className="section-header">
-        <h1 className="hero-title" style={{ fontSize: '3.5rem' }}>Documentation</h1>
+        <h1 className="hero-title doc-title">Documentation</h1>
         <p>Technical specifications and usage guide for the PhishX detection engine.</p>
       </div>
 
@@ -44,6 +44,15 @@ export default function Documentation() {
             Simply paste any suspicious URL into the centerpiece scanner. Our engine will return a **Risk Score (0-100%)** 
             and a clear verdict. You can view detailed breakdowns of the threat indicators in your scan history if 
             you are logged in.
+          </p>
+        </section>
+
+        <section>
+          <h3><FaProjectDiagram /> SecOps Webhooks</h3>
+          <p>
+            PhishX now supports native integrations with Slack and Microsoft Teams. When a high-risk URL is detected, 
+            the engine can instantly transmit a JSON payload to your configured webhook URL, alerting your security team 
+            in real-time. This can be configured in your Dashboard Settings.
           </p>
         </section>
 

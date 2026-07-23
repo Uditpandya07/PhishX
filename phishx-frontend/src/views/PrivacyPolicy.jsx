@@ -68,7 +68,17 @@ export default function PrivacyPolicy() {
         </section>
 
         <section>
-          <h3><FaLock /> 6. Data Security & Storage</h3>
+          <h3><FaGlobe /> 6. Third-Party Integrations & Webhooks</h3>
+          <p>
+            If you optionally configure SecOps Webhooks (e.g., Slack, Microsoft Teams), you expressly consent to 
+            the transmission of scan results, including submitted URLs and generated risk scores, to the configured 
+            third-party endpoints. PhishX is not responsible for the data privacy practices of these third-party platforms 
+            once the payload is successfully transmitted.
+          </p>
+        </section>
+
+        <section>
+          <h3><FaLock /> 7. Data Security & Storage</h3>
           <p>
             Data transit is protected via TLS 1.3 encryption. At-rest data is safeguarded using industry-standard 
             AES-256 encryption. We employ strict Role-Based Access Controls (RBAC) ensuring your scan history 

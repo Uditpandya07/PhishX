@@ -18,9 +18,8 @@ async def websocket_scan_endpoint(websocket: WebSocket, task_id: str):
         # Loop to check celery task status
         # In a massive production env, you'd use Redis Pub/Sub instead of polling, 
         # but this is perfect for the current scale and avoids extra overhead.
+        task_result = AsyncResult(task_id, app=celery_app)
         while True:
-            task_result = AsyncResult(task_id, app=celery_app)
-            
             if task_result.state == 'PENDING':
                 await websocket.send_json({"status": "PENDING", "progress": 10})
                 

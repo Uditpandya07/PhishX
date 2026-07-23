@@ -1,3 +1,5 @@
+/* Premium Auth Modal CSS */
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -5,7 +7,8 @@
   width: 100vw;
   height: 100vh;
   background: rgba(4, 7, 18, 0.75); 
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
   display: flex;
   justify-content: center;
   align-items: center; 
@@ -17,100 +20,166 @@
 .modal-content {
   position: relative;
   width: 100%;
-  max-width: 400px; /* Slightly narrower */
+  max-width: 440px;
   margin: auto;
-  padding: 25px;
-  animation: modalFadeIn 0.3s ease-out;
+  padding: 40px;
+  background: rgba(15, 23, 42, 0.75);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  animation: modalFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
 }
 
-@media (max-width: 480px) {
-  .modal-overlay { padding: 20px 10px; }
-  .modal-content { padding: 25px 15px; }
-}
-
 @keyframes modalFadeIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(15px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .close-btn {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: transparent;
-  border: none;
-  color: #94a3b8;
-  font-size: 1.2rem;
-  cursor: pointer;
+  position: absolute !important;
+  top: 20px !important;
+  right: 20px !important;
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.2) !important;
+  color: #ffffff !important;
+  font-size: 1.2rem !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  z-index: 99 !important;
+  box-sizing: border-box !important;
+}
+.close-btn svg {
+  fill: #ffffff !important;
+  width: 16px !important;
+  height: 16px !important;
+  display: block !important;
+}
+.close-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  transform: rotate(90deg) scale(1.1);
+}
+.close-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .modal-title {
   text-align: center;
-  margin-bottom: 15px;
-  font-size: 1.5rem;
-  background: linear-gradient(90deg, #3b82f6, #4ade80);
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #fff, #94a3b8);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  margin-bottom: 25px;
 }
 
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 20px;
 }
 
 .input-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
+}
+
+.input-group label {
+  color: #cbd5e1;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
 }
 
 .input-group input {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(15, 23, 42, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 10px 15px;
-  border-radius: 8px;
-  color: white;
-  font-size: 0.95rem;
+  padding: 14px 16px;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 1rem;
   transition: all 0.3s ease;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
 }
 
 .input-group input:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-color: #95fb40;
+  box-shadow: 0 0 0 3px rgba(149, 251, 64, 0.2);
   background: rgba(15, 23, 42, 0.8);
 }
 
-.input-group label {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #cbd5e1;
-  margin-left: 2px;
+.input-group input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #95fb40 0%, #22c55e 100%);
+  border: none;
+  padding: 14px;
+  border-radius: 12px;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 20px rgba(149, 251, 64, 0.3);
+}
+.primary-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 25px rgba(149, 251, 64, 0.4);
+}
+.primary-btn:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .auth-switch {
   text-align: center;
-  margin-top: 15px;
   color: #94a3b8;
+  font-size: 0.95rem;
 }
 
 .auth-switch span {
-  color: #4ade80;
+  color: #95fb40;
   cursor: pointer;
+  transition: color 0.3s ease;
+}
+.auth-switch span:hover {
+  color: #a78bfa;
 }
 
-/* --- NEW UI STYLES --- */
-
+/* Specifics for Auth */
 .error-message {
   color: #ef4444; 
   background-color: rgba(239, 68, 68, 0.1); 
-  padding: 10px; 
-  border-radius: 8px; 
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 12px; 
+  border-radius: 12px; 
   font-size: 0.9rem; 
   text-align: center;
+  animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
 }
 
 .password-wrapper {
@@ -120,13 +189,12 @@
 }
 
 .password-wrapper input {
-  width: 100%;
-  padding-right: 40px; 
+  padding-right: 45px; 
 }
 
 .eye-btn {
   position: absolute;
-  right: 12px;
+  right: 15px;
   background: transparent;
   border: none;
   color: #94a3b8;
@@ -135,9 +203,9 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
+  transition: color 0.2s ease;
 }
-
 .eye-btn:hover {
   color: #fff;
 }
@@ -145,15 +213,15 @@
 .password-checklist {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 5px;
+  gap: 8px;
   font-size: 0.75rem;
-  margin-top: 2px;
+  margin-top: 5px;
 }
 
 .password-checklist span {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   color: #94a3b8;
   transition: color 0.3s;
 }
@@ -161,7 +229,6 @@
 .password-checklist span.valid {
   color: #4ade80; 
 }
-
 .password-checklist span.invalid {
   color: #ef4444; 
 }
@@ -170,47 +237,57 @@
   display: flex;
   align-items: center;
   text-align: center;
-  margin: 15px 0 10px 0;
+  margin: 25px 0 20px 0;
   color: #64748b;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
 }
-
 .social-login-divider::before,
 .social-login-divider::after {
   content: '';
   flex: 1;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
-
 .social-login-divider span {
-  padding: 0 10px;
-}
-
-.social-buttons {
-  display: flex;
-  gap: 15px;
+  padding: 0 15px;
 }
 
 .social-btn {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 10px;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
   background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+  border-radius: 12px;
   color: white;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .social-btn:hover {
   background: linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-  border-color: #3b82f6; 
+  border-color: rgba(255, 255, 255, 0.2); 
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Mobile Adjustments */
+@media (max-width: 480px) {
+  .modal-overlay { 
+    padding: 20px 10px; 
+    align-items: flex-end; /* slightly lower on mobile */
+  }
+  .modal-content { 
+    padding: 30px 20px; 
+    border-radius: 20px 20px 0 0; /* Attach to bottom if we wanted, but let's just make it curved all around for now */
+    border-radius: 20px;
+    margin: 0;
+  }
+  .password-checklist {
+    grid-template-columns: 1fr;
+  }
 }

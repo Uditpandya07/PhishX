@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import axios from "axios";
 import { FaCheck } from "react-icons/fa";
+import { showErrorPopup } from "../utils/errorHandler";
 import "./PricingCards.css";
 
 const plans = [
@@ -49,7 +50,7 @@ export default function PricingCards({ user }) {
         window.location.href = res.data.url;
       }
     } catch (err) {
-      alert("Failed to start payment: " + (err.response?.data?.detail || "Unknown error"));
+      showErrorPopup("Failed to start payment: " + (err.response?.data?.detail || "Unknown error"));
     }
   };
 
