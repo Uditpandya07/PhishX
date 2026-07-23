@@ -1,12 +1,13 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { FaTimesCircle, FaSearch, FaCode, FaBrain, FaShieldAlt, FaCheckCircle, FaSpinner, FaRobot } from "react-icons/fa";
 import { FiAlertTriangle, FiCheckCircle as FiCheckCircleIcon, FiShield, FiAlertCircle } from "react-icons/fi";
 import axios from "axios";
 import { API_URL, isConfigured } from "../config";
 import ElectricBorder from "./ElectricBorder";
 import "./ScanPanel.css";
+import { showErrorPopup } from "../utils/errorHandler";
 
 const TypewriterText = ({ text, speed = 30, onNavigate }) => {
   const [displayedText, setDisplayedText] = useState("");
@@ -90,6 +91,17 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete, 
   const [feedbackComment, setFeedbackComment] = useState("");
   const [activeFeedbackType, setActiveFeedbackType] = useState(null);
 
+  const wsRef = useRef(null);
+  const shouldReduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+    };
+  }, []);
+
   const scan = async () => {
     if (!isLoggedIn) {
       const freeScansUsed = parseInt(localStorage.getItem("freeScansUsed") || "0", 10);
@@ -118,13 +130,24 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete, 
     setShowFeedbackInput(false);
     setFeedbackComment("");
 
+    const progressInterval = setInterval(() => {
+      setScanProgress(prev => {
+        if (prev < 90) {
+          const increment = Math.max(1, Math.floor((90 - prev) / 10));
+          return prev + increment;
+        }
+        return prev;
+      });
+    }, 400);
+
     try {
       const token = sessionStorage.getItem("token");
 
       if (!isConfigured) {
+        clearInterval(progressInterval);
         setLoading(false);
         setScanProgress(0);
-        alert("The PhishX backend URL is not configured. Please contact the administrator.");
+        showErrorPopup("The PhishX backend URL is not configured. Please contact the administrator.");
         return;
       }
 
@@ -135,12 +158,44 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete, 
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       
+      // If the backend ran synchronously (e.g., local dev) and returned the result immediately
+      if (res.data.status === 'COMPLETED' && res.data.result) {
+        clearInterval(progressInterval);
+        setScanProgress(100);
+        setTimeout(() => {
+          if (res.data.result.error) {
+            console.error("Backend task completed with error result:", res.data.result.error);
+            setLoading(false);
+            setScanProgress(0);
+            showErrorPopup(`Deep Analysis Engine Error: ${res.data.result.error}`);
+            return;
+          }
+          
+          setResult(res.data.result);
+          const risk = Math.round(res.data.result.risk_score);
+          const isDanger = risk >= 70;
+          
+          const newHistoryItem = {
+            id: res.data.result.id || Date.now(),
+            url: url.trim(),
+            date: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }),
+            risk: risk,
+            status: isDanger ? "Phishing" : "Safe"
+          };
+
+          if (onScanComplete) onScanComplete(newHistoryItem);
+          setLoading(false);
+        }, 500);
+        return;
+      }
+
       const taskId = res.data.task_id;
       const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const backendDomain = API_URL.replace(/^https?:\/\//, '');
       const wsUrl = `${wsProtocol}//${backendDomain}/api/v1/ws/scans/${taskId}`;
       
-      const ws = new WebSocket(wsUrl);
+      wsRef.current = new WebSocket(wsUrl);
+      const ws = wsRef.current;
       
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
@@ -150,6 +205,7 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete, 
         
         if (data.status === 'COMPLETED') {
           ws.close();
+          clearInterval(progressInterval);
           setScanProgress(100);
           
           setTimeout(() => {
@@ -157,7 +213,7 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete, 
               console.error("Backend task completed with error result:", data.result.error);
               setLoading(false);
               setScanProgress(0);
-              alert(`Deep Analysis Engine Error: ${data.result.error}`);
+              showErrorPopup(`Deep Analysis Engine Error: ${data.result.error}`);
               return;
             }
             
@@ -185,17 +241,33 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete, 
             console.error("Backend task failed:", data.error);
             setLoading(false);
             setScanProgress(0);
-            alert(`Deep Analysis Engine Error: ${data.error}`);
+            showErrorPopup(`Deep Analysis Engine Error: ${data.error}`);
           }, 500);
         }
       };
       
+      ws.onclose = () => {
+        // If we close before reaching 100 or getting a result, it means connection dropped
+        setScanProgress((prev) => {
+          if (prev < 100) {
+            clearInterval(progressInterval);
+            setIsError(true);
+            setLoading(false);
+            setScanProgress(0);
+          }
+          return prev;
+        });
+      };
+      
       ws.onerror = (err) => {
-          console.error("WebSocket error", err);
-          setLoading(false);
+        clearInterval(progressInterval);
+        console.error("Scan error:", err);
+        setIsError(true);
+        setLoading(false);
       };
 
     } catch (err) {
+      clearInterval(progressInterval);
       setScanProgress(100);
       
       setTimeout(() => {
@@ -203,7 +275,7 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete, 
         console.error("Backend failed:", errorMsg);
         setLoading(false);
         setScanProgress(0);
-        alert(`Deep Analysis Engine Error: ${errorMsg}`);
+        showErrorPopup(`Deep Analysis Engine Error: ${errorMsg}`);
       }, 500);
     }
   };
@@ -228,7 +300,7 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete, 
       
       if (!scanId) {
         setFeedbackLoading(false);
-        alert("Could not find scan record. Please try scanning again.");
+        showErrorPopup("Could not find scan record. Please try scanning again.");
         return;
       }
 
@@ -244,7 +316,7 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete, 
       setShowFeedbackInput(false);
     } catch (err) {
       console.error("Failed to submit feedback", err);
-      alert("Failed to submit report. Please check your connection.");
+      showErrorPopup("Failed to submit report. Please check your connection.");
     } finally {
       setFeedbackLoading(false);
     }
@@ -297,9 +369,9 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete, 
           {loading && (
             <motion.div 
               className="loading-progress-container"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
             >
               <div className="scanner-hud">
                 <div className="hud-header">
@@ -334,8 +406,8 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete, 
                       animate={scanProgress >= step.t ? { opacity: 1, x: 0 } : { opacity: 0.3, x: -10 }}
                       transition={{ duration: 0.4 }}
                     >
-                      <span className={`step-icon ${isActive ? 'spin-icon' : ''}`}>
-                        {isActive ? <FaSpinner /> : step.icon}
+                      <span className={`step-icon ${isActive ? 'active-icon' : isDone ? 'done-icon' : ''}`}>
+                        {isActive ? <FaSpinner className="spin-icon" /> : step.icon}
                       </span>
                       <span className="step-text">{step.text}</span>
                     </motion.div>
@@ -446,8 +518,8 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete, 
                       ) : (
                         <motion.div 
                           className="feedback-input-wrapper"
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
                         >
                           <textarea 
                             className="feedback-textarea"
