@@ -1,0 +1,65 @@
+/* Driver.js Custom Theme */
+.phishx-driver-theme {
+  background: rgba(15, 23, 42, 0.85) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  color: #cbd5e1 !important;
+  font-family: 'Outfit', sans-serif !important;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4) !important;
+}
+.phishx-driver-theme .driver-popover-title {
+  color: #fff !important;
+  font-size: 1.2rem !important;
+  margin-bottom: 10px !important;
+  font-weight: 600 !important;
+}
+.phishx-driver-theme .driver-popover-description {
+  color: #cbd5e1 !important;
+  font-size: 0.95rem !important;
+  line-height: 1.5 !important;
+}
+.phishx-driver-theme .driver-popover-footer button {
+  background: #3b82f6 !important;
+  color: #fff !important;
+  text-shadow: none !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 8px 16px !important;
+  font-family: 'Outfit', sans-serif !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+}
+.phishx-driver-theme .driver-popover-footer button:hover {
+  background: #2563eb !important;
+}
+.phishx-driver-theme .driver-popover-footer .driver-popover-prev-btn {
+  background: rgba(255,255,255,0.1) !important;
+}
+.phishx-driver-theme .driver-popover-footer .driver-popover-prev-btn:hover {
+  background: rgba(255,255,255,0.2) !important;
+}
+.phishx-driver-theme .driver-popover-close-btn {
+  color: #94a3b8 !important;
+}
+.phishx-driver-theme .driver-popover-close-btn:hover {
+  color: #fff !important;
+}
+
+@media (max-width: 768px) {
+  .phishx-driver-theme {
+    max-width: 90vw !important;
+    min-width: auto !important;
+    padding: 15px !important;
+  }
+  .phishx-driver-theme .driver-popover-title {
+    font-size: 1.1rem !important;
+  }
+  .phishx-driver-theme .driver-popover-description {
+    font-size: 0.85rem !important;
+  }
+  .phishx-driver-theme .driver-popover-footer button {
+    padding: 6px 10px !important;
+    font-size: 0.85rem !important;
+  }
+}
