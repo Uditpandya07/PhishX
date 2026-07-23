@@ -20,6 +20,7 @@ class User(Base):
     ai_training_enabled = Column(Boolean, default=True)
     stripe_customer_id = Column(String, unique=True, nullable=True)
     metadata_json = Column(JSON, nullable=True)
+    slack_webhook_url = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
