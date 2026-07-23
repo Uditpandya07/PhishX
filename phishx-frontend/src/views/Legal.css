@@ -23,11 +23,16 @@
   font-size: 1.1rem;
 }
 
+.doc-title {
+  font-size: 3.5rem;
+}
+
 @media (max-width: 768px) {
   .legal-container { padding: 20px 15px; }
   .legal-content { padding: 30px 20px; gap: 30px; }
   .legal-content section h3 { font-size: 1.3rem; }
   .legal-content section p { font-size: 1rem; }
+  .doc-title { font-size: 2.2rem; }
 }
 
 /* Creator Page Styles */
