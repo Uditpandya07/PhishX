@@ -5,6 +5,7 @@ import { FaSatelliteDish, FaExternalLinkAlt, FaClock, FaUser, FaStar, FaSpinner 
 import axios from 'axios';
 import SpotlightCard from '../components/SpotlightCard';
 import { API_URL } from '../config';
+import { showErrorPopup } from "../utils/errorHandler";
 
 export default function NewsPage() {
   const [stories, setStories] = useState([]);
@@ -30,6 +31,7 @@ export default function NewsPage() {
       } catch (err) {
         console.error("Failed to fetch news:", err);
         setError(`Failed to load live news: ${err.message || 'Network Error'}`);
+        showErrorPopup(`CyberPulse Desync: ${err.message || 'Network Error'}`);
       } finally {
         if (!isBackgroundRefresh) setLoading(false);
       }
