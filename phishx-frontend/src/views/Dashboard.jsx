@@ -709,12 +709,10 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
               <p style={{ color: '#94a3b8', lineHeight: 1.8, fontSize: '1rem' }}>
                 Next-generation AI phishing detection. A non-commercial project dedicated to securing individuals and communities from digital threats.
               </p>
-              <div style={{ display: 'flex', gap: '20px', marginTop: '30px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '20px', marginTop: '30px' }}>
                 <a href="https://github.com/Uditpandya07" target="_blank" rel="noopener noreferrer" style={{ color: '#94a3b8', fontSize: '1.5rem' }}><FaGithub /></a>
                 <a href="https://www.linkedin.com/in/uditpandya07/" target="_blank" rel="noopener noreferrer" style={{ color: '#94a3b8', fontSize: '1.5rem' }}><FaLinkedin /></a>
-                <a href="https://www.producthunt.com/products/phishx?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-phishx" target="_blank" rel="noopener noreferrer">
-                  <img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1202596&theme=dark&t=1784838124091" alt="PhishX - AI-powered phishing analysis engine | Product Hunt" style={{ width: '250px', height: '54px' }} width="250" height="54" />
-                </a>
+                <a href="https://www.producthunt.com/products/phishx?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-phishx" target="_blank" rel="noopener noreferrer" style={{ color: '#94a3b8', fontSize: '1.5rem' }}><FaProductHunt /></a>
               </div>
             </div>
 
