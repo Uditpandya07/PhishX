@@ -6,6 +6,7 @@ import { FaShieldAlt, FaExclamationTriangle } from "react-icons/fa";
 import { API_URL, isConfigured } from "../config";
 import Landing from "../views/Landing";
 import Dashboard from "../views/Dashboard";
+import ErrorPopup from "../components/ErrorPopup";
 axios.defaults.withCredentials = true;
 // ─── Config Error Screen ───────────────────────────────────────────────────
 function ConfigError() {
@@ -173,6 +174,7 @@ export default function App() {
           </motion.div>
         )}
       </AnimatePresence>
+      <ErrorPopup />
     </>
   );
 }
