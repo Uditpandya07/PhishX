@@ -200,7 +200,7 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete, 
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
         if (data.progress) {
-            setScanProgress(data.progress);
+            setScanProgress(prev => Math.max(prev, data.progress));
         }
         
         if (data.status === 'COMPLETED') {
