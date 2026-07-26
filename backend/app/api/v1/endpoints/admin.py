@@ -3,9 +3,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, text
+import logging
 from app.api import deps
 from app.schemas.admin import GlobalStats, DeletedAccountLog
 from app.db.models import User, Scan, Feedback, ApiKey, DeletionRequest
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -131,14 +134,16 @@ def check_stripe_health(
                 stripe.Price.retrieve(pro_plan_id)
                 pro_status = "active"
             except Exception as e:
-                pro_status = f"error: {str(e)}"
+                logger.error(f"Failed to retrieve Stripe Pro Price {pro_plan_id}: {e}")
+                pro_status = "error: price retrieval failed"
                 
         if ent_plan_id:
             try:
                 stripe.Price.retrieve(ent_plan_id)
                 ent_status = "active"
             except Exception as e:
-                ent_status = f"error: {str(e)}"
+                logger.error(f"Failed to retrieve Stripe Enterprise Price {ent_plan_id}: {e}")
+                ent_status = "error: price retrieval failed"
                 
         is_healthy = (pro_status == "active")
         
@@ -158,8 +163,9 @@ def check_stripe_health(
             }
         }
     except Exception as e:
+        logger.error(f"Stripe health check failed: {e}", exc_info=True)
         return {
             "status": "unhealthy",
-            "message": f"Stripe connection error: {str(e)}"
+            "message": "Stripe connection failed. Refer to server logs for diagnostics."
         }
 
