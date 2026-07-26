@@ -9,7 +9,7 @@ from app.api.v1.api import api_router
 from app.db.base import Base
 from app.db.session import engine
 # Auto-creation is disabled in favor of Alembic migrations
-# Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 logger = logging.getLogger(__name__)
 
