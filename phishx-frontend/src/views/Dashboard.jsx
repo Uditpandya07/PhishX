@@ -158,6 +158,37 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
     }
   }, [isLoggedIn]);
 
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get("session_id");
+    if (sessionId && isLoggedIn) {
+      const verifyStripeSession = async () => {
+        try {
+          const token = sessionStorage.getItem("token") || localStorage.getItem("phishx_token");
+          const headers = token ? { Authorization: `Bearer ${token}` } : {};
+          const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
+          
+          const res = await axios.get(`${baseUrl}/api/v1/payments/verify-session?session_id=${sessionId}`, { headers });
+          if (res.data.status === "success") {
+            if (triggerNotification) {
+              triggerNotification(`Subscription upgraded to ${res.data.tier.toUpperCase()} successfully!`);
+            }
+            // Fetch updated user
+            const userRes = await axios.get(`${baseUrl}/api/v1/users/me`, { headers });
+            setUser(userRes.data);
+          }
+        } catch (err) {
+          console.error("Verification error:", err);
+          showErrorPopup("Failed to verify subscription session: " + (err.response?.data?.detail || "Unknown error"));
+        } finally {
+          // Remove session_id from URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      };
+      verifyStripeSession();
+    }
+  }, [isLoggedIn]);
+
   const openModal = (mode, e) => {
     if (e) e.preventDefault();
     setAuthMode(mode);
@@ -305,6 +336,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                 >
                   <ScanPanel
                     isLoggedIn={isLoggedIn}
+                    user={user}
                     onAuthRequired={() => openModal("login")}
                     onScanComplete={handleNewScan}
                     onNavigate={(view) => setCurrentView(view)}
@@ -595,7 +627,30 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
       <nav className={`navbar ${isMobileMenuOpen ? "mobile-menu-active" : ""}`}>
         <div className="nav-brand" onClick={() => { setView('main'); setIsMobileMenuOpen(false); }} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <img src="/logo-icon.png" alt="PhishX Icon" className="brand-icon" style={{ height: '40px' }} />
-          <img src="/brand-text.png" alt="PhishX" className="brand-text-img" style={{ height: '40px' }} />
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', marginRight: user?.subscription_tier && user.subscription_tier !== 'free' ? '30px' : '0px' }}>
+            <img src="/brand-text.png" alt="PhishX" className="brand-text-img" style={{ height: '40px' }} />
+            {user?.subscription_tier && user.subscription_tier !== 'free' && (
+              <span style={{
+                position: 'absolute',
+                bottom: '-2px',
+                right: '-28px',
+                border: user.subscription_tier === 'enterprise' ? '1px solid #a855f7' : '1px solid #4ade80',
+                background: user.subscription_tier === 'enterprise' ? 'rgba(168, 85, 247, 0.25)' : 'rgba(74, 222, 128, 0.15)',
+                color: user.subscription_tier === 'enterprise' ? '#c084fc' : '#4ade80',
+                fontSize: '0.55rem',
+                fontWeight: '800',
+                padding: '1px 6px',
+                borderRadius: '100px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                boxShadow: user.subscription_tier === 'enterprise' ? '0 0 10px rgba(168, 85, 247, 0.2)' : '0 0 10px rgba(74, 222, 128, 0.2)',
+                backdropFilter: 'blur(4px)',
+                lineHeight: '1'
+              }}>
+                {user.subscription_tier}
+              </span>
+            )}
+          </div>
         </div>
 
         <button
@@ -704,7 +759,30 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
             <div style={{ maxWidth: '400px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '25px' }}>
                 <img src="/logo-icon.png" alt="PhishX Icon" style={{ height: '45px' }} />
-                <img src="/brand-text.png" alt="PhishX" style={{ height: '45px' }} />
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center', marginRight: user?.subscription_tier && user.subscription_tier !== 'free' ? '35px' : '0px' }}>
+                  <img src="/brand-text.png" alt="PhishX" style={{ height: '45px' }} />
+                  {user?.subscription_tier && user.subscription_tier !== 'free' && (
+                    <span style={{
+                      position: 'absolute',
+                      bottom: '-2px',
+                      right: '-32px',
+                      border: user.subscription_tier === 'enterprise' ? '1px solid #a855f7' : '1px solid #4ade80',
+                      background: user.subscription_tier === 'enterprise' ? 'rgba(168, 85, 247, 0.25)' : 'rgba(74, 222, 128, 0.15)',
+                      color: user.subscription_tier === 'enterprise' ? '#c084fc' : '#4ade80',
+                      fontSize: '0.58rem',
+                      fontWeight: '800',
+                      padding: '1px 6px',
+                      borderRadius: '100px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      boxShadow: user.subscription_tier === 'enterprise' ? '0 0 10px rgba(168, 85, 247, 0.2)' : '0 0 10px rgba(74, 222, 128, 0.2)',
+                      backdropFilter: 'blur(4px)',
+                      lineHeight: '1'
+                    }}>
+                      {user.subscription_tier}
+                    </span>
+                  )}
+                </div>
               </div>
               <p style={{ color: '#94a3b8', lineHeight: 1.8, fontSize: '1rem' }}>
                 Next-generation AI phishing detection. A non-commercial project dedicated to securing individuals and communities from digital threats.
