@@ -2,9 +2,12 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 import stripe
+import logging
 from app.api import deps
 from app.core.config import settings
 from app.db.models import User, Payment, SubscriptionPlan
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -48,7 +51,8 @@ def create_checkout_session(
         )
         return {"url": checkout_session.url}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        logger.error(f"Checkout session creation failed: {e}", exc_info=True)
+        raise HTTPException(status_code=400, detail="Failed to create checkout session. Please try again.")
 
 @router.get("/verify-session")
 def verify_session(
@@ -69,7 +73,8 @@ def verify_session(
         else:
             return {"status": "pending"}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        logger.error(f"Session verification failed: {e}", exc_info=True)
+        raise HTTPException(status_code=400, detail="Failed to verify checkout session. Please contact support.")
 
 @router.get("/subscription")
 def get_subscription_details(
@@ -118,7 +123,8 @@ def get_subscription_details(
             "subscription_id": sub.get("id")
         }
     except Exception as e:
-        return {"has_subscription": False, "error": str(e)}
+        logger.error(f"Subscription retrieval failed: {e}", exc_info=True)
+        return {"has_subscription": False, "error": "An error occurred while retrieving subscription details."}
 
 @router.post("/customer-portal")
 def create_customer_portal(
@@ -137,7 +143,8 @@ def create_customer_portal(
         )
         return {"url": session.url}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        logger.error(f"Customer portal creation failed: {e}", exc_info=True)
+        raise HTTPException(status_code=400, detail="Failed to create customer portal session. Please try again.")
 
 @router.post("/webhook")
 async def stripe_webhook(request: Request, db: Session = Depends(deps.get_db)) -> Any:
