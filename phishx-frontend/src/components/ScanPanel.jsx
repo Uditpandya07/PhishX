@@ -6,6 +6,7 @@ import { FiAlertTriangle, FiCheckCircle as FiCheckCircleIcon, FiShield, FiAlertC
 import axios from "axios";
 import { API_URL, isConfigured } from "../config";
 import ElectricBorder from "./ElectricBorder";
+import RiskInsights from "./RiskInsights";
 import "./ScanPanel.css";
 import { showErrorPopup } from "../utils/errorHandler";
 
@@ -79,7 +80,7 @@ const TypewriterText = ({ text, speed = 30, onNavigate }) => {
   );
 };
 
-export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete, onNavigate }) {
+export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComplete, onNavigate }) {
   const [url, setUrl] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -475,6 +476,9 @@ export default function ScanPanel({ isLoggedIn, onAuthRequired, onScanComplete, 
                   </p>
                 </div>
               )}
+
+              {/* RISK INSIGHTS (PRO FEATURE) */}
+              <RiskInsights user={user} scanData={result} />
 
               {/* GUEST LIMIT BANNER */}
               {!isLoggedIn && (
