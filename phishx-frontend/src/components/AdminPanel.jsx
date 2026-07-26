@@ -25,7 +25,8 @@ export default function AdminPanel() {
     { id: 'oauth', name: 'Google Bridge', status: 'pending', message: 'Idle' },
     { id: 'logic', name: 'Logic Core', status: 'pending', message: 'Idle' },
     { id: 'contact', name: 'Support Tickets', status: 'pending', message: 'Idle' },
-    { id: 'news', name: 'CyberPulse Feed', status: 'pending', message: 'Idle' }
+    { id: 'news', name: 'CyberPulse Feed', status: 'pending', message: 'Idle' },
+    { id: 'stripe', name: 'Stripe Gateway', status: 'pending', message: 'Idle' }
   ]);
 
   const fetchData = async () => {
@@ -201,6 +202,24 @@ export default function AdminPanel() {
     } catch (err) {
       updateTest('news', 'error', 'Offline');
       addLog('CyberPulse Feed', err.message);
+    }
+
+    // 11. Stripe Payment Gateway Test (Real live connection check)
+    try {
+      const headers = { Authorization: `Bearer ${sessionStorage.getItem("token") || ""}` };
+      const res = await axios.get(`${baseUrl}/api/v1/admin/stripe-health`, { headers });
+      
+      if (res.data.status === 'healthy') {
+        updateTest('stripe', 'success', `Connected (${res.data.latency_ms}ms)`);
+      } else if (res.data.status === 'degraded') {
+        updateTest('stripe', 'error', 'Degraded');
+        addLog('Stripe Gateway', `Degraded: Pricing retrieval issues. Details: Pro Plan ID: ${res.data.pro_plan?.status}, Enterprise Plan ID: ${res.data.enterprise_plan?.status}`);
+      } else {
+        throw new Error(res.data.message || 'Verification failed');
+      }
+    } catch (err) {
+      updateTest('stripe', 'error', 'Failed');
+      addLog('Stripe Gateway', err.response?.data?.detail || err.message);
     }
 
     setIsPulseRunning(false);
@@ -411,9 +430,9 @@ export default function AdminPanel() {
               <div key={i} className="chart-column">
                 <motion.div 
                   className="chart-bar-fill" 
-                  initial={{ scaleY: 0 }}
-                  animate={{ scaleY: maxCount > 0 ? day.count / maxCount : 0 }}
-                  style={{ transformOrigin: "bottom", height: "100%" }}
+                  initial={{ height: "0%" }}
+                  animate={{ height: maxCount > 0 ? `${(day.count / maxCount) * 100}%` : "0%" }}
+                  style={{ transformOrigin: "bottom" }}
                   transition={{ duration: 1, delay: i * 0.1 }}
                 >
                   <span className="bar-tooltip">{day.count} Total Scans</span>
