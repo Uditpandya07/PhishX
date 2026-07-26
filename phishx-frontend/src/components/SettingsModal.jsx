@@ -1,9 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { FaTimes, FaKey, FaUserShield, FaCopy, FaUser, FaLock, FaTrashAlt, FaEyeSlash, FaPlug } from "react-icons/fa";
+import { FaTimes, FaKey, FaUserShield, FaCopy, FaUser, FaLock, FaTrashAlt, FaEyeSlash, FaPlug, FaCreditCard, FaCrown, FaExternalLinkAlt } from "react-icons/fa";
 import axios from "axios";
 import Orb from "./Orb";
+import AlertSettings from "./AlertSettings";
 import "./SettingsModal.css";
 
 export default function SettingsModal({ isOpen, onClose, user, onClearHistory }) {
@@ -18,10 +19,33 @@ export default function SettingsModal({ isOpen, onClose, user, onClearHistory })
   const [message, setMessage] = useState("");
 
   const [toggleAI, setToggleAI] = useState(user?.ai_training_enabled ?? true);
+  const [subDetails, setSubDetails] = useState(null);
+  const [portalLoading, setPortalLoading] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (activeTab === "subscription" && user?.subscription_tier && user.subscription_tier !== "free") {
+      const fetchSubDetails = async () => {
+        setLoading(true);
+        try {
+          const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
+          const token = sessionStorage.getItem("token");
+          const res = await axios.get(`${baseUrl}/api/v1/payments/subscription`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {}
+          });
+          setSubDetails(res.data);
+        } catch (err) {
+          console.error("Failed to fetch subscription details:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchSubDetails();
+    }
+  }, [activeTab, user]);
 
   useEffect(() => {
     if (user) {
@@ -194,6 +218,9 @@ export default function SettingsModal({ isOpen, onClose, user, onClearHistory })
             <button className={`tab-btn ${activeTab === 'privacy' ? 'active' : ''}`} onClick={() => setActiveTab('privacy')}>
               <FaEyeSlash /> Privacy & Data
             </button>
+            <button className={`tab-btn ${activeTab === 'subscription' ? 'active' : ''}`} onClick={() => setActiveTab('subscription')}>
+              <FaCreditCard /> Subscription & Billing
+            </button>
           </div>
         </div>
 
@@ -272,26 +299,7 @@ export default function SettingsModal({ isOpen, onClose, user, onClearHistory })
 
           {activeTab === 'integrations' && (
             <div className="pane-inner">
-              <h3>Integrations</h3>
-              <p className="pane-subtitle">
-                Enter your Slack or Teams webhook URL to receive instant alerts when high-risk phishing URLs are detected.
-              </p>
-              
-              <form onSubmit={handleWebhookUpdate} className="auth-form">
-                <div className="input-group">
-                  <label>Webhook URL</label>
-                  <input 
-                    type="url" 
-                    placeholder="https://hooks.slack.com/services/..." 
-                    value={slackWebhook}
-                    onChange={(e) => setSlackWebhook(e.target.value)}
-                    disabled={loading}
-                  />
-                </div>
-                <button type="submit" className="primary-btn" disabled={loading}>
-                  {loading ? "Saving..." : "Save Webhook"}
-                </button>
-              </form>
+              <AlertSettings user={user} triggerNotification={setMessage} />
             </div>
           )}
 
@@ -380,6 +388,101 @@ export default function SettingsModal({ isOpen, onClose, user, onClearHistory })
                 </div>
               )}
 
+            </div>
+          )}
+
+          {activeTab === 'subscription' && (
+            <div className="pane-inner">
+              <h3>Subscription & Billing</h3>
+              <p className="pane-subtitle">Manage your premium plan, billing cycle, and invoices.</p>
+              
+              <div className="subscription-card glass-panel" style={{ padding: '24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(15, 23, 42, 0.3)', marginBottom: '25px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                  <div>
+                    <h4 style={{ color: '#fff', margin: 0, fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      PhishX {user?.subscription_tier?.toUpperCase() || "FREE"}
+                      {user?.subscription_tier && user?.subscription_tier !== "free" && <FaCrown style={{ color: '#ffd700' }} />}
+                    </h4>
+                    <p style={{ color: '#94a3b8', margin: '4px 0 0 0', fontSize: '0.85rem' }}>
+                      Status: <span style={{ color: user?.subscription_tier && user.subscription_tier !== 'free' ? '#4ade80' : '#94a3b8', fontWeight: 'bold' }}>
+                        {user?.subscription_tier && user.subscription_tier !== 'free' ? '● Active' : 'Free Tier'}
+                      </span>
+                    </p>
+                  </div>
+                  {user?.subscription_tier && user.subscription_tier !== "free" && subDetails?.amount && (
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff' }}>
+                        {subDetails?.currency === 'INR' ? '₹' : '$'}{subDetails?.amount}
+                      </span>
+                      <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}> / month</span>
+                    </div>
+                  )}
+                </div>
+
+                {user?.subscription_tier && user.subscription_tier !== "free" ? (
+                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '20px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 24px', fontSize: '0.9rem', marginBottom: '25px' }}>
+                      <div>
+                        <span style={{ color: '#64748b', display: 'block', fontSize: '0.8rem', textTransform: 'uppercase' }}>Next Renewal Date</span>
+                        <strong style={{ color: '#e2e8f0' }}>{subDetails?.next_billing_date || "Loading..."}</strong>
+                      </div>
+                      <div>
+                        <span style={{ color: '#64748b', display: 'block', fontSize: '0.8rem', textTransform: 'uppercase' }}>Stripe Customer ID</span>
+                        <code style={{ color: '#e2e8f0', background: 'rgba(255,255,255,0.04)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.8rem' }}>{user?.stripe_customer_id || "None"}</code>
+                      </div>
+                      <div>
+                        <span style={{ color: '#64748b', display: 'block', fontSize: '0.8rem', textTransform: 'uppercase' }}>Payment Frequency</span>
+                        <strong style={{ color: '#e2e8f0' }}>Monthly</strong>
+                      </div>
+                      <div>
+                        <span style={{ color: '#64748b', display: 'block', fontSize: '0.8rem', textTransform: 'uppercase' }}>Subscription ID</span>
+                        <code style={{ color: '#e2e8f0', background: 'rgba(255,255,255,0.04)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem' }}>{subDetails?.subscription_id || "Loading..."}</code>
+                      </div>
+                    </div>
+
+                    <button 
+                      className="primary-btn"
+                      disabled={portalLoading}
+                      onClick={async () => {
+                        setPortalLoading(true);
+                        try {
+                          const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
+                          const token = sessionStorage.getItem("token");
+                          const res = await axios.post(`${baseUrl}/api/v1/payments/customer-portal`, {}, {
+                            headers: token ? { Authorization: `Bearer ${token}` } : {}
+                          });
+                          if (res.data.url) {
+                            window.location.href = res.data.url;
+                          }
+                        } catch (err) {
+                          console.error("Portal error:", err);
+                          setMessage("❌ Failed to open billing portal.");
+                        } finally {
+                          setPortalLoading(false);
+                        }
+                      }}
+                      style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                    >
+                      {portalLoading ? "Launching..." : <>Manage Subscription <FaExternalLinkAlt style={{ fontSize: '0.8rem' }} /></>}
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                    <p style={{ color: '#94a3b8', fontSize: '0.95rem', marginBottom: '20px' }}>
+                      Get access to advanced AI risk insights, automated Slack/email notifications, and unlimited API keys.
+                    </p>
+                    <button 
+                      className="primary-btn" 
+                      onClick={() => {
+                        onClose();
+                        window.location.hash = "pricing";
+                      }}
+                    >
+                      Upgrade Protection
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
