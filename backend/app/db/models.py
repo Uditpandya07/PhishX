@@ -21,6 +21,7 @@ class User(Base):
     stripe_customer_id = Column(String, unique=True, nullable=True)
     metadata_json = Column(JSON, nullable=True)
     slack_webhook_url = Column(String, nullable=True)
+    alert_preferences = Column(JSON, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
@@ -40,6 +41,7 @@ class Scan(Base):
     prediction = Column(String, nullable=False)
     risk_score = Column(Float, nullable=False)
     features_json = Column(JSON, nullable=True)
+    whois_data = Column(JSON, nullable=True)
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User", back_populates="scans")
