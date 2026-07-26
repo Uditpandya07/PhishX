@@ -34,7 +34,13 @@ def upgrade() -> None:
                existing_type=sa.NUMERIC(),
                type_=sa.Uuid(),
                existing_nullable=True)
-    op.add_column('deletion_requests', sa.Column('user_email', sa.String(), nullable=False))
+    op.add_column('deletion_requests', sa.Column('user_email', sa.String(), nullable=True))
+    op.execute(
+        "UPDATE deletion_requests SET user_email = COALESCE("
+        "(SELECT email FROM users WHERE users.id = deletion_requests.user_id), "
+        "'deleted-user@phishx.com')"
+    )
+    op.alter_column('deletion_requests', 'user_email', nullable=False)
     op.add_column('deletion_requests', sa.Column('deleted_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True))
     op.alter_column('deletion_requests', 'id',
                existing_type=sa.NUMERIC(),
