@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import axios from "axios";
 import { FaCheck } from "react-icons/fa";
 import { showErrorPopup } from "../utils/errorHandler";
+import { API_URL } from "../config";
 import "./PricingCards.css";
 
 const plans = [
@@ -17,33 +18,34 @@ const plans = [
   {
     id: "pro",
     name: "Pro",
-    price: "$19",
+    price: "$9.99",
     features: ["Advanced AI Analysis", "Priority Support", "Detailed Risk Insights", "Automated Alerts"],
-    buttonText: "Coming Soon",
-    disabled: true,
-    comingSoon: true,
+    buttonText: "Upgrade to Pro",
+    disabled: false,
+    comingSoon: false,
   },
   {
     id: "enterprise",
     name: "Enterprise",
-    price: "$99",
+    price: "$49.99",
     features: ["Custom AI Training", "Team Management", "Dedicated Support", "Full Analytics Suite"],
-    buttonText: "Coming Soon",
-    disabled: true,
-    comingSoon: true,
+    buttonText: "Upgrade to Enterprise",
+    disabled: false,
+    comingSoon: false,
   }
 ];
 
 export default function PricingCards({ user }) {
+  const userTier = user?.subscription_tier || "free";
+
   const handleUpgrade = async (planId) => {
     if (planId === "enterprise") {
-      window.location.href = "mailto:sales@phishx.com";
-      return;
+      // Allow self-serve enterprise checkout too!
     }
     
     try {
       const token = sessionStorage.getItem("token");
-      const res = await axios.post(`http://127.0.0.1:8000/api/v1/payments/create-checkout-session?plan_id=${planId}`, {}, {
+      const res = await axios.post(`${API_URL}/api/v1/payments/create-checkout-session?plan_id=${planId}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.url) {
@@ -52,6 +54,18 @@ export default function PricingCards({ user }) {
     } catch (err) {
       showErrorPopup("Failed to start payment: " + (err.response?.data?.detail || "Unknown error"));
     }
+  };
+
+  const getButtonText = (plan) => {
+    if (userTier === plan.id) return "Current Plan";
+    if (plan.id === "free" && userTier !== "free") return "Basic Protection";
+    return plan.buttonText;
+  };
+
+  const isButtonDisabled = (plan) => {
+    if (userTier === plan.id) return true;
+    if (plan.id === "free" && userTier !== "free") return true;
+    return plan.disabled;
   };
 
   return (
@@ -73,11 +87,11 @@ export default function PricingCards({ user }) {
               ))}
             </ul>
             <button 
-              className={`primary-btn ${plan.disabled ? 'disabled-btn' : ''}`}
-              onClick={() => !plan.disabled && handleUpgrade(plan.id)}
-              disabled={plan.disabled || (user?.subscription_tier === plan.id)}
+              className={`primary-btn ${isButtonDisabled(plan) ? 'disabled-btn' : ''}`}
+              onClick={() => !isButtonDisabled(plan) && handleUpgrade(plan.id)}
+              disabled={isButtonDisabled(plan)}
             >
-              {user?.subscription_tier === plan.id ? "Current Plan" : plan.buttonText}
+              {getButtonText(plan)}
             </button>
           </motion.div>
         ))}

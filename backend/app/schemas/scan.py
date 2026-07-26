@@ -12,6 +12,7 @@ class ScanResponse(BaseModel):
     prediction: str
     risk_score: float
     features_json: Optional[Dict[str, Any]] = None
+    whois_data: Optional[Dict[str, Any]] = None
     timestamp: datetime
 
     class Config:
