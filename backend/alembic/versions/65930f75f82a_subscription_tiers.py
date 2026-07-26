@@ -51,8 +51,8 @@ def upgrade() -> None:
                type_=sa.Uuid(),
                nullable=True)
     op.create_index(op.f('ix_deletion_requests_user_email'), 'deletion_requests', ['user_email'], unique=False)
-    op.drop_constraint(None, 'deletion_requests', type_='foreignkey')
-    op.create_foreign_key(None, 'deletion_requests', 'users', ['user_id'], ['id'], ondelete='SET NULL')
+    op.drop_constraint('deletion_requests_user_id_fkey', 'deletion_requests', type_='foreignkey')
+    op.create_foreign_key('fk_deletion_requests_user_id', 'deletion_requests', 'users', ['user_id'], ['id'], ondelete='SET NULL')
     op.drop_column('deletion_requests', 'processed_at')
     op.alter_column('feedbacks', 'id',
                existing_type=sa.NUMERIC(),
@@ -142,8 +142,8 @@ def downgrade() -> None:
                type_=sa.NUMERIC(),
                existing_nullable=False)
     op.add_column('deletion_requests', sa.Column('processed_at', sa.DATETIME(), nullable=True))
-    op.drop_constraint(None, 'deletion_requests', type_='foreignkey')
-    op.create_foreign_key(None, 'deletion_requests', 'users', ['user_id'], ['id'], ondelete='CASCADE')
+    op.drop_constraint('fk_deletion_requests_user_id', 'deletion_requests', type_='foreignkey')
+    op.create_foreign_key('deletion_requests_user_id_fkey', 'deletion_requests', 'users', ['user_id'], ['id'], ondelete='CASCADE')
     op.drop_index(op.f('ix_deletion_requests_user_email'), table_name='deletion_requests')
     op.alter_column('deletion_requests', 'user_id',
                existing_type=sa.Uuid(),
