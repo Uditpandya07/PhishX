@@ -96,3 +96,70 @@ def get_deleted_accounts(
     )
     return logs
 
+@router.get("/stripe-health")
+def check_stripe_health(
+    current_user: User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """Real check of Stripe integration health."""
+    import stripe
+    from app.core.config import settings
+    import time
+    
+    if not settings.STRIPE_API_KEY:
+        return {
+            "status": "unhealthy",
+            "message": "Stripe API Key is missing in environment configuration."
+        }
+        
+    try:
+        stripe.api_key = settings.STRIPE_API_KEY
+        
+        # 1. Contact Stripe API & measure latency
+        start_time = time.time()
+        account_details = stripe.Account.retrieve().to_dict()
+        latency = round((time.time() - start_time) * 1000)
+        
+        # 2. Check if the configured Plan IDs are valid
+        pro_plan_id = settings.STRIPE_PRO_PLAN_ID
+        ent_plan_id = settings.STRIPE_ENTERPRISE_PLAN_ID
+        
+        pro_status = "unconfigured"
+        ent_status = "unconfigured"
+        
+        if pro_plan_id:
+            try:
+                stripe.Price.retrieve(pro_plan_id)
+                pro_status = "active"
+            except Exception as e:
+                pro_status = f"error: {str(e)}"
+                
+        if ent_plan_id:
+            try:
+                stripe.Price.retrieve(ent_plan_id)
+                ent_status = "active"
+            except Exception as e:
+                ent_status = f"error: {str(e)}"
+                
+        is_healthy = (pro_status == "active")
+        
+        return {
+            "status": "healthy" if is_healthy else "degraded",
+            "latency_ms": latency,
+            "account_id": account_details.get("id"),
+            "account_email": account_details.get("email"),
+            "charges_enabled": account_details.get("charges_enabled"),
+            "pro_plan": {
+                "id": pro_plan_id,
+                "status": pro_status
+            },
+            "enterprise_plan": {
+                "id": ent_plan_id,
+                "status": ent_status
+            }
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "message": f"Stripe connection error: {str(e)}"
+        }
+
