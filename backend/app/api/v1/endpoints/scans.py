@@ -270,6 +270,33 @@ async def predict_url(
         logger.error(f"Prediction Dispatch Error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal analysis engine error. Please try again later.")
 
+@router.post("/advanced", response_model=TaskResponse)
+async def advanced_predict_url(
+    *,
+    db: Session = Depends(deps.get_db),
+    scan_in: ScanCreate,
+    current_user: User = Depends(deps.get_current_active_user),
+) -> Any:
+    """Advanced URL prediction for Pro/Enterprise users."""
+    if current_user.subscription_tier not in ["pro", "enterprise"]:
+        raise HTTPException(status_code=403, detail="Advanced scanning requires a Pro or Enterprise subscription.")
+    
+    try:
+        from app.worker import process_url_scan
+        import uuid
+        
+        # Dispatch to celery queue (advanced features handled by worker if Pro user)
+        # We pass user_id so worker can apply advanced logic
+        task = process_url_scan.delay(scan_in.url, current_user.id)
+        return {
+            "task_id": task.id,
+            "status": "QUEUED",
+            "message": "Advanced scan dispatched to background worker"
+        }
+    except Exception as e:
+        logger.error(f"Advanced Prediction Dispatch Error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal analysis engine error. Please try again later.")
+
 @router.get("/history", response_model=List[ScanResponse])
 def get_scan_history(
     db: Session = Depends(deps.get_db),
