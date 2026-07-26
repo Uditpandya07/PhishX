@@ -71,6 +71,23 @@ def generate_api_key(
     
     return {"id": str(new_key.id), "key_value": raw_key}
 
+@router.post("/alerts")
+def update_alert_preferences(
+    alert_preferences: dict,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_active_user),
+):
+    """Update alert preferences for Pro/Enterprise users."""
+    if current_user.subscription_tier not in ["pro", "enterprise"]:
+        raise HTTPException(status_code=403, detail="Alert configuration requires a Pro or Enterprise subscription.")
+        
+    current_user.alert_preferences = alert_preferences
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+    
+    return {"detail": "Alert preferences updated successfully", "preferences": current_user.alert_preferences}
+
 @router.delete("/me")
 def delete_own_account(
     db: Session = Depends(deps.get_db),
