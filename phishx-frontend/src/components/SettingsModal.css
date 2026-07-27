@@ -391,4 +391,16 @@
   .auth-form {
     gap: 16px;
   }
+  .settings-card div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.settings-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.settings-card:hover {
+  border-color: rgba(149, 251, 64, 0.25) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
 }
