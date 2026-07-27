@@ -152,76 +152,181 @@
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
 }
 
-/* HERO */
-.hero-section {
+/* ==========================================================================
+   HERO SECTION (CYBER-TERMINAL SECURITY CORE - CROWDSTRIKE / PALANTIR STYLE)
+   ========================================================================== */
+.hero-section.cyber-hero {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 80px 0 40px 0;
+  padding: 95px 20px 50px 20px;
+  overflow: hidden;
+  z-index: 10;
 }
 
-.hero-badge {
+.cyber-hero-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 860px;
+  margin: 0 auto;
+  z-index: 2;
+}
+
+/* Active Cyber Laser Scan Sweep Line */
+.cyber-laser-sweep {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #38bdf8, #4ade80, transparent);
+  box-shadow: 0 0 15px #38bdf8, 0 0 30px #4ade80;
+  opacity: 0.7;
+  animation: scanLaser 6s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes scanLaser {
+  0% { top: 0%; opacity: 0; }
+  15% { opacity: 0.8; }
+  85% { opacity: 0.8; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* Cyber Status Badge */
+.hero-badge.cyber-badge {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: rgba(74, 222, 128, 0.05);
-  border: 1px solid rgba(74, 222, 128, 0.3);
-  box-shadow: 0 0 20px rgba(74, 222, 128, 0.15);
-  border-radius: 100px;
-  color: #4ade80;
-  font-size: 0.85rem;
-  font-weight: 600;
+  gap: 10px;
+  padding: 7px 18px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #38bdf8;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
   margin-bottom: 30px;
-  backdrop-filter: blur(10px);
-  animation: pulseNeon 3s infinite;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes pulseNeon {
-  0% {
-    box-shadow: 0 0 10px rgba(74, 222, 128, 0.1);
-  }
-
-  50% {
-    box-shadow: 0 0 25px rgba(74, 222, 128, 0.3);
-  }
-
-  100% {
-    box-shadow: 0 0 10px rgba(74, 222, 128, 0.1);
-  }
+.cyber-badge:hover {
+  border-color: rgba(74, 222, 128, 0.7);
+  box-shadow: 0 0 25px rgba(74, 222, 128, 0.25);
+  color: #4ade80;
 }
 
-.hero-title {
-  font-size: clamp(3rem, 6vw, 4.5rem);
+.cyber-live-dot {
+  width: 6px;
+  height: 6px;
+  background-color: #4ade80;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #4ade80;
+  animation: cyberPulse 1.5s infinite alternate;
+}
+
+@keyframes cyberPulse {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  100% { transform: scale(1.4); opacity: 1; }
+}
+
+/* Cyber Title */
+.hero-title.cyber-title {
+  font-size: clamp(3.2rem, 7vw, 5rem);
   font-weight: 900;
   letter-spacing: -3px;
-  line-height: 1.1;
-  margin-bottom: 30px;
-  background: linear-gradient(90deg, #3b82f6, #4ade80);
+  line-height: 1.08;
+  margin-bottom: 28px;
+  background: linear-gradient(135deg, #ffffff 0%, #38bdf8 50%, #4ade80 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 25px rgba(56, 189, 248, 0.25));
 }
 
-.hero-subtext {
-  font-size: 1.25rem;
-  color: #94a3b8;
-  max-width: 700px;
-  margin: 0 auto 40px auto;
-  line-height: 1.6;
+/* Cyber Subtext */
+.hero-subtext.cyber-subtext {
+  font-size: clamp(1.15rem, 2vw, 1.3rem);
+  color: #cbd5e1;
+  max-width: 740px;
+  margin: 0 auto 42px auto;
+  line-height: 1.65;
+  font-weight: 400;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
 }
 
-.hero-primary-btn {
-  background: linear-gradient(135deg, #3b82f6, #4ade80);
+/* Cyber Buttons */
+.hero-btn-group.cyber-btn-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.hero-primary-btn.cyber-primary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 38px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a !important;
+  text-decoration: none;
+  background: linear-gradient(135deg, #38bdf8 0%, #4ade80 100%);
   border: none;
-  box-shadow: 0 8px 30px rgba(74, 222, 128, 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 8px;
+  box-shadow: 0 0 25px rgba(56, 189, 248, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.hero-primary-btn:hover {
+.hero-primary-btn.cyber-primary-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 15px 40px rgba(74, 222, 128, 0.5);
-  filter: brightness(1.1);
+  box-shadow: 0 0 40px rgba(74, 222, 128, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  filter: brightness(1.05);
+}
+
+.hero-secondary-btn.cyber-secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 34px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #38bdf8 !important;
+  text-decoration: none;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 8px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.hero-secondary-btn.cyber-secondary-btn:hover {
+  background: rgba(56, 189, 248, 0.12);
+  border-color: rgba(56, 189, 248, 0.7);
+  box-shadow: 0 0 25px rgba(56, 189, 248, 0.3);
+  transform: translateY(-2px);
+  color: #ffffff !important;
+}
+
+.cyber-arrow {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.hero-secondary-btn.cyber-secondary-btn:hover .cyber-arrow {
+  transform: translateX(4px);
 }
 
 /* SCANNER SECTION (The Centerpiece) */
@@ -255,6 +360,11 @@
   border: 1px solid rgba(255, 255, 255, 0.05);
   text-align: center;
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 145px;
 }
 
 .scan-stat-card:hover {
@@ -266,16 +376,28 @@
   font-size: 0.8rem;
   color: #94a3b8;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: 500;
+  letter-spacing: 0.8px;
+  font-weight: 600;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  line-height: 1.35;
+  margin-bottom: 4px;
 }
 
 .scan-stat-card strong {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 2.8rem;
-  margin-top: 8px;
+  margin-top: 0;
   font-weight: 900;
   text-shadow: 0 0 20px currentColor;
+  flex-grow: 1;
+  width: 100%;
 }
 
 /* ABOUT SECTION */
@@ -653,8 +775,9 @@
 
 /* Tablets & Small Laptops (<= 1024px) */
 @media (max-width: 1024px) {
-  .hero-title {
-    font-size: 4rem;
+  .hero-title,
+  .hero-title.cyber-title {
+    font-size: clamp(2.8rem, 7vw, 4rem);
     letter-spacing: -2px;
   }
 
@@ -830,36 +953,50 @@
   }
 
   /* Hero Section */
-  .hero-section {
-    padding: 30px 0 10px 0;
+  .hero-section,
+  .hero-section.cyber-hero {
+    padding: 50px 15px 30px 15px;
   }
 
-  .hero-badge {
-    font-size: 0.75rem;
-    padding: 6px 12px;
+  .hero-badge,
+  .hero-badge.cyber-badge {
+    font-size: 0.68rem;
+    padding: 6px 14px;
+    letter-spacing: 1px;
+    margin-bottom: 22px;
   }
 
-  .hero-title {
-    font-size: 2.2rem;
-    line-height: 1.2;
-    letter-spacing: -1px;
+  .hero-title,
+  .hero-title.cyber-title {
+    font-size: clamp(2.3rem, 9vw, 3.2rem);
+    line-height: 1.15;
+    letter-spacing: -1.5px;
+    margin-bottom: 20px;
   }
 
-  .hero-subtext {
-    font-size: 1rem;
-    margin-bottom: 25px;
+  .hero-subtext,
+  .hero-subtext.cyber-subtext {
+    font-size: 0.98rem;
+    margin-bottom: 30px;
+    padding: 0 5px;
+    line-height: 1.55;
   }
 
-  .hero-btn-group {
+  .hero-btn-group,
+  .hero-btn-group.cyber-btn-group {
     flex-direction: column;
     width: 100%;
-    gap: 15px;
+    gap: 14px;
   }
 
-  .hero-btn-group a {
+  .hero-btn-group a,
+  .hero-primary-btn.cyber-primary-btn,
+  .hero-secondary-btn.cyber-secondary-btn {
     width: 100%;
+    justify-content: center;
     text-align: center;
     box-sizing: border-box;
+    padding: 14px 20px;
   }
 
   /* Scan centerpiece */
@@ -876,6 +1013,12 @@
 
   .scan-stat-card {
     padding: 15px;
+    min-height: auto;
+  }
+
+  .scan-stat-card span {
+    min-height: auto;
+    margin-bottom: 6px;
   }
 
   .scan-stat-card strong {

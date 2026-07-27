@@ -86,14 +86,14 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onLo
           params.append('password', password);
 
           const res = await axios.post(`${API_URL}/api/v1/auth/login`, params, {
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            withCredentials: true
           });
 
-          // Check if we got a token in the response (some setups might return it in JSON)
-          // But our backend currently sets a cookie. 
-          // If it returns a token in JSON, we should save it.
-          // The backend automatically sets the access_token in an HttpOnly cookie.
-          // We no longer store it in localStorage/sessionStorage for security reasons.
+          if (res.data?.access_token) {
+            sessionStorage.setItem("token", res.data.access_token);
+            localStorage.setItem("phishx_token", res.data.access_token);
+          }
           
           if (onLoginSuccess) onLoginSuccess(res.data.user || { email });
         } else {
@@ -111,6 +111,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", onLo
             }),
             { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, withCredentials: true }
           );
+          if (loginRes.data?.access_token) {
+            sessionStorage.setItem("token", loginRes.data.access_token);
+            localStorage.setItem("phishx_token", loginRes.data.access_token);
+          }
           if (onLoginSuccess) onLoginSuccess(loginRes.data.user || { email });
           if (triggerNotification) triggerNotification("Successfully registered and logged in!");
         }

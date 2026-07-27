@@ -1,3 +1,5 @@
+import axios from "axios";
+
 /**
  * Central configuration & environment validation for PhishX frontend.
  *
@@ -15,3 +17,15 @@ function isValidUrl(val) {
 export const API_URL = isValidUrl(rawApiUrl) ? rawApiUrl.replace(/\/$/, "") : null;
 
 export const isConfigured = Boolean(API_URL);
+
+axios.defaults.withCredentials = true;
+
+axios.interceptors.request.use((config) => {
+  if (typeof window !== "undefined") {
+    const token = sessionStorage.getItem("token") || localStorage.getItem("phishx_token");
+    if (token && !config.headers.Authorization) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});

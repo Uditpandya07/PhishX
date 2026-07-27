@@ -226,6 +226,7 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
               id: data.result.id || Date.now(),
               url: url.trim(),
               date: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }),
+              rawTimestamp: new Date().toISOString(),
               risk: risk,
               status: isDanger ? "Phishing" : "Safe"
             };
