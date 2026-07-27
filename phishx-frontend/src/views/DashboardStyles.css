@@ -87,6 +87,7 @@
   padding: 40px;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border-radius: 20px;
   border: 1px solid var(--glass-border);
   transition: all 0.3s;
