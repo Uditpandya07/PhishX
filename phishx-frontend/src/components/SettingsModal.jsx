@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { FaTimes, FaKey, FaUserShield, FaCopy, FaUser, FaLock, FaTrashAlt, FaEyeSlash, FaPlug, FaCreditCard, FaCrown, FaExternalLinkAlt } from "react-icons/fa";
+import { FaTimes, FaKey, FaUserShield, FaCopy, FaUser, FaLock, FaTrashAlt, FaEye, FaEyeSlash, FaPlug, FaCreditCard, FaCrown, FaExternalLinkAlt, FaCheckCircle, FaEnvelope } from "react-icons/fa";
 import axios from "axios";
 import Orb from "./Orb";
 import AlertSettings from "./AlertSettings";
@@ -12,11 +12,19 @@ export default function SettingsModal({ isOpen, onClose, user, onClearHistory })
   const [activeTab, setActiveTab] = useState("profile");
   const [name, setName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
-  const [password, setPassword] = useState("");
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [forgotLoading, setForgotLoading] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [slackWebhook, setSlackWebhook] = useState(user?.slack_webhook_url || "");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [passwordMsg, setPasswordMsg] = useState({ text: "", isError: false });
 
   const [toggleAI, setToggleAI] = useState(user?.ai_training_enabled ?? true);
   const [subDetails, setSubDetails] = useState(null);
@@ -80,17 +88,12 @@ export default function SettingsModal({ isOpen, onClose, user, onClearHistory })
 
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
-    if (password && password.length < 8) {
-      setMessage("Password must be at least 8 characters.");
-      return;
-    }
     setLoading(true);
     try {
       const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
       const token = sessionStorage.getItem("token");
       
       const updateData = { name, email };
-      if (password) updateData.password = password;
 
       await axios.put(`${baseUrl}/api/v1/users/me`, 
         updateData,
@@ -100,11 +103,91 @@ export default function SettingsModal({ isOpen, onClose, user, onClearHistory })
         }
       );
       setMessage("✅ Profile updated successfully!");
-      setPassword("");
+      setTimeout(() => setMessage(""), 4000);
     } catch (err) {
       setMessage("❌ Failed to update profile.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePasswordUpdate = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    setPasswordMsg({ text: "", isError: false });
+    
+    if (!oldPassword) {
+      const errText = "❌ Please enter your current password.";
+      setMessage(errText);
+      setPasswordMsg({ text: errText, isError: true });
+      return;
+    }
+    if (newPassword.length < 8) {
+      const errText = "❌ Password must be at least 8 characters long.";
+      setMessage(errText);
+      setPasswordMsg({ text: errText, isError: true });
+      return;
+    }
+    if (!/\d/.test(newPassword) || !/[A-Z]/.test(newPassword) || !/[!@#$%^&*(),.?":{}|<>]/.test(newPassword)) {
+      const errText = "❌ New password must meet all security requirements.";
+      setMessage(errText);
+      setPasswordMsg({ text: errText, isError: true });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      const errText = "❌ New password and confirmation do not match.";
+      setMessage(errText);
+      setPasswordMsg({ text: errText, isError: true });
+      return;
+    }
+    
+    setPasswordLoading(true);
+    try {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
+      const token = sessionStorage.getItem("token");
+      
+      await axios.put(`${baseUrl}/api/v1/users/me`, 
+        { old_password: oldPassword, password: newPassword },
+        { 
+          withCredentials: true,
+          headers: token ? { Authorization: `Bearer ${token}` } : {} 
+        }
+      );
+      const successText = "🔒 Password changed successfully! Your account is secure.";
+      setMessage(successText);
+      setPasswordMsg({ text: successText, isError: false });
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setTimeout(() => {
+        setMessage("");
+        setPasswordMsg({ text: "", isError: false });
+      }, 6000);
+    } catch (err) {
+      const errText = "❌ " + (err.response?.data?.detail || "Failed to change password. Please verify your current password.");
+      setMessage(errText);
+      setPasswordMsg({ text: errText, isError: true });
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    const targetEmail = user?.email || email;
+    if (!targetEmail) {
+      setMessage("❌ Please enter an email address to send the reset link to.");
+      return;
+    }
+    setForgotLoading(true);
+    try {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
+      await axios.post(`${baseUrl}/api/v1/auth/forgot-password`, { email: targetEmail });
+      setMessage(`📧 Password reset instructions have been sent to ${targetEmail}!`);
+      setTimeout(() => setMessage(""), 6000);
+    } catch (err) {
+      setMessage("❌ Failed to send reset email. Please try again later.");
+    } finally {
+      setForgotLoading(false);
     }
   };
 
@@ -231,43 +314,195 @@ export default function SettingsModal({ isOpen, onClose, user, onClearHistory })
           {activeTab === 'profile' && (
             <div className="pane-inner">
               <h3>Profile & Security</h3>
-              <p className="pane-subtitle">Manage your personal information and account security.</p>
+              <p className="pane-subtitle">Manage your personal information and account authentication.</p>
               
-              <form onSubmit={handleProfileUpdate} className="auth-form">
-                <div className="input-group">
-                  <label>Full Name</label>
-                  <input 
-                    type="text" 
-                    placeholder="Enter your name" 
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    disabled={loading}
-                  />
+              {/* Profile Information Card */}
+              <div className="settings-card glass-panel" style={{ padding: '24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(15, 23, 42, 0.4)', marginBottom: '30px' }}>
+                <h4 style={{ color: '#fff', margin: '0 0 6px 0', fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <FaUser style={{ color: '#95fb40', fontSize: '1rem' }} /> Profile Information
+                </h4>
+                <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: '0 0 20px 0' }}>
+                  Update your account's profile identity and primary email address.
+                </p>
+                <form onSubmit={handleProfileUpdate} className="auth-form" style={{ maxWidth: '100%' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div className="input-group">
+                      <label>Full Name</label>
+                      <input 
+                        type="text" 
+                        placeholder="Enter your name" 
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        disabled={loading}
+                      />
+                    </div>
+                    <div className="input-group">
+                      <label>Email Address</label>
+                      <input 
+                        type="email" 
+                        placeholder="name@company.com" 
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
+                    <button type="submit" className="primary-btn" disabled={loading} style={{ padding: '12px 24px', fontSize: '0.95rem' }}>
+                      {loading ? "Saving..." : "Save Profile Details"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* Password & Authentication Card */}
+              <div className="settings-card glass-panel" style={{ padding: '24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(15, 23, 42, 0.4)', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
+                  <h4 style={{ color: '#fff', margin: 0, fontSize: '1.15rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <FaLock style={{ color: '#95fb40', fontSize: '1rem' }} /> Change Password
+                  </h4>
+                  <button 
+                    type="button"
+                    onClick={handleForgotPassword}
+                    disabled={forgotLoading}
+                    style={{ background: 'transparent', border: 'none', color: '#95fb40', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '600', padding: '4px 8px', borderRadius: '6px', transition: 'all 0.2s' }}
+                    onMouseOver={(e) => e.currentTarget.style.background = 'rgba(149, 251, 64, 0.1)'}
+                    onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <FaEnvelope style={{ fontSize: '0.8rem' }} /> {forgotLoading ? "Sending Reset Link..." : "Forgot Current Password?"}
+                  </button>
                 </div>
-                <div className="input-group">
-                  <label>Email Address</label>
-                  <input 
-                    type="email" 
-                    placeholder="name@company.com" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={loading}
-                  />
-                </div>
-                <div className="input-group">
-                  <label>New Password (Optional)</label>
-                  <input 
-                    type="password" 
-                    placeholder="••••••••" 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={loading}
-                  />
-                </div>
-                <button type="submit" className="primary-btn" disabled={loading}>
-                  {loading ? "Updating..." : "Save Changes"}
-                </button>
-              </form>
+                <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: '0 0 24px 0' }}>
+                  Ensure your account uses a long, random password to stay secure across all sessions.
+                </p>
+                
+                <form onSubmit={handlePasswordUpdate} className="auth-form" style={{ maxWidth: '100%', gap: '20px' }}>
+                  <div className="input-group">
+                    <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Current Password</span>
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <input 
+                        type={showOldPassword ? "text" : "password"} 
+                        placeholder="Enter current password" 
+                        value={oldPassword}
+                        onChange={(e) => setOldPassword(e.target.value)}
+                        disabled={passwordLoading}
+                        style={{ paddingRight: '44px' }}
+                      />
+                      <button 
+                        type="button" 
+                        onClick={() => setShowOldPassword(!showOldPassword)}
+                        style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}
+                      >
+                        {showOldPassword ? <FaEyeSlash /> : <FaEye />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div className="input-group">
+                      <label>New Password</label>
+                      <div style={{ position: 'relative' }}>
+                        <input 
+                          type={showNewPassword ? "text" : "password"} 
+                          placeholder="Enter new password" 
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          disabled={passwordLoading}
+                          style={{ paddingRight: '44px' }}
+                        />
+                        <button 
+                          type="button" 
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                          style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}
+                        >
+                          {showNewPassword ? <FaEyeSlash /> : <FaEye />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="input-group">
+                      <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>Confirm New Password</span>
+                        {confirmPassword && (
+                          <span style={{ fontSize: '0.75rem', color: newPassword === confirmPassword ? '#4ade80' : '#ef4444', fontWeight: '600' }}>
+                            {newPassword === confirmPassword ? '✓ Passwords match' : '⚠️ Do not match'}
+                          </span>
+                        )}
+                      </label>
+                      <div style={{ position: 'relative' }}>
+                        <input 
+                          type={showConfirmPassword ? "text" : "password"} 
+                          placeholder="Re-enter new password" 
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          disabled={passwordLoading}
+                          style={{ paddingRight: '44px', borderColor: confirmPassword ? (newPassword === confirmPassword ? '#22c55e' : '#ef4444') : undefined }}
+                        />
+                        <button 
+                          type="button" 
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}
+                        >
+                          {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Password Requirements Indicator */}
+                  {newPassword.length > 0 && (
+                    <div style={{ background: 'rgba(0, 0, 0, 0.25)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '14px 16px', marginTop: '4px' }}>
+                      <span style={{ fontSize: '0.8rem', color: '#cbd5e1', fontWeight: '600', display: 'block', marginBottom: '8px' }}>Password Requirements:</span>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: newPassword.length >= 8 ? '#4ade80' : '#64748b' }}>
+                          <FaCheckCircle style={{ opacity: newPassword.length >= 8 ? 1 : 0.3 }} /> 8+ Characters
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: /\d/.test(newPassword) ? '#4ade80' : '#64748b' }}>
+                          <FaCheckCircle style={{ opacity: /\d/.test(newPassword) ? 1 : 0.3 }} /> At least 1 Number (0-9)
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: /[A-Z]/.test(newPassword) ? '#4ade80' : '#64748b' }}>
+                          <FaCheckCircle style={{ opacity: /[A-Z]/.test(newPassword) ? 1 : 0.3 }} /> 1 Uppercase Letter (A-Z)
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: /[!@#$%^&*(),.?":{}|<>]/.test(newPassword) ? '#4ade80' : '#64748b' }}>
+                          <FaCheckCircle style={{ opacity: /[!@#$%^&*(),.?":{}|<>]/.test(newPassword) ? 1 : 0.3 }} /> 1 Special Symbol (!@#$%)
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Immediate Password Feedback Notification */}
+                  {passwordMsg.text && (
+                    <div style={{ 
+                      padding: '12px 16px', 
+                      borderRadius: '12px', 
+                      fontSize: '0.9rem', 
+                      fontWeight: '600',
+                      background: passwordMsg.isError ? 'rgba(239, 68, 68, 0.15)' : 'rgba(34, 197, 94, 0.15)', 
+                      border: `1px solid ${passwordMsg.isError ? 'rgba(239, 68, 68, 0.35)' : 'rgba(34, 197, 94, 0.35)'}`, 
+                      color: passwordMsg.isError ? '#f87171' : '#4ade80',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      marginTop: '6px'
+                    }}>
+                      {passwordMsg.text}
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
+                    <button 
+                      type="submit" 
+                      className="primary-btn" 
+                      disabled={passwordLoading || !newPassword || !oldPassword || newPassword !== confirmPassword} 
+                      style={{ padding: '12px 24px', fontSize: '0.95rem', opacity: (!newPassword || !oldPassword || newPassword !== confirmPassword) ? 0.6 : 1 }}
+                    >
+                      {passwordLoading ? "Updating Password..." : "Update Security Password"}
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           )}
 
