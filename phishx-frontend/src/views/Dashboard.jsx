@@ -264,6 +264,16 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
       return;
     }
 
+    const escapeHtml = (unsafe) => {
+      if (unsafe === null || unsafe === undefined) return "";
+      return String(unsafe)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    };
+
     const totalScans = filtered.length;
     const phishingScans = filtered.filter(s => s.status === "Phishing" || s.risk >= 70).length;
     const safeScans = totalScans - phishingScans;
@@ -284,8 +294,8 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
       const rowBg = idx % 2 === 0 ? "#0b0f19" : "#111827";
       return `
         <tr style="background-color: ${rowBg}; border-bottom: 1px solid #1e293b;">
-          <td style="padding: 14px 16px; color: #f8fafc; font-family: monospace; font-size: 13px; word-break: break-all;">${s.url}</td>
-          <td style="padding: 14px 16px; color: #94a3b8; font-size: 13px; white-space: nowrap;">${s.date}</td>
+          <td style="padding: 14px 16px; color: #f8fafc; font-family: monospace; font-size: 13px; word-break: break-all;">${escapeHtml(s.url)}</td>
+          <td style="padding: 14px 16px; color: #94a3b8; font-size: 13px; white-space: nowrap;">${escapeHtml(s.date)}</td>
           <td style="padding: 14px 16px; font-weight: bold; color: ${isDanger ? '#ef4444' : '#4ade80'}; font-size: 14px; text-align: center;">${s.risk}%</td>
           <td style="padding: 14px 16px; text-align: center;">
             <span style="background-color: ${statusBg}; color: #ffffff; padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; display: inline-block;">${statusText}</span>
@@ -511,16 +521,16 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
       <div class="details-section">
         <div class="details-title" style="color: #38bdf8;">👤 AUTHORIZED SOC OPERATOR</div>
         <div class="details-grid">
-          <div><span class="label">Analyst Name:</span> <span class="val">${operatorName}</span></div>
-          <div><span class="label">Analyst Email:</span> <span class="val">${operatorEmail}</span></div>
-          <div><span class="label">Security Clearance:</span> <span class="val badge-green">${clearanceTier} SOC OPERATOR</span></div>
+          <div><span class="label">Analyst Name:</span> <span class="val">${escapeHtml(operatorName)}</span></div>
+          <div><span class="label">Analyst Email:</span> <span class="val">${escapeHtml(operatorEmail)}</span></div>
+          <div><span class="label">Security Clearance:</span> <span class="val badge-green">${escapeHtml(clearanceTier)} SOC OPERATOR</span></div>
         </div>
       </div>
       <div class="details-section green-border">
         <div class="details-title" style="color: #4ade80;">🛡️ AUDIT SPECIFICATIONS</div>
         <div class="details-grid">
-          <div><span class="label">Audit Reference ID:</span> <span class="val">${auditId}</span></div>
-          <div><span class="label">Monitoring Period:</span> <span class="val">${dateRangeStr}</span></div>
+          <div><span class="label">Audit Reference ID:</span> <span class="val">${escapeHtml(auditId)}</span></div>
+          <div><span class="label">Monitoring Period:</span> <span class="val">${escapeHtml(dateRangeStr)}</span></div>
           <div><span class="label">Detection Engine:</span> <span class="val" style="color: #38bdf8;">PhishX V2 ML Classifier (Random Forest)</span></div>
         </div>
       </div>
@@ -547,7 +557,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
 
     <div class="exec-summary">
       <strong style="color: #4ade80; display: block; margin-bottom: 8px; font-size: 14px; letter-spacing: 0.5px; text-transform: uppercase;">📋 Executive Threat Analysis & Methodology</strong>
-      This security audit report covers the monitoring period of <strong>${dateRangeStr}</strong> for authorized SOC operator <strong>${operatorName}</strong>. During this timeframe, the <strong>PhishX Deep Lexical & Neural Engine (v2.0)</strong> evaluated <strong>${totalScans} URLs</strong>.<br/><br/>
+      This security audit report covers the monitoring period of <strong>${escapeHtml(dateRangeStr)}</strong> for authorized SOC operator <strong>${escapeHtml(operatorName)}</strong>. During this timeframe, the <strong>PhishX Deep Lexical & Neural Engine (v2.0)</strong> evaluated <strong>${totalScans} URLs</strong>.<br/><br/>
       <strong style="color: #38bdf8; font-size: 13px;">3-Layer Hierarchical Precedence Evaluation:</strong>
       <ul style="margin: 6px 0 10px 18px; padding: 0; color: #cbd5e1; font-size: 13px; line-height: 1.5;">
         <li><strong>Layer 1 (Enterprise Whitelist):</strong> Direct string matching against 500+ curated trusted domains with 0.0% false-positive guarantee.</li>
@@ -559,7 +569,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
 
     <div class="section-title">
       <span>Detailed Intelligence Log</span>
-      <span style="font-size: 12px; color: #94a3b8; font-weight: normal;">Filter Active: <strong>${exportStatusFilter}</strong></span>
+      <span style="font-size: 12px; color: #94a3b8; font-weight: normal;">Filter Active: <strong>${escapeHtml(exportStatusFilter)}</strong></span>
     </div>
 
     <table>
