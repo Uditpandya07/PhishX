@@ -33,10 +33,16 @@ def update_user_me(
     """Update own user."""
     user_data = user_in.model_dump(exclude_unset=True)
     if "password" in user_data:
-        from app.core.security import get_password_hash
-        hashed_password = get_password_hash(user_data["password"])
-        current_user.password_hash = hashed_password
-        del user_data["password"]
+        new_pwd = user_data.pop("password")
+        if new_pwd:
+            from app.core.security import get_password_hash, verify_password
+            if current_user.password_hash and current_user.password_hash != "google_oauth_protected":
+                old_pwd = user_data.get("old_password")
+                if not old_pwd or not verify_password(old_pwd, current_user.password_hash):
+                    raise HTTPException(status_code=400, detail="Incorrect current password. Please check and try again.")
+            current_user.password_hash = get_password_hash(new_pwd)
+    if "old_password" in user_data:
+        del user_data["old_password"]
     
     for field, value in user_data.items():
         setattr(current_user, field, value)
