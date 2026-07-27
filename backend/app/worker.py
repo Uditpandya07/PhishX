@@ -160,14 +160,19 @@ def process_url_scan(url: str, user_id: Optional[str] = None):
             if result["prediction"] == "Phishing":
                 if user and user.slack_webhook_url:
                     try:
-                        import requests
-                        payload = {
-                            "text": f"🚨 *PhishX Alert:* A high-risk phishing URL was detected!\n\n"
-                                    f"*URL:* {url}\n"
-                                    f"*Risk Score:* {result['risk_score']}%\n"
-                                    f"*AI Explanation:* {result['features'].get('ai_explanation', 'N/A')}"
-                        }
-                        requests.post(user.slack_webhook_url, json=payload, timeout=5)
+                        from urllib.parse import urlparse
+                        webhook_url = str(user.slack_webhook_url).strip()
+                        parsed_wh = urlparse(webhook_url)
+                        allowed_hosts = ["hooks.slack.com", "outlook.office.com", "outlook.office365.com", "discord.com", "discordapp.com"]
+                        if parsed_wh.scheme == "https" and parsed_wh.netloc in allowed_hosts:
+                            import requests
+                            payload = {
+                                "text": f"🚨 *PhishX Alert:* A high-risk phishing URL was detected!\n\n"
+                                        f"*URL:* {url}\n"
+                                        f"*Risk Score:* {result['risk_score']}%\n"
+                                        f"*AI Explanation:* {result['features'].get('ai_explanation', 'N/A')}"
+                            }
+                            requests.post(webhook_url, json=payload, timeout=5)
                     except Exception as e:
                         logger.error(f"Failed to send Slack webhook for user {user_id}: {e}")
         else:

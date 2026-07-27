@@ -43,6 +43,13 @@ def update_user_me(
             current_user.password_hash = get_password_hash(new_pwd)
     if "old_password" in user_data:
         del user_data["old_password"]
+        
+    if "slack_webhook_url" in user_data and user_data["slack_webhook_url"]:
+        from urllib.parse import urlparse
+        parsed_url = urlparse(str(user_data["slack_webhook_url"]).strip())
+        allowed_hosts = ["hooks.slack.com", "outlook.office.com", "outlook.office365.com", "discord.com", "discordapp.com"]
+        if parsed_url.scheme != "https" or parsed_url.netloc not in allowed_hosts:
+            raise HTTPException(status_code=400, detail="Invalid webhook URL. Must be an HTTPS URL from an approved provider (Slack, Microsoft Teams, or Discord).")
     
     for field, value in user_data.items():
         setattr(current_user, field, value)

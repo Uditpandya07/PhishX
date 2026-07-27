@@ -147,10 +147,26 @@ def analyze_url(url: str, model_instance) -> dict:
     import asyncio as _asyncio
 
     async def _fetch_html(target_url: str) -> str:
-        """Non-blocking fetch with a strict 1.5s timeout."""
+        """Non-blocking fetch with strict 1.5s timeout and SSRF mitigation."""
         try:
+            from urllib.parse import urlparse
+            import ipaddress
+            import socket
+            parsed = urlparse(target_url)
+            if parsed.scheme not in ["http", "https"]:
+                return ""
+            hostname = parsed.hostname or ""
+            if hostname in ["localhost", "127.0.0.1", "0.0.0.0", "::1", "169.254.169.254"] or hostname.endswith(".local"):
+                return ""
+            try:
+                ip_str = socket.gethostbyname(hostname)
+                ip_obj = ipaddress.ip_address(ip_str)
+                if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local or ip_obj.is_multicast or ip_obj.is_reserved:
+                    return ""
+            except Exception:
+                pass
             async with httpx.AsyncClient(
-                timeout=1.5, verify=False, follow_redirects=True
+                timeout=1.5, verify=False, follow_redirects=False
             ) as client:
                 resp = await client.get(target_url)
                 return resp.text.lower()
