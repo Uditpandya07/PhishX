@@ -268,75 +268,77 @@ export default function AdminPanel() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="section-header" style={{ textAlign: 'center', marginBottom: '60px' }}>
-        <h1 className="hero-title" style={{ fontSize: '4.5rem', marginBottom: '10px', letterSpacing: '-3px' }}>System Oversight</h1>
-        <p style={{ color: '#94a3b8', fontSize: '1.2rem' }}>Platform metrics and real-time service health diagnostics.</p>
+      <div className="section-header admin-main-header">
+        <h1 className="hero-title admin-main-title">System Oversight</h1>
+        <p className="admin-main-subtitle">Platform metrics and real-time service health diagnostics.</p>
       </div>
 
       {/* System Pulse Section */}
       <section className="pulse-section glass-section" style={{ marginBottom: '40px' }}>
-        <div className="pulse-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+        <div className="pulse-header">
+          <div className="pulse-title-wrap">
             <FaMicrochip style={{ color: '#a855f7', fontSize: '1.5rem' }} />
             <h2 style={{ fontSize: '1.4rem', fontWeight: '700', margin: 0 }}>System Pulse</h2>
           </div>
-          <button 
-            className={`pulse-btn ${isPulseRunning ? 'running' : ''}`}
-            onClick={runDiagnostics}
-            disabled={isPulseRunning}
-            style={{
-              background: isPulseRunning ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)',
-              color: 'white',
-              border: 'none',
-              padding: '10px 20px',
-              borderRadius: '8px',
-              cursor: isPulseRunning ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              fontWeight: '600',
-              transition: 'all 0.3s'
-            }}
-          >
-            <FaSyncAlt className={isPulseRunning ? 'spin' : ''} />
-            {isPulseRunning ? 'SCANNING...' : 'RUN DIAGNOSTICS'}
-          </button>
-          <button 
-            className="pulse-btn"
-            onClick={async () => {
-              if (window.confirm("Attempt to repair and synchronize all database tables?")) {
-                try {
-                  const token = sessionStorage.getItem("token");
-                  const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
-                  await axios.post(`${baseUrl}/api/v1/admin/repair-db`, {}, {
-                    headers: { Authorization: `Bearer ${token}` }
-                  });
-                  alert("✅ Neural Database Repaired & Optimized.");
-                  runDiagnostics();
-                } catch (err) {
-                  showErrorPopup("❌ Repair failed. Check backend logs.");
+          <div className="pulse-actions">
+            <button 
+              className={`pulse-btn ${isPulseRunning ? 'running' : ''}`}
+              onClick={runDiagnostics}
+              disabled={isPulseRunning}
+              style={{
+                background: isPulseRunning ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: '8px',
+                cursor: isPulseRunning ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                fontWeight: '600',
+                transition: 'all 0.3s'
+              }}
+            >
+              <FaSyncAlt className={isPulseRunning ? 'spin' : ''} />
+              {isPulseRunning ? 'SCANNING...' : 'RUN DIAGNOSTICS'}
+            </button>
+            <button 
+              className="pulse-btn repair-btn"
+              onClick={async () => {
+                if (window.confirm("Attempt to repair and synchronize all database tables?")) {
+                  try {
+                    const token = sessionStorage.getItem("token");
+                    const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
+                    await axios.post(`${baseUrl}/api/v1/admin/repair-db`, {}, {
+                      headers: { Authorization: `Bearer ${token}` }
+                    });
+                    alert("✅ Neural Database Repaired & Optimized.");
+                    runDiagnostics();
+                  } catch (err) {
+                    showErrorPopup("❌ Repair failed. Check backend logs.");
+                  }
                 }
-              }
-            }}
-            style={{
-              background: 'rgba(59, 130, 246, 0.1)',
-              color: '#3b82f6',
-              border: '1px solid rgba(59, 130, 246, 0.3)',
-              padding: '10px 20px',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              fontWeight: '600',
-              transition: 'all 0.3s'
-            }}
-          >
-            <FaDatabase />
-            REPAIR DATABASE
-          </button>
+              }}
+              style={{
+                background: 'rgba(59, 130, 246, 0.1)',
+                color: '#3b82f6',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+                padding: '10px 20px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                fontWeight: '600',
+                transition: 'all 0.3s'
+              }}
+            >
+              <FaDatabase />
+              REPAIR DATABASE
+            </button>
+          </div>
         </div>
-        <div className="pulse-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+        <div className="pulse-grid">
           {pulseTests.map(test => (
             <div key={test.id} className={`pulse-card ${test.status}`} style={{
               background: 'rgba(15, 23, 42, 0.4)',
@@ -453,10 +455,10 @@ export default function AdminPanel() {
 
       {/* ── Deleted Accounts Audit Log ─────────────────────────────── */}
       <section className="admin-feedback-section glass-section">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '35px' }}>
+        <div className="admin-section-header">
           <FaUserShield style={{ color: '#ef4444', fontSize: '1.5rem' }} />
           <h2 style={{ margin: 0 }}>Deleted Accounts Log</h2>
-          <span style={{ marginLeft: 'auto', fontSize: '0.75rem', color: '#64748b', background: 'rgba(239,68,68,0.1)', padding: '4px 10px', borderRadius: '999px', border: '1px solid rgba(239,68,68,0.2)' }}>
+          <span className="admin-readonly-badge">
             READ-ONLY · Self-deletions only
           </span>
         </div>
@@ -494,7 +496,7 @@ export default function AdminPanel() {
       </section>
 
       <section className="admin-feedback-section glass-section">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '35px' }}>
+        <div className="admin-section-header">
           <FaHistory style={{ color: '#3b82f6', fontSize: '1.5rem' }} />
           <h2 style={{ margin: 0 }}>Community Intelligence Logs</h2>
         </div>
@@ -538,7 +540,7 @@ export default function AdminPanel() {
       </section>
 
       <section className="admin-feedback-section glass-section" style={{ marginTop: '40px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '35px' }}>
+        <div className="admin-section-header">
           <FaCommentDots style={{ color: '#8b5cf6', fontSize: '1.5rem' }} />
           <h2 style={{ margin: 0 }}>Support & Contact Queries</h2>
         </div>
