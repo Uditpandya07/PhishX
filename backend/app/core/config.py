@@ -37,11 +37,9 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = "postgres"
     POSTGRES_DB: str = "phishx"
 
-    # Stripe
-    STRIPE_API_KEY: Optional[str] = None
-    STRIPE_WEBHOOK_SECRET: Optional[str] = None
-    STRIPE_PRO_PLAN_ID: Optional[str] = None
-    STRIPE_ENTERPRISE_PLAN_ID: Optional[str] = None
+    # Razorpay
+    RAZORPAY_KEY_ID: Optional[str] = None
+    RAZORPAY_KEY_SECRET: Optional[str] = None
 
     # Email
     SENDGRID_API_KEY: Optional[str] = None
