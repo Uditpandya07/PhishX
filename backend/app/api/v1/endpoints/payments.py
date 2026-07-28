@@ -1,174 +1,173 @@
 from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
-import stripe
+import razorpay
 import logging
+from pydantic import BaseModel
 from app.api import deps
 from app.core.config import settings
 from app.db.models import User, Payment, SubscriptionPlan
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-stripe.api_key = settings.STRIPE_API_KEY
+def get_razorpay_client():
+    if not settings.RAZORPAY_KEY_ID or not settings.RAZORPAY_KEY_SECRET:
+        raise HTTPException(status_code=500, detail="Razorpay is not configured")
+    return razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
-@router.post("/create-checkout-session")
-def create_checkout_session(
-    plan_id: str,
+class SubscriptionCreate(BaseModel):
+    plan_id: str
+
+# Helper to get or create a razorpay plan dynamically
+def get_or_create_plan(client, plan_name: str, amount_paise: int):
+    # In a production app, we would cache plan IDs in DB.
+    # We will just create a new plan for simplicity of this implementation.
+    try:
+        plan = client.plan.create({
+            "item": {
+                "name": plan_name,
+                "amount": amount_paise,
+                "currency": "INR",
+                "description": f"{plan_name} Monthly"
+            },
+            "period": "monthly",
+            "interval": 1
+        })
+        return plan["id"]
+    except Exception as e:
+        logger.error(f"Failed to create Razorpay Plan: {e}")
+        raise HTTPException(status_code=500, detail="Failed to initialize billing plan")
+
+@router.post("/create-subscription")
+def create_subscription(
+    sub_in: SubscriptionCreate,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_active_user),
 ) -> Any:
-    """Create a Stripe checkout session."""
-    if not settings.STRIPE_API_KEY:
-        raise HTTPException(status_code=500, detail="Stripe is not configured")
-
+    """Create a Razorpay subscription for an upgrade."""
+    client = get_razorpay_client()
+    
+    amount = 499900 if sub_in.plan_id == "enterprise" else 99900 # ₹4999 or ₹999
+    plan_name = "PhishX Enterprise" if sub_in.plan_id == "enterprise" else "PhishX Standard"
+    
     try:
-        # Create or get Stripe Customer
-        if not current_user.stripe_customer_id:
-            customer = stripe.Customer.create(
-                email=current_user.email,
-                metadata={"user_id": str(current_user.id)}
-            )
-            current_user.stripe_customer_id = customer.id
-            db.commit()
-
-        stripe_price_id = settings.STRIPE_PRO_PLAN_ID if plan_id == "pro" else settings.STRIPE_ENTERPRISE_PLAN_ID
-
-        checkout_session = stripe.checkout.Session.create(
-            customer=current_user.stripe_customer_id,
-            payment_method_types=['card'],
-            line_items=[
-                {
-                    'price': stripe_price_id,
-                    'quantity': 1,
-                },
-            ],
-            mode='subscription',
-            success_url=f"{settings.FRONTEND_URL}/?session_id={{CHECKOUT_SESSION_ID}}",
-            cancel_url=f"{settings.FRONTEND_URL}/",
-            metadata={"user_id": str(current_user.id), "plan_id": plan_id}
-        )
-        return {"url": checkout_session.url}
+        # Create a dynamic Razorpay plan
+        rzp_plan_id = get_or_create_plan(client, plan_name, amount)
+        
+        # Create Razorpay subscription
+        subscription = client.subscription.create({
+            "plan_id": rzp_plan_id,
+            "total_count": 120, # 10 years duration
+            "customer_notify": 1,
+            "notes": {
+                "user_id": str(current_user.id),
+                "tier": sub_in.plan_id
+            }
+        })
+        
+        return {
+            "subscription_id": subscription["id"],
+            "amount": amount,
+            "currency": "INR",
+            "key_id": settings.RAZORPAY_KEY_ID
+        }
     except Exception as e:
-        logger.error(f"Checkout session creation failed: {e}", exc_info=True)
-        raise HTTPException(status_code=400, detail="Failed to create checkout session. Please try again.")
+        logger.error(f"Subscription creation failed: {e}", exc_info=True)
+        raise HTTPException(status_code=400, detail="Failed to create Razorpay subscription.")
 
-@router.get("/verify-session")
-def verify_session(
-    session_id: str,
+class PaymentVerification(BaseModel):
+    razorpay_payment_id: str
+    razorpay_subscription_id: str
+    razorpay_signature: str
+    plan_id: str
+
+@router.post("/verify-payment")
+def verify_payment(
+    payment_data: PaymentVerification,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_active_user),
 ) -> Any:
-    """Verify a Stripe checkout session and upgrade the user."""
-    if not settings.STRIPE_API_KEY:
-        raise HTTPException(status_code=500, detail="Stripe is not configured")
+    """Verify a Razorpay subscription payment and upgrade the user."""
+    client = get_razorpay_client()
     try:
-        session = stripe.checkout.Session.retrieve(session_id).to_dict()
-        if session.get("payment_status") == "paid":
-            plan_id = session.get("metadata", {}).get("plan_id", "pro")
-            current_user.subscription_tier = plan_id
-            db.commit()
-            return {"status": "success", "tier": plan_id}
-        else:
-            return {"status": "pending"}
+        # Verify signature for subscription
+        client.utility.verify_subscription_payment_signature({
+            'razorpay_subscription_id': payment_data.razorpay_subscription_id,
+            'razorpay_payment_id': payment_data.razorpay_payment_id,
+            'razorpay_signature': payment_data.razorpay_signature
+        })
+        
+        # Upgrade user
+        current_user.subscription_tier = payment_data.plan_id
+        current_user.razorpay_subscription_id = payment_data.razorpay_subscription_id
+        current_user.subscription_status = "active"
+        db.commit()
+        
+        return {"status": "success", "tier": payment_data.plan_id}
+    except razorpay.errors.SignatureVerificationError:
+        raise HTTPException(status_code=400, detail="Invalid payment signature")
     except Exception as e:
-        logger.error(f"Session verification failed: {e}", exc_info=True)
-        raise HTTPException(status_code=400, detail="Failed to verify checkout session. Please contact support.")
+        logger.error(f"Payment verification failed: {e}", exc_info=True)
+        raise HTTPException(status_code=400, detail="Failed to verify payment. Please contact support.")
 
 @router.get("/subscription")
 def get_subscription_details(
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_active_user),
 ) -> Any:
-    """Get active subscription details from Stripe."""
-    if not settings.STRIPE_API_KEY:
-        raise HTTPException(status_code=500, detail="Stripe is not configured")
-    
-    if not current_user.stripe_customer_id:
+    """Get active subscription details live from Razorpay."""
+    if current_user.subscription_tier == "free" or not current_user.razorpay_subscription_id:
         return {"has_subscription": False}
         
+    client = get_razorpay_client()
     try:
-        subscriptions = stripe.Subscription.list(
-            customer=current_user.stripe_customer_id,
-            status="active",
-            limit=1
-        ).to_dict()
+        sub = client.subscription.fetch(current_user.razorpay_subscription_id)
         
-        sub_list = subscriptions.get("data", [])
-        if not sub_list:
-            return {"has_subscription": False}
+        next_billing_date = "N/A"
+        if sub.get("charge_at"):
+            next_billing_date = datetime.fromtimestamp(sub["charge_at"]).strftime("%B %d, %Y")
             
-        sub = sub_list[0]
-        items = sub.get("items", {}).get("data", [])
-        if items:
-            item = items[0]
-            price = item.get("price", {})
-            amount = price.get("unit_amount", 0) / 100
-            currency = price.get("currency", "usd").upper()
-            import datetime
-            current_period_end = datetime.datetime.fromtimestamp(item.get("current_period_end", 0)).strftime('%Y-%m-%d')
-        else:
-            amount = 0
-            currency = "USD"
-            current_period_end = "N/A"
-        
         return {
             "has_subscription": True,
             "tier": current_user.subscription_tier,
-            "amount": amount,
-            "currency": currency,
-            "next_billing_date": current_period_end,
-            "status": sub.get("status"),
-            "subscription_id": sub.get("id")
+            "amount": sub.get("plan_id"), # In real app, we fetch plan details
+            "currency": "INR",
+            "next_billing_date": next_billing_date,
+            "status": sub.get("status", "unknown"),
+            "subscription_id": current_user.razorpay_subscription_id
         }
     except Exception as e:
-        logger.error(f"Subscription retrieval failed: {e}", exc_info=True)
-        return {"has_subscription": False, "error": "An error occurred while retrieving subscription details."}
+        logger.error(f"Failed to fetch subscription: {e}")
+        # Fallback to local DB status
+        return {
+            "has_subscription": True,
+            "tier": current_user.subscription_tier,
+            "status": current_user.subscription_status,
+            "subscription_id": current_user.razorpay_subscription_id,
+            "next_billing_date": "Error fetching live data"
+        }
 
-@router.post("/customer-portal")
-def create_customer_portal(
+@router.post("/cancel-subscription")
+def cancel_subscription(
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_active_user),
 ) -> Any:
-    """Create a Stripe Customer Portal session."""
-    if not settings.STRIPE_API_KEY:
-        raise HTTPException(status_code=500, detail="Stripe is not configured")
-    if not current_user.stripe_customer_id:
-        raise HTTPException(status_code=400, detail="User does not have a Stripe Customer ID")
+    """Cancel Razorpay subscription."""
+    if not current_user.razorpay_subscription_id:
+        raise HTTPException(status_code=400, detail="No active subscription found")
+        
+    client = get_razorpay_client()
     try:
-        session = stripe.billing_portal.Session.create(
-            customer=current_user.stripe_customer_id,
-            return_url=f"{settings.FRONTEND_URL}/",
-        )
-        return {"url": session.url}
+        client.subscription.cancel(current_user.razorpay_subscription_id)
+        
+        current_user.subscription_tier = "free"
+        current_user.subscription_status = "cancelled"
+        db.commit()
+        
+        return {"status": "success", "message": "Subscription cancelled successfully"}
     except Exception as e:
-        logger.error(f"Customer portal creation failed: {e}", exc_info=True)
-        raise HTTPException(status_code=400, detail="Failed to create customer portal session. Please try again.")
-
-@router.post("/webhook")
-async def stripe_webhook(request: Request, db: Session = Depends(deps.get_db)) -> Any:
-    """Handle Stripe webhooks."""
-    payload = await request.body()
-    sig_header = request.headers.get("stripe-signature")
-
-    try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
-        )
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail="Invalid payload")
-    except stripe.error.SignatureVerificationError as e:
-        raise HTTPException(status_code=400, detail="Invalid signature")
-
-    if event["type"] == "checkout.session.completed":
-        session = event["data"]["object"]
-        # Fulfill the purchase...
-        user_id = session.get("metadata", {}).get("user_id")
-        if user_id:
-            user = db.query(User).filter(User.id == user_id).first()
-            if user:
-                user.subscription_tier = "pro"  # simplify for now
-                db.commit()
-
-    return {"status": "success"}
+        logger.error(f"Failed to cancel subscription: {e}")
+        raise HTTPException(status_code=500, detail="Failed to cancel subscription")
