@@ -26,7 +26,7 @@ class UserUpdate(BaseModel):
 class UserInDBBase(UserBase):
     id: UUID
     subscription_tier: str
-    stripe_customer_id: Optional[str] = None
+    razorpay_customer_id: Optional[str] = None
     is_verified: bool
     created_at: datetime
     updated_at: Optional[datetime] = None
