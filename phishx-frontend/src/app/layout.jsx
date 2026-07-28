@@ -1,4 +1,5 @@
 import "../index.css";
+import Script from "next/script";
 
 export const metadata = {
   title: "PhishX | Advanced Enterprise Cybersecurity & Threat Intelligence",
@@ -54,6 +55,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="bg-slate-950 text-white min-h-screen">
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
         {children}
       </body>
     </html>
