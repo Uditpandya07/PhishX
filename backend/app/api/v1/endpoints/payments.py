@@ -54,8 +54,16 @@ def create_subscription(
     plan_name = "PhishX Enterprise" if sub_in.plan_id == "enterprise" else "PhishX Standard"
     
     try:
-        # Create a dynamic Razorpay plan
-        rzp_plan_id = get_or_create_plan(client, plan_name, amount)
+        # Check if pre-configured plan IDs exist in environment
+        rzp_plan_id = None
+        if sub_in.plan_id == "enterprise" and settings.RAZORPAY_ENTERPRISE_PLAN_ID:
+            rzp_plan_id = settings.RAZORPAY_ENTERPRISE_PLAN_ID
+        elif sub_in.plan_id == "pro" and settings.RAZORPAY_PRO_PLAN_ID:
+            rzp_plan_id = settings.RAZORPAY_PRO_PLAN_ID
+            
+        if not rzp_plan_id:
+            # Fallback to dynamic creation (works in Test mode, often blocked in Live mode)
+            rzp_plan_id = get_or_create_plan(client, plan_name, amount)
         
         # Create Razorpay subscription
         subscription = client.subscription.create({
