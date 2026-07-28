@@ -17,6 +17,7 @@
   text-align: center;
   position: relative;
   overflow: hidden;
+  height: 100%;
 }
 
 .pricing-card.highlight {
@@ -54,6 +55,7 @@
 }
 
 .features-list {
+  flex-grow: 1;
   list-style: none;
   padding: 0;
   margin: 0 0 40px 0;
@@ -78,4 +80,13 @@
   color: #64748b !important;
   cursor: default !important;
   border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.pricing-header {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 20px;
+  width: 100%;
 }
