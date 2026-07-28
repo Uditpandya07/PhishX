@@ -164,36 +164,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
     }
   }, [isLoggedIn]);
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const sessionId = urlParams.get("session_id");
-    if (sessionId && isLoggedIn) {
-      const verifyStripeSession = async () => {
-        try {
-          const token = sessionStorage.getItem("token") || localStorage.getItem("phishx_token");
-          const headers = token ? { Authorization: `Bearer ${token}` } : {};
-          const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
-          
-          const res = await axios.get(`${baseUrl}/api/v1/payments/verify-session?session_id=${sessionId}`, { headers });
-          if (res.data.status === "success") {
-            if (triggerNotification) {
-              triggerNotification(`Subscription upgraded to ${res.data.tier.toUpperCase()} successfully!`);
-            }
-            // Fetch updated user
-            const userRes = await axios.get(`${baseUrl}/api/v1/users/me`, { headers });
-            setUser(userRes.data);
-          }
-        } catch (err) {
-          console.error("Verification error:", err);
-          showErrorPopup("Failed to verify subscription session: " + (err.response?.data?.detail || "Unknown error"));
-        } finally {
-          // Remove session_id from URL
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
-      };
-      verifyStripeSession();
-    }
-  }, [isLoggedIn]);
+  // Stripe session verification removed - Razorpay uses popup callbacks
 
   const openModal = (mode, e) => {
     if (e) e.preventDefault();
@@ -236,7 +207,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
 
   const generateColorfulPDF = () => {
     let filtered = [...scanHistory];
-    
+
     if (exportStartDate) {
       const start = new Date(exportStartDate).getTime();
       filtered = filtered.filter(s => {
@@ -244,7 +215,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
         return !isNaN(t) && t >= start;
       });
     }
-    
+
     if (exportEndDate) {
       const end = new Date(exportEndDate).getTime() + (24 * 60 * 60 * 1000 - 1);
       filtered = filtered.filter(s => {
@@ -252,13 +223,13 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
         return !isNaN(t) && t <= end;
       });
     }
-    
+
     if (exportStatusFilter === "PHISHING") {
       filtered = filtered.filter(s => s.status === "Phishing" || s.risk >= 70);
     } else if (exportStatusFilter === "SAFE") {
       filtered = filtered.filter(s => s.status === "Safe" && s.risk < 70);
     }
-    
+
     if (filtered.length === 0) {
       showErrorPopup("No scan records match the selected date range or filter.");
       return;
@@ -278,7 +249,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
     const phishingScans = filtered.filter(s => s.status === "Phishing" || s.risk >= 70).length;
     const safeScans = totalScans - phishingScans;
     const threatRate = Math.round((phishingScans / totalScans) * 100);
-    const dateRangeStr = (exportStartDate || exportEndDate) 
+    const dateRangeStr = (exportStartDate || exportEndDate)
       ? `${exportStartDate || 'Beginning'} to ${exportEndDate || 'Present'}`
       : "All Time (Complete Archive)";
     const generatedTime = new Date().toLocaleString();
@@ -311,10 +282,25 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
   <title>PhishX_SOC_Report_${Date.now()}</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+    
     @page {
-      size: A4;
+      size: A4 portrait;
       margin: 15mm;
     }
+    
+    @media print {
+      body {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      .report-container {
+        width: 100%;
+        max-width: none;
+        box-sizing: border-box;
+      }
+    }
+
     body {
       margin: 0;
       padding: 0;
@@ -325,9 +311,9 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
       print-color-adjust: exact !important;
     }
     .report-container {
-      max-width: 1000px;
+      width: 210mm; /* A4 width */
       margin: 0 auto;
-      padding: 30px;
+      padding: 20px;
       background-color: #030712;
       border: 1px solid #1e293b;
       border-radius: 12px;
@@ -366,6 +352,8 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
     }
     .status-badge {
       text-align: right;
+      flex-shrink: 0;
+      white-space: nowrap;
     }
     .user-details-card {
       display: grid;
@@ -512,8 +500,8 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
         </div>
       </div>
       <div class="status-badge">
-        <span style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;">STATUS: AUTHORIZED SOC AUDIT</span>
-        <span style="font-size: 12px; color: #4ade80; font-weight: 800; background: rgba(74, 222, 128, 0.15); padding: 4px 10px; border-radius: 100px; border: 1px solid rgba(74, 222, 128, 0.3);">● LIVE ARCHIVE EXPORT</span>
+        <span style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 6px; letter-spacing: 0.5px;">STATUS: AUTHORIZED SOC AUDIT</span>
+        <span style="font-size: 12px; color: #4ade80; font-weight: 800; background: rgba(74, 222, 128, 0.15); padding: 4px 10px; border-radius: 100px; border: 1px solid rgba(74, 222, 128, 0.3); display: inline-block;">● LIVE ARCHIVE EXPORT</span>
       </div>
     </div>
 
@@ -1344,14 +1332,14 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
               >
                 <FaTimes />
               </button>
-              
+
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
                 <div style={{ background: 'rgba(59, 130, 246, 0.15)', padding: '12px', borderRadius: '12px', color: '#38bdf8' }}>
                   <FiFileText size={28} />
                 </div>
                 <div>
                   <h3 style={{ color: '#fff', fontSize: '1.4rem', fontWeight: 800, margin: 0 }}>Export SOC PDF Report</h3>
-                  <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Generate colorful executive intelligence document</span>
+                  <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Generate executive intelligence document</span>
                 </div>
               </div>
 
@@ -1477,7 +1465,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                 onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
                 onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
               >
-                <FiDownload size={20} /> Generate & Download Colorful PDF
+                <FiDownload size={20} /> Generate & Download PDF
               </button>
             </motion.div>
           </motion.div>
