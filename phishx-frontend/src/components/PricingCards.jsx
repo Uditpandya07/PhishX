@@ -10,47 +10,92 @@ const plans = [
   {
     id: "free",
     name: "Standard",
-    price: "$0",
+    price: "₹0",
     features: ["Unlimited Scans", "AI Classification", "Scan History", "Community Support"],
     buttonText: "Current Plan",
     disabled: true,
   },
-  {
-    id: "pro",
-    name: "Pro",
-    price: "$9.99",
-    features: ["Advanced AI Analysis", "Priority Support", "Detailed Risk Insights", "Automated Alerts"],
-    buttonText: "Upgrade to Pro",
-    disabled: false,
-    comingSoon: false,
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    price: "$49.99",
-    features: ["Custom AI Training", "Team Management", "Dedicated Support", "Full Analytics Suite"],
-    buttonText: "Upgrade to Enterprise",
-    disabled: false,
-    comingSoon: false,
-  }
+    {
+      id: 'pro',
+      name: 'Pro',
+      price: '₹999',
+      description: 'Advanced protection for professionals',
+      features: [
+        'Advanced AI Analysis',
+        'Unlimited Scans',
+        'Priority Support',
+        'Detailed Reports',
+        'API Access (100 req/day)'
+      ],
+      buttonText: "Upgrade to Pro",
+      highlight: true
+    },
+    {
+      id: 'enterprise',
+      name: 'Enterprise',
+      price: '₹4,999',
+      description: 'Custom solutions for teams',
+      features: [
+        'Everything in Pro',
+        'Custom Integrations',
+        '24/7 Phone Support',
+        'Dedicated Account Manager',
+        'Unlimited API Access',
+        'Custom Training Models'
+      ],
+      buttonText: "Upgrade to Enterprise"
+    }
 ];
 
 export default function PricingCards({ user }) {
   const userTier = user?.subscription_tier || "free";
 
   const handleUpgrade = async (planId) => {
-    if (planId === "enterprise") {
-      // Allow self-serve enterprise checkout too!
-    }
-    
     try {
       const token = sessionStorage.getItem("token");
-      const res = await axios.post(`${API_URL}/api/v1/payments/create-checkout-session?plan_id=${planId}`, {}, {
+      const res = await axios.post(`${API_URL}/api/v1/payments/create-subscription`, { plan_id: planId }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      if (res.data.url) {
-        window.location.href = res.data.url;
-      }
+      
+      const { subscription_id, amount, currency, key_id } = res.data;
+
+      const options = {
+          key: key_id,
+          amount: amount,
+          currency: currency,
+          name: "PhishX",
+          description: `Upgrade to ${planId.toUpperCase()}`,
+          subscription_id: subscription_id,
+          handler: async function (response) {
+              try {
+                  await axios.post(`${API_URL}/api/v1/payments/verify-payment`, {
+                      razorpay_payment_id: response.razorpay_payment_id,
+                      razorpay_subscription_id: response.razorpay_subscription_id,
+                      razorpay_signature: response.razorpay_signature,
+                      plan_id: planId
+                  }, {
+                      headers: { Authorization: `Bearer ${token}` }
+                  });
+                  alert("Upgrade successful! Welcome to " + planId.toUpperCase());
+                  window.location.reload();
+              } catch (err) {
+                  showErrorPopup("Payment verification failed: " + (err.response?.data?.detail || "Unknown error"));
+              }
+          },
+          prefill: {
+              name: user?.name || "",
+              email: user?.email || ""
+          },
+          theme: {
+              color: "#3b82f6"
+          }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (response){
+          showErrorPopup("Payment failed: " + response.error.description);
+      });
+      rzp.open();
     } catch (err) {
       showErrorPopup("Failed to start payment: " + (err.response?.data?.detail || "Unknown error"));
     }
@@ -70,7 +115,7 @@ export default function PricingCards({ user }) {
 
   return (
     <div className="pricing-container">
-      <h2 className="section-title">Upgrade Your Protection</h2>
+      <h2 className="pricing-header">Upgrade Your Protection</h2>
       <div className="pricing-grid">
         {plans.map((plan) => (
           <motion.div 
