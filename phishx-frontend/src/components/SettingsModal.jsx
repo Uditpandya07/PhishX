@@ -86,6 +86,26 @@ export default function SettingsModal({ isOpen, onClose, user, onClearHistory })
     }
   };
 
+  const handleCancelSubscription = async () => {
+    if (!window.confirm("Are you sure you want to cancel your subscription? This action cannot be undone.")) return;
+    
+    setPortalLoading(true);
+    try {
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
+      const token = sessionStorage.getItem("token");
+      await axios.post(`${baseUrl}/api/v1/payments/cancel-subscription`, {}, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      setMessage("✅ Subscription cancelled successfully. Refreshing...");
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (err) {
+      console.error("Failed to cancel subscription:", err);
+      setMessage("❌ Failed to cancel subscription.");
+    } finally {
+      setPortalLoading(false);
+    }
+  };
+
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -644,12 +664,17 @@ export default function SettingsModal({ isOpen, onClose, user, onClearHistory })
                       </span>
                     </p>
                   </div>
-                  {user?.subscription_tier && user.subscription_tier !== "free" && subDetails?.amount && (
+                  {user?.subscription_tier && user.subscription_tier !== "free" && subDetails?.has_subscription && (
                     <div style={{ textAlign: 'right' }}>
                       <span style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff' }}>
-                        {subDetails?.currency === 'INR' ? '₹' : '$'}{subDetails?.amount}
+                        {subDetails?.currency === 'INR' ? '₹' : '$'}{(subDetails?.amount || 0) / 100}
                       </span>
                       <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}> / month</span>
+                    </div>
+                  )}
+                  {user?.subscription_tier && user.subscription_tier !== "free" && !subDetails?.has_subscription && (
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={{ color: '#4ade80', fontSize: '1rem', fontWeight: 'bold' }}>Legacy Lifetime Plan</span>
                     </div>
                   )}
                 </div>
@@ -662,44 +687,37 @@ export default function SettingsModal({ isOpen, onClose, user, onClearHistory })
                         <strong style={{ color: '#e2e8f0' }}>{subDetails?.next_billing_date || "Loading..."}</strong>
                       </div>
                       <div>
-                        <span style={{ color: '#64748b', display: 'block', fontSize: '0.8rem', textTransform: 'uppercase' }}>Stripe Customer ID</span>
-                        <code style={{ color: '#e2e8f0', background: 'rgba(255,255,255,0.04)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.8rem' }}>{user?.stripe_customer_id || "None"}</code>
+                        <span style={{ color: '#64748b', display: 'block', fontSize: '0.8rem', textTransform: 'uppercase' }}>Razorpay Customer ID</span>
+                        <code style={{ color: '#e2e8f0', background: 'rgba(255,255,255,0.04)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.8rem' }}>{user?.razorpay_customer_id || "None"}</code>
                       </div>
                       <div>
                         <span style={{ color: '#64748b', display: 'block', fontSize: '0.8rem', textTransform: 'uppercase' }}>Payment Frequency</span>
-                        <strong style={{ color: '#e2e8f0' }}>Monthly</strong>
+                        <strong style={{ color: '#e2e8f0' }}>{subDetails?.has_subscription ? 'Monthly' : 'One-time (Legacy)'}</strong>
                       </div>
                       <div>
                         <span style={{ color: '#64748b', display: 'block', fontSize: '0.8rem', textTransform: 'uppercase' }}>Subscription ID</span>
-                        <code style={{ color: '#e2e8f0', background: 'rgba(255,255,255,0.04)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem' }}>{subDetails?.subscription_id || "Loading..."}</code>
+                        <code style={{ color: '#e2e8f0', background: 'rgba(255,255,255,0.04)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem' }}>{subDetails?.has_subscription ? (subDetails?.subscription_id || "Loading...") : "N/A"}</code>
                       </div>
                     </div>
 
-                    <button 
-                      className="primary-btn"
-                      disabled={portalLoading}
-                      onClick={async () => {
-                        setPortalLoading(true);
-                        try {
-                          const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
-                          const token = sessionStorage.getItem("token");
-                          const res = await axios.post(`${baseUrl}/api/v1/payments/customer-portal`, {}, {
-                            headers: token ? { Authorization: `Bearer ${token}` } : {}
-                          });
-                          if (res.data.url) {
-                            window.location.href = res.data.url;
-                          }
-                        } catch (err) {
-                          console.error("Portal error:", err);
-                          setMessage("❌ Failed to open billing portal.");
-                        } finally {
-                          setPortalLoading(false);
-                        }
-                      }}
-                      style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-                    >
-                      {portalLoading ? "Launching..." : <>Manage Subscription <FaExternalLinkAlt style={{ fontSize: '0.8rem' }} /></>}
-                    </button>
+                    {subDetails?.has_subscription ? (
+                      <button 
+                        className="primary-btn"
+                        disabled={portalLoading || subDetails?.status === "cancelled"}
+                        onClick={handleCancelSubscription}
+                        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }}
+                      >
+                        {portalLoading ? "Cancelling..." : <>Cancel Subscription <FaTimes style={{ fontSize: '0.8rem' }} /></>}
+                      </button>
+                    ) : (
+                      <button 
+                        className="primary-btn"
+                        disabled={true}
+                        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: 'rgba(74, 222, 128, 0.1)', color: '#4ade80', border: '1px solid rgba(74, 222, 128, 0.2)', cursor: 'default' }}
+                      >
+                        <FaCheckCircle style={{ fontSize: '0.9rem' }} /> Legacy Plan Active
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <div style={{ textAlign: 'center', padding: '20px 0' }}>

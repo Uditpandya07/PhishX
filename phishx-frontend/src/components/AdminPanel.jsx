@@ -26,7 +26,7 @@ export default function AdminPanel() {
     { id: 'logic', name: 'Logic Core', status: 'pending', message: 'Idle' },
     { id: 'contact', name: 'Support Tickets', status: 'pending', message: 'Idle' },
     { id: 'news', name: 'CyberPulse Feed', status: 'pending', message: 'Idle' },
-    { id: 'stripe', name: 'Stripe Gateway', status: 'pending', message: 'Idle' }
+    { id: 'razorpay', name: 'Razorpay Gateway', status: 'pending', message: 'Idle' }
   ]);
 
   const fetchData = async () => {
@@ -204,22 +204,19 @@ export default function AdminPanel() {
       addLog('CyberPulse Feed', err.message);
     }
 
-    // 11. Stripe Payment Gateway Test (Real live connection check)
+    // 11. Razorpay Payment Gateway Test (Real live connection check)
     try {
       const headers = { Authorization: `Bearer ${sessionStorage.getItem("token") || ""}` };
-      const res = await axios.get(`${baseUrl}/api/v1/admin/stripe-health`, { headers });
+      const res = await axios.get(`${baseUrl}/api/v1/admin/razorpay-health`, { headers });
       
       if (res.data.status === 'healthy') {
-        updateTest('stripe', 'success', `Connected (${res.data.latency_ms}ms)`);
-      } else if (res.data.status === 'degraded') {
-        updateTest('stripe', 'error', 'Degraded');
-        addLog('Stripe Gateway', `Degraded: Pricing retrieval issues. Details: Pro Plan ID: ${res.data.pro_plan?.status}, Enterprise Plan ID: ${res.data.enterprise_plan?.status}`);
+        updateTest('razorpay', 'success', `Connected (${res.data.latency_ms}ms)`);
       } else {
         throw new Error(res.data.message || 'Verification failed');
       }
     } catch (err) {
-      updateTest('stripe', 'error', 'Failed');
-      addLog('Stripe Gateway', err.response?.data?.detail || err.message);
+      updateTest('razorpay', 'error', 'Failed');
+      addLog('Razorpay Gateway', err.response?.data?.detail || err.message);
     }
 
     setIsPulseRunning(false);
