@@ -40,6 +40,8 @@ class Settings(BaseSettings):
     # Razorpay
     RAZORPAY_KEY_ID: Optional[str] = None
     RAZORPAY_KEY_SECRET: Optional[str] = None
+    RAZORPAY_PRO_PLAN_ID: Optional[str] = None
+    RAZORPAY_ENTERPRISE_PLAN_ID: Optional[str] = None
 
     # Email
     SENDGRID_API_KEY: Optional[str] = None

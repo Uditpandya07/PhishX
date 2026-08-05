@@ -124,7 +124,7 @@ def analyze_url(url: str, model_instance) -> dict:
     excessive_subdomains = subdomain_count >= 3
     
     # 6. Typosquatting patterns (very basic check for common replacements)
-    typosquatting = any(x in domain for x in ['paypa1', 'goog1e', 'micros0ft', 'yaho0', 'app1e', '1nstagram'])
+    typosquatting = any(x in domain for x in ['paypa1', 'goog1e', 'g00gle', 'micros0ft', 'yaho0', 'app1e', '1nstagram'])
     
     # Evaluate Rules
     risk_score = 0.0

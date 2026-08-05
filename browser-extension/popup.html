@@ -1,135 +1,374 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
+  <title>PhishX Popup</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap');
+
     :root {
       --primary: #3b82f6;
-      --secondary: #4ade80;
-      --bg: #030712;
-      --glass: rgba(15, 23, 42, 0.8);
+      --secondary: #2dd4bf;
+      --danger: #f43f5e;
+      --safe: #10b981;
+      --bg-dark: #020617;
+      --glass-bg: rgba(15, 23, 42, 0.7);
+      --glass-border: rgba(59, 130, 246, 0.2);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
     }
+    
     body {
-      width: 350px;
+      width: 400px;
       margin: 0;
-      padding: 20px;
-      background-color: var(--bg);
-      color: #fff;
-      font-family: system-ui, -apple-system, sans-serif;
-      overflow: hidden;
-    }
-    .glass-container {
-      background: var(--glass);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(59, 130, 246, 0.3);
-      border-radius: 20px;
-      padding: 25px;
-      text-align: center;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-    }
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 25px;
-    }
-    .header img {
-      height: 32px;
-    }
-    .header h1 {
-      font-size: 1.5rem;
-      font-weight: 900;
-      margin: 0;
-      background: linear-gradient(90deg, var(--primary), var(--secondary));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .url-display {
-      background: rgba(0,0,0,0.3);
-      padding: 10px 15px;
-      border-radius: 12px;
-      font-family: monospace;
-      font-size: 0.85rem;
-      color: #94a3b8;
-      margin-bottom: 20px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      border: 1px solid rgba(255,255,255,0.05);
-    }
-    .scan-btn {
-      width: 100%;
       padding: 15px;
-      background: linear-gradient(90deg, var(--primary), var(--secondary));
-      border: none;
-      border-radius: 12px;
-      color: #0f172a;
-      font-weight: 800;
-      font-size: 1rem;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 10px 20px rgba(59, 130, 246, 0.2);
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+      overflow: hidden;
     }
-    .scan-btn:hover {
-      transform: translateY(-2px);
-      filter: brightness(1.1);
-      box-shadow: 0 15px 30px rgba(59, 130, 246, 0.4);
-    }
-    .scan-btn:disabled {
-      opacity: 0.5;
-      cursor: wait;
-    }
-    .result-box {
-      display: none;
-      margin-top: 25px;
-      padding-top: 20px;
-      border-top: 1px solid rgba(255,255,255,0.1);
-    }
-    #prediction {
-      padding: 12px;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: 0.9rem;
-      letter-spacing: 1px;
-    }
-    .footer {
-      margin-top: 25px;
-      font-size: 0.75rem;
-      color: #475569;
-    }
+
+    /* Animated background grid */
     .dot-grid {
       position: fixed;
       inset: 0;
       z-index: -1;
-      background-image: radial-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px);
-      background-size: 20px 20px;
+      background-image: 
+        radial-gradient(rgba(45, 212, 191, 0.15) 1px, transparent 1px),
+        radial-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+      background-size: 24px 24px;
+      background-position: 0 0, 12px 12px;
+      animation: gridMove 20s linear infinite;
+    }
+    @keyframes gridMove {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(24px); }
+    }
+
+    .glass-container {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Ambient glow behind container */
+    .glass-container::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at top, rgba(59, 130, 246, 0.15), transparent 60%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand h1 {
+      font-size: 1.5rem;
+      font-weight: 900;
+      margin: 0;
+      color: #fff;
+      letter-spacing: 0.5px;
+    }
+    .settings-icon {
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.3s ease;
+      padding: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.03);
+    }
+    .settings-icon:hover {
+      color: var(--text-main);
+      background: rgba(255,255,255,0.1);
+      transform: rotate(90deg);
+    }
+
+    .url-display {
+      background: rgba(0,0,0,0.4);
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-family: 'Outfit', monospace;
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: var(--secondary);
+      margin-bottom: 24px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border: 1px solid rgba(45, 212, 191, 0.2);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    /* High-Grade SVG Gauge */
+    .gauge-wrapper {
+      position: relative;
+      width: 180px;
+      height: 100px;
+      margin: 0 auto 20px;
+      display: none;
+    }
+    .gauge-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+    .gauge-bg {
+      fill: none;
+      stroke: rgba(255,255,255,0.05);
+      stroke-width: 12;
+      stroke-linecap: round;
+    }
+    .gauge-progress {
+      fill: none;
+      stroke: var(--safe);
+      stroke-width: 12;
+      stroke-linecap: round;
+      stroke-dasharray: 283; /* 180 * PI * R (R=90) / 2 */
+      stroke-dashoffset: 283; /* Starts at 0 */
+      transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.5s ease;
+      filter: drop-shadow(0 0 8px var(--safe));
+    }
+    .gauge-text-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      text-align: center;
+    }
+    .gauge-value {
+      font-size: 2.5rem;
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 4px;
+      color: var(--safe);
+      text-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+      transition: color 0.5s ease;
+    }
+    .gauge-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .scan-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border: none;
+      border-radius: 14px;
+      color: var(--bg-dark);
+      font-weight: 900;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 10px 20px rgba(45, 212, 191, 0.3), inset 0 1px 0 rgba(255,255,255,0.4);
+      position: relative;
+      overflow: hidden;
+    }
+    .scan-btn::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%; width: 50%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      transition: 0.5s;
+    }
+    .scan-btn:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 25px rgba(45, 212, 191, 0.4), inset 0 1px 0 rgba(255,255,255,0.4);
+    }
+    .scan-btn:hover:not(:disabled)::after {
+      left: 150%;
+    }
+    .scan-btn:disabled {
+      background: #1e293b;
+      color: #64748b;
+      box-shadow: none;
+      cursor: wait;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .result-box {
+      display: none;
+      margin-top: 24px;
+      animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    #prediction {
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 1.1rem;
+      text-align: center;
+      margin-bottom: 16px;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .features-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .feature-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0,0,0,0.3);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      border: 1px solid rgba(255,255,255,0.03);
+      color: #cbd5e1;
+    }
+    .feature-item strong {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    .feature-true {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--safe);
+    }
+    .feature-false {
+      background: rgba(244, 63, 94, 0.1);
+      color: var(--danger);
+    }
+    .feature-neutral {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+
+    /* Loading Animation */
+    .loading-container {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      height: 100px;
+      margin-bottom: 20px;
+    }
+    .radar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: 2px solid var(--primary);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+    }
+    .radar::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 50%;
+      height: 50%;
+      background: conic-gradient(from 0deg, transparent 70%, var(--secondary) 100%);
+      transform-origin: 0 0;
+      animation: radarScan 1.5s linear infinite;
+    }
+    @keyframes radarScan {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
   <div class="dot-grid"></div>
   <div class="glass-container">
+    
     <div class="header">
-      <img src="icon128.png" alt="X">
-      <h1>PHISHX</h1>
-    </div>
-    
-    <div id="url-display" class="url-display">Analyzing current tab...</div>
-    
-    <button id="scan-now" class="scan-btn">Deep Scan</button>
-    
-    <div id="result-box" class="result-box">
-      <div id="prediction">SCANNING...</div>
-      <div style="margin-top: 15px; font-size: 0.8rem; color: #64748b;">
-        Lexical analysis complete.
+      <div class="brand">
+        <img src="logo.png" alt="PhishX Logo" style="height: 32px; width: 32px;">
+        <h1>Phish<span style="color: #72f542;">X</span></h1>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <div class="settings-icon" id="account-btn" title="Sign In">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <div class="settings-icon" id="settings-btn" title="Settings">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </div>
       </div>
     </div>
     
-    <div class="footer">
-      Powered by PhishX AI Model v1.0
+    <div id="url-display" class="url-display">Initializing...</div>
+    
+    <!-- Loading Animation -->
+    <div id="loading-container" class="loading-container">
+      <div class="radar"></div>
     </div>
+    
+    <!-- SVG Gauge -->
+    <div id="gauge-container" class="gauge-wrapper">
+      <svg class="gauge-svg" viewBox="0 0 200 100">
+        <!-- Background arc -->
+        <path class="gauge-bg" d="M 10,100 A 90,90 0 0,1 190,100" />
+        <!-- Progress arc -->
+        <path id="gauge-progress" class="gauge-progress" d="M 10,100 A 90,90 0 0,1 190,100" />
+      </svg>
+      <div class="gauge-text-container">
+        <div id="gauge-value" class="gauge-value">0%</div>
+        <div class="gauge-label">Threat Level</div>
+      </div>
+    </div>
+    
+    <button id="scan-now" class="scan-btn">
+      <span id="btn-text">Deep Scan Page</span>
+    </button>
+    
+    <div id="result-box" class="result-box">
+      <div id="prediction">SCANNING...</div>
+      <div class="features-list" id="features-list">
+        <!-- Features injected here -->
+      </div>
+      
+      <div class="report-actions" id="report-actions" style="display:none; margin-top: 15px; display:flex; gap: 8px;">
+        <button id="report-false-positive" style="flex:1; padding: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text-muted); cursor: pointer; transition: 0.3s; font-size: 0.8rem;">Report False Positive</button>
+        <button id="report-missed-phish" style="flex:1; padding: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text-muted); cursor: pointer; transition: 0.3s; font-size: 0.8rem;">Report Missed Phish</button>
+      </div>
+    </div>
+    
   </div>
   <script src="popup.js"></script>
 </body>
