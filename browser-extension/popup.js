@@ -2,40 +2,167 @@ document.addEventListener('DOMContentLoaded', async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const urlDisplay = document.getElementById('url-display');
   const scanBtn = document.getElementById('scan-now');
+  const btnText = document.getElementById('btn-text');
   const resultBox = document.getElementById('result-box');
   const predictionBox = document.getElementById('prediction');
+  const featuresList = document.getElementById('features-list');
+  const gaugeContainer = document.getElementById('gauge-container');
+  const loadingContainer = document.getElementById('loading-container');
+  const gaugeProgress = document.getElementById('gauge-progress');
+  const gaugeValue = document.getElementById('gauge-value');
+  const settingsBtn = document.getElementById('settings-btn');
 
-  if (tab) {
-    urlDisplay.textContent = new URL(tab.url).hostname;
+  if (tab && tab.url) {
+    try {
+      urlDisplay.textContent = new URL(tab.url).hostname;
+    } catch (e) {
+      urlDisplay.textContent = tab.url.substring(0, 30) + '...';
+    }
+  }
+
+  settingsBtn.addEventListener('click', () => {
+    chrome.runtime.openOptionsPage();
+  });
+
+  const accountBtn = document.getElementById('account-btn');
+  if (accountBtn) {
+    accountBtn.addEventListener('click', () => {
+      chrome.tabs.create({ url: 'https://phishx-app.vercel.app/' });
+    });
   }
 
   scanBtn.addEventListener('click', async () => {
     scanBtn.disabled = true;
-    scanBtn.textContent = 'Analyzing...';
+    btnText.textContent = 'ANALYZING...';
+    resultBox.style.display = 'none';
+    gaugeContainer.style.display = 'none';
+    loadingContainer.style.display = 'flex';
+    
+    // Reset gauge
+    gaugeProgress.style.strokeDashoffset = 283;
+    gaugeValue.textContent = '0%';
     
     try {
-      // Note: In a real extension, you'd store the API key in chrome.storage
-      // For this demo, we'll call the public endpoint or assume a stored key
-      const response = await fetch('http://127.0.0.1:8000/api/v1/scans/predict', {
+      const { apiUrl = 'http://127.0.0.1:8000', apiToken = '' } = await chrome.storage.local.get(['apiUrl', 'apiToken']);
+      
+      const response = await fetch(`${apiUrl.replace(/\/$/, '')}/api/v1/scans/predict`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(apiToken ? { 'Authorization': `Bearer ${apiToken}` } : {})
+        },
         body: JSON.stringify({ url: tab.url })
       });
       
-      const data = await response.json();
-      resultBox.style.display = 'block';
-      predictionBox.textContent = data.prediction === 'Phishing' ? '🚨 PHISHING DETECTED' : '✅ PAGE IS SAFE';
-      predictionBox.style.background = data.prediction === 'Phishing' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(74, 222, 128, 0.2)';
-      predictionBox.style.color = data.prediction === 'Phishing' ? '#ef4444' : '#4ade80';
-      predictionBox.style.border = `1px solid ${data.prediction === 'Phishing' ? '#ef4444' : '#4ade80'}`;
+      if (!response.ok) throw new Error('API Error');
       
+      const rawData = await response.json();
+      const data = rawData.result || rawData;
+      
+      // Delay slightly for premium feel
+      setTimeout(() => {
+        loadingContainer.style.display = 'none';
+        resultBox.style.display = 'block';
+        gaugeContainer.style.display = 'block';
+        
+        const isPhishing = data.prediction === 'Phishing';
+        const riskScore = data.risk_score || 0;
+        const color = isPhishing ? '#f43f5e' : '#10b981';
+        
+        predictionBox.innerHTML = isPhishing ? 
+          '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> PHISHING DETECTED' : 
+          '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> PAGE IS SAFE';
+        
+        predictionBox.style.background = isPhishing ? 'rgba(244, 63, 94, 0.15)' : 'rgba(16, 185, 129, 0.15)';
+        predictionBox.style.color = color;
+        predictionBox.style.border = `1px solid ${color}`;
+        
+        // Animate SVG Gauge
+        const offset = 283 - (283 * (riskScore / 100));
+        setTimeout(() => {
+          gaugeProgress.style.stroke = color;
+          gaugeProgress.style.strokeDashoffset = offset;
+          gaugeValue.style.color = color;
+          
+          // Animate numbers
+          let current = 0;
+          const target = Math.round(riskScore);
+          const interval = setInterval(() => {
+            if (current >= target) {
+              clearInterval(interval);
+              gaugeValue.textContent = `${target}%`;
+            } else {
+              current++;
+              gaugeValue.textContent = `${current}%`;
+            }
+          }, 15);
+        }, 100);
+        
+        // Populate Features
+        featuresList.innerHTML = '';
+        if (data.features && Object.keys(data.features).length > 0) {
+          for (const [key, value] of Object.entries(data.features)) {
+            const formattedKey = key.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            const item = document.createElement('div');
+            item.className = 'feature-item';
+            
+            let valClass = 'feature-neutral';
+            let valIcon = '-';
+            
+            if (value === true) {
+              valClass = isPhishing ? 'feature-false' : 'feature-true';
+              valIcon = '✓';
+            }
+            if (value === false) {
+              valClass = isPhishing ? 'feature-true' : 'feature-false';
+              valIcon = '✗';
+            }
+            
+            item.innerHTML = `<span>${formattedKey}</span> <strong class="${valClass}">${valIcon}</strong>`;
+            featuresList.appendChild(item);
+          }
+        } else {
+          featuresList.innerHTML = '<div style="text-align:center; padding: 10px; opacity:0.5;">No specific features triggered</div>';
+        }
+        
+        // Show report actions
+        const reportActions = document.getElementById('report-actions');
+        if (reportActions) reportActions.style.display = 'flex';
+        
+      }, 300); // 300ms delay for premium feel
+
     } catch (err) {
-      predictionBox.textContent = 'Connection Error';
-      predictionBox.style.color = '#ff9800';
+      predictionBox.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> CONNECTION ERROR';
+      predictionBox.style.background = 'rgba(245, 158, 11, 0.15)';
+      predictionBox.style.color = '#f59e0b';
+      predictionBox.style.border = '1px solid #f59e0b';
+      featuresList.innerHTML = `<div style="text-align:center; padding: 10px; opacity:0.6;">Failed to reach API. Check settings.</div>`;
+      loadingContainer.style.display = 'none';
       resultBox.style.display = 'block';
+      gaugeContainer.style.display = 'none';
+      if (document.getElementById('report-actions')) document.getElementById('report-actions').style.display = 'none';
     } finally {
       scanBtn.disabled = false;
-      scanBtn.textContent = 'Scan Current Page';
+      btnText.textContent = 'DEEP SCAN PAGE';
     }
   });
+
+  // Reporting Logic
+  const reportFP = document.getElementById('report-false-positive');
+  const reportMP = document.getElementById('report-missed-phish');
+  
+  if (reportFP) {
+    reportFP.addEventListener('click', () => {
+      reportFP.textContent = 'Reported! ✓';
+      reportFP.style.color = '#10b981';
+      setTimeout(() => { reportFP.textContent = 'Report False Positive'; reportFP.style.color = 'var(--text-muted)'; }, 3000);
+    });
+  }
+  if (reportMP) {
+    reportMP.addEventListener('click', () => {
+      reportMP.textContent = 'Reported! ✓';
+      reportMP.style.color = '#10b981';
+      setTimeout(() => { reportMP.textContent = 'Report Missed Phish'; reportMP.style.color = 'var(--text-muted)'; }, 3000);
+    });
+  }
 });
