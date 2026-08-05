@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PhishX Options</title>
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --secondary: #4ade80;
+      --bg: #030712;
+      --glass: rgba(15, 23, 42, 0.8);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .dot-grid {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background-image: radial-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    .container {
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+      position: relative;
+    }
+    .back-btn {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color 0.3s, transform 0.3s;
+      background: none;
+      border: none;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .back-btn:hover {
+      color: var(--text);
+      transform: translateX(-3px);
+    }
+    .header h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.3);
+      color: #fff;
+      font-size: 1rem;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    input[type="text"]:focus {
+      border-color: var(--primary);
+    }
+    .help-text {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+      display: block;
+    }
+    button.save-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      border: none;
+      border-radius: 12px;
+      color: #0f172a;
+      font-weight: 800;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+    button.save-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+    }
+    #status {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--secondary);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+  </style>
+</head>
+<body>
+  <div class="dot-grid"></div>
+  <div class="container">
+    <button id="backBtn" class="back-btn" title="Go Back">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+    </button>
+      <h1>Phish<span style="color: #72f542;">X</span> Settings</h1>
+    
+    <div class="form-group">
+      <label for="apiUrl">Backend API URL</label>
+      <input type="text" id="apiUrl" placeholder="http://127.0.0.1:8000">
+      <span class="help-text">Leave blank to use the default API.</span>
+    </div>
+    
+    <div class="form-group">
+      <label for="apiToken">API Token (Optional)</label>
+      <input type="text" id="apiToken" placeholder="Enter your token...">
+      <span class="help-text">For Pro users requiring authentication.</span>
+    </div>
+    
+    <button id="saveBtn" class="save-btn">Save Settings</button>
+    <div id="status">Settings saved!</div>
+  </div>
+  
+  <script src="options.js"></script>
+</body>
+</html>
