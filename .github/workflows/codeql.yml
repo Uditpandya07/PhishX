@@ -2,9 +2,7 @@ name: "CodeQL Analysis"
 
 on:
   push:
-    branches: [ "main", "develop", "fix/**", "feat/**" ]
   pull_request:
-    branches: [ "main", "develop", "fix/**", "feat/**" ]
 
 concurrency:
   group: codeql-${{ github.workflow }}-${{ github.ref }}

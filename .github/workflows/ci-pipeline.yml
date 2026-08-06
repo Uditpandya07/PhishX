@@ -1,10 +1,8 @@
 name: PhishX CI Pipeline
 
 on:
-  pull_request:
-    branches: [ "main", "develop", "fix/**", "feat/**" ]
   push:
-    branches: [ "main", "develop", "fix/**", "feat/**" ]
+  pull_request:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
