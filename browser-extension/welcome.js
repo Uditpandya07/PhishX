@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Ensure device_uuid exists in storage
   let { deviceUuid, apiUrl = 'http://127.0.0.1:8000' } = await chrome.storage.local.get(['deviceUuid', 'apiUrl']);
   if (!deviceUuid) {
-    deviceUuid = 'px_dev_' + (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2) + Date.now().toString(36));
+    deviceUuid = 'px_dev_' + (crypto.randomUUID ? crypto.randomUUID() : Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join(''));
     await chrome.storage.local.set({ deviceUuid });
   }
 

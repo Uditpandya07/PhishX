@@ -1,4 +1,3 @@
-import random
 import string
 import secrets
 from datetime import datetime, timedelta, timezone
@@ -95,7 +94,7 @@ def request_trial_otp(
             )
 
     # 3. Generate 6-Digit OTP Code
-    otp_code = "".join(random.choices(string.digits, k=6))
+    otp_code = "".join(secrets.choice(string.digits) for _ in range(6))
     expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
 
     if not existing_record:
