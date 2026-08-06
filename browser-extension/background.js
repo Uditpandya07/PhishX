@@ -20,10 +20,22 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       const isPhishing = result.prediction === 'Phishing';
       const riskScore = Math.round(result.risk_score || 0);
 
-      // Inject sleek DOM overlay instead of harsh alert()
+      const { alertDuration = '8000', desktopAlerts = true } = await chrome.storage.local.get(['alertDuration', 'desktopAlerts']);
+      const durationMs = alertDuration === 'permanent' ? 0 : parseInt(alertDuration, 10);
+
+      if (isPhishing && desktopAlerts) {
+        chrome.notifications.create({
+          type: 'basic',
+          iconUrl: 'logo.png',
+          title: '🚨 PhishX Threat Alert!',
+          message: `Phishing link intercepted! Risk Score: ${riskScore}%. Do not click!`
+        });
+      }
+
+      // Inject sleek DOM overlay
       chrome.scripting.executeScript({
         target: { tabId: tab.id },
-        func: (isPhish, url, risk) => {
+        func: (isPhish, url, risk, dur) => {
           const div = document.createElement('div');
           div.style.position = 'fixed';
           div.style.bottom = '20px';
@@ -47,9 +59,11 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
             <button style="margin-top:15px; padding:8px 16px; border:none; border-radius:6px; background:rgba(0,0,0,0.2); color:#fff; cursor:pointer;" onclick="this.parentElement.remove()">Dismiss</button>
           `;
           document.body.appendChild(div);
-          setTimeout(() => { if(div.parentElement) div.remove(); }, 8000);
+          if (dur > 0) {
+            setTimeout(() => { if(div.parentElement) div.remove(); }, dur);
+          }
         },
-        args: [isPhishing, info.linkUrl, riskScore]
+        args: [isPhishing, info.linkUrl, riskScore, durationMs]
       });
       
     } catch (e) {
@@ -64,10 +78,15 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 // Handle Tab Updates for automatic scanning
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tab.url && tab.url.startsWith('http')) {
+    // Check autoScan setting
+    const { autoScan = true, desktopAlerts = true } = await chrome.storage.local.get(['autoScan', 'desktopAlerts']);
+    if (!autoScan) return;
+
     try {
       const result = await scanUrl(tab.url);
       const isDanger = result.prediction === 'Phishing';
-      
+      const riskScore = Math.round(result.risk_score || 0);
+
       // Update badge
       chrome.action.setBadgeText({
         text: isDanger ? '!' : '',
@@ -79,10 +98,17 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
         tabId: tabId
       });
 
+      if (isDanger && desktopAlerts) {
+        chrome.notifications.create({
+          type: 'basic',
+          iconUrl: 'logo.png',
+          title: '🚨 PhishX Threat Intercepted',
+          message: `Warning: This page is flagged as Phishing (${riskScore}% Risk Level).`
+        });
+      }
+
     } catch (err) {
       console.error('PhishX background scan failed:', err);
-      // Optional: show a small question mark if API is unreachable
-      // chrome.action.setBadgeText({ text: '?', tabId: tabId });
     }
   }
 });
@@ -96,26 +122,75 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         console.error('Background scan error:', err);
         sendResponse({ error: 'API Error' });
       });
-    return true; // Keep the message channel open for async response
+    return true; // Keep channel open
   }
 });
 
-// Core Scanning Logic pulling from Storage
+// Core Scanning Logic with Whitelist/Blacklist/Sensitivity Checks
 async function scanUrl(urlToScan) {
-  const { apiUrl = 'http://127.0.0.1:8000', apiToken = '' } = await chrome.storage.local.get(['apiUrl', 'apiToken']);
+  const { 
+    apiUrl = 'http://127.0.0.1:8000', 
+    apiToken = '', 
+    trialToken = '', 
+    deviceUuid = '',
+    customWhitelist = '',
+    customBlacklist = '',
+    sensitivity = 'standard'
+  } = await chrome.storage.local.get(['apiUrl', 'apiToken', 'trialToken', 'deviceUuid', 'customWhitelist', 'customBlacklist', 'sensitivity']);
   
+  const cleanUrl = urlToScan.trim().toLowerCase();
+  let domain = cleanUrl;
+  try {
+    domain = new URL(cleanUrl).hostname;
+  } catch (e) {}
+
+  // 1. Check Custom Whitelist
+  if (customWhitelist) {
+    const wDomains = customWhitelist.split(/[\n,]/).map(d => d.trim().toLowerCase()).filter(Boolean);
+    if (wDomains.some(w => domain === w || domain.endsWith('.' + w))) {
+      return { url: urlToScan, prediction: 'Safe', risk_score: 0.0, features: { custom_whitelist: true } };
+    }
+  }
+
+  // 2. Check Custom Blacklist
+  if (customBlacklist) {
+    const bDomains = customBlacklist.split(/[\n,]/).map(d => d.trim().toLowerCase()).filter(Boolean);
+    if (bDomains.some(b => domain === b || domain.endsWith('.' + b))) {
+      return { url: urlToScan, prediction: 'Phishing', risk_score: 100.0, features: { custom_blacklist: true } };
+    }
+  }
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'X-Sensitivity': sensitivity
+  };
+
+  if (apiToken) headers['Authorization'] = `Bearer ${apiToken}`;
+  if (trialToken) headers['X-Trial-Token'] = trialToken;
+  if (deviceUuid) headers['X-Device-UUID'] = deviceUuid;
+
   const response = await fetch(`${apiUrl.replace(/\/$/, '')}/api/v1/scans/predict`, {
     method: 'POST',
-    headers: { 
-      'Content-Type': 'application/json',
-      ...(apiToken ? { 'Authorization': `Bearer ${apiToken}` } : {})
-    },
+    headers,
     body: JSON.stringify({ url: urlToScan })
   });
   
   if (!response.ok) {
+    if (response.status === 402) {
+      throw new Error('Trial Expired. Please upgrade to PhishX Pro.');
+    }
     throw new Error('API Error');
   }
   
-  return await response.json();
+  const rawData = await response.json();
+  const data = rawData.result || rawData;
+
+  // Apply Sensitivity Threshold Override if specified
+  const thresholdMap = { 'aggressive': 70, 'standard': 80, 'strict': 90 };
+  const targetThreshold = thresholdMap[sensitivity] || 80;
+  if (data.risk_score !== undefined) {
+    data.prediction = data.risk_score >= targetThreshold ? 'Phishing' : 'Safe';
+  }
+
+  return data;
 }
