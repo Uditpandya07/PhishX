@@ -142,3 +142,21 @@ class ContactQuery(Base):
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User", backref="contact_queries")
+
+
+class TrialRecord(Base):
+    __tablename__ = "trial_records"
+
+    id = Column(Uuid, primary_key=True, default=uuid.uuid4, index=True)
+    name = Column(String, nullable=False)
+    email = Column(String, unique=True, index=True, nullable=False)
+    device_uuid = Column(String, index=True, nullable=True)
+    otp_code = Column(String, nullable=True)
+    otp_expires_at = Column(DateTime(timezone=True), nullable=True)
+    is_verified = Column(Boolean, default=False)
+    trial_start = Column(DateTime(timezone=True), nullable=True)
+    trial_end = Column(DateTime(timezone=True), nullable=True)
+    trial_token = Column(String, unique=True, index=True, nullable=True)
+    ip_address = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
