@@ -16,7 +16,7 @@ concurrency:
 jobs:
   test-backend:
     name: test-backend
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     
     services:
       postgres:
@@ -73,7 +73,7 @@ jobs:
 
   frontend-tests:
     name: Frontend Jest & Quality
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     
     steps:
       - uses: actions/checkout@v4
@@ -99,7 +99,7 @@ jobs:
 
   build-frontend:
     name: build-frontend
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v4
