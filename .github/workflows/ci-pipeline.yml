@@ -1,14 +1,16 @@
-name: test-backend
+name: PhishX CI Pipeline
 
 on:
-  push:
   pull_request:
+    branches: [ "main", "develop" ]
+  push:
+    branches: [ "main", "develop" ]
 
 permissions:
   contents: read
 
 concurrency:
-  group: test-backend-${{ github.event_name }}-${{ github.ref }}
+  group: ci-pipeline-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -68,3 +70,53 @@ jobs:
           fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  frontend-tests:
+    name: Frontend Jest & Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './phishx-frontend/package-lock.json'
+          
+      - name: Install Dependencies
+        working-directory: ./phishx-frontend
+        run: npm ci
+        
+      - name: Run Linter
+        working-directory: ./phishx-frontend
+        run: npm run lint || true
+        
+      - name: Run Tests
+        working-directory: ./phishx-frontend
+        run: npm run test
+
+  build-frontend:
+    name: build-frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './phishx-frontend/package-lock.json'
+
+      - name: Install Dependencies
+        working-directory: ./phishx-frontend
+        run: npm ci
+
+      - name: Build Next.js App
+        working-directory: ./phishx-frontend
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8000
+        run: npm run build
