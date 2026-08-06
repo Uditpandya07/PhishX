@@ -2,9 +2,13 @@ name: PhishX CI Pipeline
 
 on:
   pull_request:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "develop", "fix/**", "feat/**" ]
   push:
-    branches: [ "main" ]
+    branches: [ "main", "develop", "fix/**", "feat/**" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test-backend:
