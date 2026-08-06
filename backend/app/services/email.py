@@ -56,4 +56,18 @@ class EmailService:
         """
         return self.send_email(to_email, subject, html_content)
 
+    def send_trial_otp_email(self, to_email: str, name: str, otp_code: str):
+        subject = f"{otp_code} is your PhishX 15-Day Trial Verification Code"
+        html_content = f"""
+            <div style="font-family: Arial, sans-serif; background-color: #0f172a; padding: 30px; color: #ffffff; border-radius: 10px;">
+                <h2 style="color: #4ade80;">Welcome to PhishX, {name}!</h2>
+                <p style="font-size: 16px;">Here is your 6-digit verification code to activate your <strong>15-Day Free Trial</strong>:</p>
+                <div style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #38bdf8; background: #1e293b; padding: 15px 25px; display: inline-block; border-radius: 8px; margin: 15px 0;">
+                    {otp_code}
+                </div>
+                <p style="color: #94a3b8; font-size: 14px;">This code will expire in 10 minutes. If you did not request this trial, please ignore this email.</p>
+            </div>
+        """
+        return self.send_email(to_email, subject, html_content)
+
 email_service = EmailService()
