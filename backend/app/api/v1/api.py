@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import auth, users, scans, payments, feedback, admin, ws, news, contact
+from app.api.v1.endpoints import auth, users, scans, payments, feedback, admin, ws, news, contact, trial
 
 api_router = APIRouter()
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
@@ -12,3 +12,4 @@ api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
 api_router.include_router(ws.router, prefix="/ws", tags=["websocket"])
 api_router.include_router(news.router, prefix="/news", tags=["news"])
 api_router.include_router(contact.router, prefix="/contact", tags=["contact"])
+api_router.include_router(trial.router, prefix="/trial", tags=["trial"])
