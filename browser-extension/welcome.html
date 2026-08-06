@@ -142,18 +142,55 @@
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
         </svg>
-        <span><strong>Automatic Background Scanning</strong><br>We scan URLs dynamically before they load.</span>
+        <span><strong>Real-Time AI Protection</strong><br>Automated background threat detection.</span>
       </div>
       <div class="feature">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"></circle>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
         </svg>
-        <span><strong>Customizable Settings</strong><br>Click the gear icon in the popup to configure your API endpoint.</span>
+        <span><strong>Zero-Trust Credential Shield</strong><br>Prevents phishing traps on fake login pages.</span>
       </div>
     </div>
     
-    <button class="btn" id="start-btn">Start Browsing Safely</button>
+    <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;" id="action-buttons">
+      <a href="https://phishx-app.vercel.app/?view=pricing" target="_blank" class="btn" style="background: linear-gradient(135deg, #72f542, #10b981); color: #020617;">Buy a Paid Plan</a>
+      <button class="btn" id="trial-modal-btn" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff;">Try Out First (15-Day Free Trial)</button>
+    </div>
+
+    <!-- Trial Registration Modal -->
+    <div id="trial-modal" style="display: none; background: rgba(15, 23, 42, 0.95); padding: 25px; border-radius: 16px; border: 1px solid rgba(59, 130, 246, 0.3); margin-top: 20px; text-align: left;">
+      <h3 style="margin-top: 0; color: #72f542; font-size: 1.3rem;">Start Your 15-Day Free Trial</h3>
+      <p style="font-size: 0.9rem; margin-bottom: 15px; color: var(--text-muted);">Enter your real email to receive a 6-digit OTP verification code. Disposable emails are blocked.</p>
+      
+      <div id="trial-form-step">
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 0.85rem; margin-bottom: 5px; color: #94a3b8;">Full Name</label>
+          <input type="text" id="trial-name" placeholder="John Doe" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: #020617; color: #fff; box-sizing: border-box;">
+        </div>
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; font-size: 0.85rem; margin-bottom: 5px; color: #94a3b8;">Work or Personal Email</label>
+          <input type="email" id="trial-email" placeholder="name@example.com" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: #020617; color: #fff; box-sizing: border-box;">
+        </div>
+        <div style="margin-bottom: 20px; display: flex; align-items: flex-start; gap: 8px;">
+          <input type="checkbox" id="trial-consent" style="margin-top: 3px;">
+          <label for="trial-consent" style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.4;">I consent to PhishX scanning URLs for threats and agree to the 15-day trial terms.</label>
+        </div>
+        <button id="send-otp-btn" class="btn" style="width: 100%; font-size: 0.95rem; padding: 14px;">Send 6-Digit OTP Code</button>
+      </div>
+
+      <div id="trial-otp-step" style="display: none;">
+        <p style="font-size: 0.85rem; color: #38bdf8; margin-bottom: 12px;" id="otp-sent-msg">Verification code sent to your email!</p>
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; font-size: 0.85rem; margin-bottom: 5px; color: #94a3b8;">Enter 6-Digit Verification Code</label>
+          <input type="text" id="trial-otp" maxlength="6" placeholder="123456" style="width: 100%; padding: 14px; border-radius: 8px; border: 1px solid rgba(114, 245, 66, 0.4); background: #020617; color: #72f542; font-size: 1.4rem; font-weight: bold; letter-spacing: 4px; text-align: center; box-sizing: border-box;">
+        </div>
+        <button id="verify-otp-btn" class="btn" style="width: 100%; font-size: 0.95rem; padding: 14px; background: linear-gradient(135deg, #72f542, #10b981); color: #020617;">Verify & Activate 15 Days</button>
+      </div>
+
+      <div id="trial-status-msg" style="margin-top: 15px; font-size: 0.85rem; font-weight: bold;"></div>
+    </div>
   </div>
   <script src="welcome.js"></script>
 </body>
