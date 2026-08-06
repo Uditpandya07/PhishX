@@ -30,7 +30,6 @@ function initTabs() {
 function saveOptions() {
   const settings = {
     autoScan: document.getElementById('autoScan').checked,
-    linkDefanging: document.getElementById('linkDefanging').checked,
     inputShield: document.getElementById('inputShield').checked,
     sensitivity: document.getElementById('sensitivity').value,
     desktopAlerts: document.getElementById('desktopAlerts').checked,
@@ -54,7 +53,6 @@ function saveOptions() {
 function restoreOptions() {
   const defaults = {
     autoScan: true,
-    linkDefanging: true,
     inputShield: true,
     sensitivity: 'standard',
     desktopAlerts: true,
@@ -68,7 +66,6 @@ function restoreOptions() {
 
   chrome.storage.local.get(defaults, (items) => {
     document.getElementById('autoScan').checked = items.autoScan;
-    document.getElementById('linkDefanging').checked = items.linkDefanging;
     document.getElementById('inputShield').checked = items.inputShield;
     document.getElementById('sensitivity').value = items.sensitivity;
     document.getElementById('desktopAlerts').checked = items.desktopAlerts;
