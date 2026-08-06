@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else if (tData.status === 'expired') {
           scanBtn.disabled = true;
           btnText.textContent = 'TRIAL EXPIRED';
-          predictionBox.innerHTML = '⚠️ 15-DAY TRIAL EXPIRED<br><a href="https://phishx-app.vercel.app/pricing" target="_blank" style="color: #72f542; text-decoration: underline; font-size: 0.85rem;">Click here to Upgrade to Pro</a>';
+          predictionBox.innerHTML = '⚠️ 15-DAY TRIAL EXPIRED<br><a href="https://phishx-app.vercel.app/?view=pricing" target="_blank" style="color: #72f542; text-decoration: underline; font-size: 0.85rem;">Click here to Upgrade to Pro</a>';
           predictionBox.style.background = 'rgba(244, 63, 94, 0.2)';
           predictionBox.style.color = '#f43f5e';
           predictionBox.style.border = '1px solid #f43f5e';
