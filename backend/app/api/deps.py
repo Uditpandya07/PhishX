@@ -113,7 +113,38 @@ free_scan_limiter = RateLimiter(requests_limit=10, window_seconds=60, resource_n
 
 async def check_free_scan_limit(
     request: Request,
+    db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_optional_user)
 ):
-    if not current_user:
-        await free_scan_limiter(request)
+    # Authenticated account with active subscription -> Bypass
+    if current_user and current_user.subscription_tier in ["pro", "enterprise"]:
+        return
+
+    # Check Trial Headers from Extension
+    trial_token = request.headers.get("X-Trial-Token")
+    device_uuid = request.headers.get("X-Device-UUID")
+
+    from app.db.models import TrialRecord
+    from datetime import datetime, timezone
+
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+
+    if trial_token or device_uuid:
+        query = db.query(TrialRecord).filter(TrialRecord.is_verified == True)
+        record = None
+        if trial_token:
+            record = query.filter(TrialRecord.trial_token == trial_token).first()
+        elif device_uuid:
+            record = query.filter(TrialRecord.device_uuid == device_uuid).first()
+
+        if record:
+            t_end = record.trial_end.replace(tzinfo=None) if record.trial_end else None
+            if t_end and t_end < now:
+                raise HTTPException(
+                    status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                    detail="Your 15-day free trial has expired. Please upgrade to PhishX Pro to continue scanning."
+                )
+            return
+
+    # Unauthenticated / Unregistered IP rate limiting fallback
+    await free_scan_limiter(request)
