@@ -73,6 +73,18 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
   const [exportEndDate, setExportEndDate] = useState("");
   const [exportStatusFilter, setExportStatusFilter] = useState("ALL");
 
+  useEffect(() => {
+    const path = window.location.pathname.replace(/^\//, '').toLowerCase();
+    const hash = window.location.hash.replace(/^#/, '').toLowerCase();
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewParam = urlParams.get('view');
+
+    const targetView = path || hash || viewParam;
+    if (targetView && ['pricing', 'admin', 'privacy', 'terms', 'creator', 'api', 'docs', 'vision', 'news', 'intel'].includes(targetView)) {
+      setCurrentView(targetView);
+    }
+  }, []);
+
   // --- Joyride State ---
   const [runTour, setRunTour] = useState(false);
   const [tourSteps] = useState([
@@ -256,7 +268,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
     const operatorName = user?.name || "SOC Senior Investigator";
     const operatorEmail = user?.email || "analyst@phishx.security";
     const clearanceTier = (user?.subscription_tier || "Enterprise").toUpperCase();
-    const auditId = `SOC-${Math.floor(100000 + Math.random() * 900000)}-PX`;
+    const auditId = `SOC-${typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID().slice(0, 8).toUpperCase() : '847291'}-PX`;
 
     const tableRows = filtered.map((s, idx) => {
       const isDanger = s.status === "Phishing" || s.risk >= 70;

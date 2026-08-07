@@ -14,7 +14,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (tab && tab.url) {
     try {
-      urlDisplay.textContent = new URL(tab.url).hostname;
+      if (tab.url.startsWith('chrome://') || tab.url.startsWith('edge://') || tab.url.startsWith('about:') || tab.url.startsWith('file://')) {
+        urlDisplay.textContent = tab.url.replace(/^https?:\/\//, '');
+      } else {
+        urlDisplay.textContent = new URL(tab.url).hostname;
+      }
     } catch (e) {
       urlDisplay.textContent = tab.url.substring(0, 30) + '...';
     }
@@ -31,6 +35,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  // Check Trial Status
+  try {
+    const { trialToken, deviceUuid, apiUrl = 'http://127.0.0.1:8000' } = await chrome.storage.local.get(['trialToken', 'deviceUuid', 'apiUrl']);
+    if (trialToken || deviceUuid) {
+      const param = trialToken ? `trial_token=${trialToken}` : `device_uuid=${deviceUuid}`;
+      const res = await fetch(`${apiUrl.replace(/\/$/, '')}/api/v1/trial/status?${param}`);
+      if (res.ok) {
+        const tData = await res.json();
+        if (tData.status === 'active') {
+          const headerDiv = document.querySelector('.header');
+          if (headerDiv) {
+            const badge = document.createElement('div');
+            badge.style.cssText = 'font-size: 0.75rem; color: #72f542; background: rgba(114, 245, 66, 0.1); border: 1px solid rgba(114, 245, 66, 0.3); padding: 2px 8px; border-radius: 12px; font-weight: bold; margin-left: 8px; align-self: center;';
+            badge.textContent = `${tData.days_remaining}d Trial`;
+            headerDiv.appendChild(badge);
+          }
+        } else if (tData.status === 'expired') {
+          scanBtn.disabled = true;
+          btnText.textContent = 'TRIAL EXPIRED';
+          predictionBox.innerHTML = '⚠️ 15-DAY TRIAL EXPIRED<br><a href="https://phishx-app.vercel.app/?view=pricing" target="_blank" style="color: #72f542; text-decoration: underline; font-size: 0.85rem;">Click here to Upgrade to Pro</a>';
+          predictionBox.style.background = 'rgba(244, 63, 94, 0.2)';
+          predictionBox.style.color = '#f43f5e';
+          predictionBox.style.border = '1px solid #f43f5e';
+          resultBox.style.display = 'block';
+        }
+      }
+    }
+  } catch (e) {
+    console.log('Trial status check offline fallback');
+  }
+
   scanBtn.addEventListener('click', async () => {
     scanBtn.disabled = true;
     btnText.textContent = 'ANALYZING...';
@@ -43,18 +78,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     gaugeValue.textContent = '0%';
     
     try {
-      const { apiUrl = 'http://127.0.0.1:8000', apiToken = '' } = await chrome.storage.local.get(['apiUrl', 'apiToken']);
+      const { apiUrl = 'http://127.0.0.1:8000', apiToken = '', trialToken = '', deviceUuid = '' } = await chrome.storage.local.get(['apiUrl', 'apiToken', 'trialToken', 'deviceUuid']);
       
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+      if (apiToken) headers['Authorization'] = `Bearer ${apiToken}`;
+      if (trialToken) headers['X-Trial-Token'] = trialToken;
+      if (deviceUuid) headers['X-Device-UUID'] = deviceUuid;
+
       const response = await fetch(`${apiUrl.replace(/\/$/, '')}/api/v1/scans/predict`, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          ...(apiToken ? { 'Authorization': `Bearer ${apiToken}` } : {})
-        },
+        headers,
         body: JSON.stringify({ url: tab.url })
       });
       
-      if (!response.ok) throw new Error('API Error');
+      if (!response.ok) {
+        if (response.status === 402) {
+          throw new Error('Trial Expired! Upgrade to Pro');
+        }
+        throw new Error('API Error');
+      }
       
       const rawData = await response.json();
       const data = rawData.result || rawData;

@@ -57,6 +57,16 @@ SAFE_WHITELIST = TRUSTED_DOMAINS
 
 def analyze_url(url: str, model_instance) -> dict:
     raw_url = url.strip().lower()
+
+    # 0. Internal System Pages Whitelist (chrome://, chrome-extension://, edge://, file://, etc.)
+    if any(raw_url.startswith(sys_prefix) for sys_prefix in ["chrome://", "chrome-extension://", "edge://", "about:", "file://", "moz-extension://", "view-source:"]):
+        return {
+            "url": url,
+            "prediction": "Safe",
+            "risk_score": 0.0,
+            "features": {"system_page_whitelist": True}
+        }
+
     if not raw_url.startswith("http://") and not raw_url.startswith("https://"):
         normalized_url = "https://" + raw_url
     else:
