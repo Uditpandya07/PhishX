@@ -29,6 +29,7 @@ function initTabs() {
 
 function saveOptions() {
   const settings = {
+    enableLiveAI: document.getElementById('enableLiveAI').checked,
     autoScan: document.getElementById('autoScan').checked,
     inputShield: document.getElementById('inputShield').checked,
     sensitivity: document.getElementById('sensitivity').value,
@@ -52,6 +53,7 @@ function saveOptions() {
 
 function restoreOptions() {
   const defaults = {
+    enableLiveAI: false,
     autoScan: true,
     inputShield: true,
     sensitivity: 'standard',
@@ -65,6 +67,7 @@ function restoreOptions() {
   };
 
   chrome.storage.local.get(defaults, (items) => {
+    document.getElementById('enableLiveAI').checked = items.enableLiveAI;
     document.getElementById('autoScan').checked = items.autoScan;
     document.getElementById('inputShield').checked = items.inputShield;
     document.getElementById('sensitivity').value = items.sensitivity;

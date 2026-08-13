@@ -63,6 +63,9 @@ class Settings(BaseSettings):
     # OpenAI API Key
     OPENAI_API_KEY: Optional[str] = None
 
+    # Gemini API Key
+    GEMINI_API_KEY: Optional[str] = None
+
     class Config:
         case_sensitive = True
         env_file = "../.env"
