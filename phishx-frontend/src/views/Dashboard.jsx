@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { FaGithub, FaTwitter, FaLinkedin, FaProductHunt, FaShieldAlt, FaBolt, FaRobot, FaLock, FaHistory, FaCode, FaChartLine, FaEnvelopeOpenText, FaSearch, FaExclamationTriangle, FaTerminal, FaInfoCircle, FaCrown, FaCog, FaSignOutAlt, FaSignInAlt, FaUserPlus, FaUserShield, FaTrashAlt, FaBars, FaTimes, FaNewspaper, FaGlobe, FaSatelliteDish } from "react-icons/fa";
+import { FaGithub, FaTwitter, FaLinkedin, FaProductHunt, FaShieldAlt, FaBolt, FaRobot, FaLock, FaHistory, FaCode, FaChartLine, FaEnvelopeOpenText, FaSearch, FaExclamationTriangle, FaTerminal, FaInfoCircle, FaCrown, FaCog, FaSignOutAlt, FaSignInAlt, FaUserPlus, FaUserShield, FaTrashAlt, FaBars, FaTimes, FaNewspaper, FaGlobe, FaSatelliteDish, FaCommentDots } from "react-icons/fa";
 import { FiInfo, FiZap, FiGlobe, FiClock, FiActivity, FiStar, FiLogIn, FiUserPlus as FiUserPlusOutline, FiCpu, FiShield, FiDatabase, FiCode, FiLayers, FiBox, FiMonitor, FiLock, FiBell, FiFileText, FiDownload, FiCalendar, FiFilter } from "react-icons/fi";
 import { motion, useScroll, useSpring, AnimatePresence } from "framer-motion";
 import { STATUS } from "react-joyride";
