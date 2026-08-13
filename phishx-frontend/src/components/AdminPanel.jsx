@@ -26,7 +26,8 @@ export default function AdminPanel() {
     { id: 'logic', name: 'Logic Core', status: 'pending', message: 'Idle' },
     { id: 'contact', name: 'Support Tickets', status: 'pending', message: 'Idle' },
     { id: 'news', name: 'CyberPulse Feed', status: 'pending', message: 'Idle' },
-    { id: 'razorpay', name: 'Razorpay Gateway', status: 'pending', message: 'Idle' }
+    { id: 'razorpay', name: 'Razorpay Gateway', status: 'pending', message: 'Idle' },
+    { id: 'ai', name: 'Gemini AI Core', status: 'pending', message: 'Idle' }
   ]);
 
   const fetchData = async () => {
@@ -217,6 +218,21 @@ export default function AdminPanel() {
     } catch (err) {
       updateTest('razorpay', 'error', 'Failed');
       addLog('Razorpay Gateway', err.response?.data?.detail || err.message);
+    }
+
+    // 12. Gemini AI Core Test (Real live connection check)
+    try {
+      const headers = { Authorization: `Bearer ${sessionStorage.getItem("token") || ""}` };
+      const res = await axios.get(`${baseUrl}/api/v1/admin/ai-health`, { headers });
+      
+      if (res.data.status === 'healthy') {
+        updateTest('ai', 'success', `Connected (${res.data.latency_ms}ms)`);
+      } else {
+        throw new Error(res.data.message || 'Verification failed');
+      }
+    } catch (err) {
+      updateTest('ai', 'error', 'Failed');
+      addLog('Gemini AI Core', err.response?.data?.detail || err.message);
     }
 
     setIsPulseRunning(false);
