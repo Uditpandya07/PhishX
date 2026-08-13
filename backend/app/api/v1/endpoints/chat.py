@@ -29,7 +29,7 @@ class ChatMessage(BaseModel):
     @classmethod
     def validate_content(cls, v: str) -> str:
         v = v.strip()
-        if len(v) > 300:
+        if len(v) > 2000:
             raise ValueError("History message content exceeds maximum length.")
         return v
 

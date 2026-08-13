@@ -86,7 +86,13 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
               if (!msg) return;
               
               historyEl.style.display = 'block';
-              historyEl.innerHTML += `<div style="margin-bottom:4px;"><strong>You:</strong> ${msg}</div>`;
+              const userMsgEl = document.createElement('div');
+              userMsgEl.style.marginBottom = '4px';
+              const userLabelEl = document.createElement('strong');
+              userLabelEl.textContent = 'You: ';
+              userMsgEl.appendChild(userLabelEl);
+              userMsgEl.appendChild(document.createTextNode(msg));
+              historyEl.appendChild(userMsgEl);
               inputEl.value = '';
               sendBtn.innerText = '...';
               sendBtn.disabled = true;
@@ -105,7 +111,14 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
                 sendBtn.disabled = false;
                 
                 if (response && response.reply) {
-                  historyEl.innerHTML += `<div style="margin-bottom:4px; color:#a7f3d0;"><strong>AI:</strong> ${response.reply}</div>`;
+                  const aiMsgEl = document.createElement('div');
+                  aiMsgEl.style.marginBottom = '4px';
+                  aiMsgEl.style.color = '#a7f3d0';
+                  const aiLabelEl = document.createElement('strong');
+                  aiLabelEl.textContent = 'AI: ';
+                  aiMsgEl.appendChild(aiLabelEl);
+                  aiMsgEl.appendChild(document.createTextNode(response.reply));
+                  historyEl.appendChild(aiMsgEl);
                   chatHistory.push({ role: 'user', content: msg });
                   chatHistory.push({ role: 'model', content: response.reply });
                 } else {
