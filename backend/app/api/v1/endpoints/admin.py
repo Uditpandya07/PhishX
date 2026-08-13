@@ -133,3 +133,41 @@ def check_razorpay_health(
             "message": "Razorpay connection failed. Refer to server logs for diagnostics."
         }
 
+
+@router.get("/ai-health")
+def check_ai_health(
+    current_user: User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """Real check of Gemini AI integration health."""
+    from app.core.config import settings
+    import time
+    
+    if not settings.GEMINI_API_KEY:
+        return {
+            "status": "unhealthy",
+            "message": "GEMINI_API_KEY is missing in environment configuration."
+        }
+        
+    try:
+        from google import genai
+        client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        
+        start_time = time.time()
+        # A simple lightweight call to verify auth and responsiveness
+        response = client.models.generate_content(
+            model='models/gemini-3.5-flash',
+            contents='Return the word OK',
+        )
+        latency = round((time.time() - start_time) * 1000)
+        
+        return {
+            "status": "healthy",
+            "latency_ms": latency,
+        }
+    except Exception as e:
+        logger.error(f"AI health check failed: {e}", exc_info=True)
+        return {
+            "status": "unhealthy",
+            "message": "Gemini AI connection failed. Refer to server logs for diagnostics."
+        }
+

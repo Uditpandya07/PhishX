@@ -6,6 +6,13 @@ This release includes a complete architectural overhaul to Next.js, asynchronous
 
 ---
 
+## 🌟 PhishX v2.2.0 - AI Threat Intelligence & Security Upgrades
+- **Live AI Chat Widget:** Integrated a contextual Gemini-powered AI threat analyst directly into the scan interface, featuring custom UI avatars, bouncing animations, and quick-action prompt chips.
+- **AI Prompt Guardrails:** Built a robust regex engine and Pydantic boundary payload validation to intercept jailbreaks, system-prompt leakage, and payload bloat attempts.
+- **Extension XSS Security:** Resolved a critical DOM-based Cross-Site Scripting (XSS) vulnerability flagged by GitHub Advanced Security in the Chromium browser extension.
+- **RDAP Domain Age:** Deprecated legacy WHOIS logic in favor of the modern RDAP protocol, significantly improving domain registration extraction reliability for complex TLDs.
+- **Razorpay Fix:** Resolved live subscription plan creation logic for the backend billing module.
+
 ## 🚀 0. PhishX v2.1.0 - DevSecOps Webhooks & Security Patches
 - **Slack/Teams Webhooks:** Integrated real-time alerting payloads in the Celery worker (`worker.py`), firing instant SecOps alerts when high-risk URLs are detected.
 - **Data Sovereignty:** Added an `ai_training_enabled` opt-out toggle in the user settings, enforcing absolute GDPR/DPDP privacy compliance.

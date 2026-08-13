@@ -181,6 +181,15 @@ Fsa<div align="center">
       <sub>No hardcoded secrets. No black boxes. All credentials managed via <code>.env</code> files with a comprehensive <code>.env.example</code>. Ready for CodeQL and GitHub Advanced Security scanning.</sub>
       <br/><br/>
     </td>
+    <td align="center" width="33%">
+      <br/>
+      <img src="https://img.icons8.com/fluency/64/000000/chatbot.png" width="52" alt="AI Chat"/>
+      <br/><br/>
+      <strong>💬 Live AI Threat Analyst</strong>
+      <br/><br/>
+      <sub>Powered by Gemini, ask context-aware questions about scan results. Fortified with strict Pydantic payload limits and robust prompt-injection guardrails.</sub>
+      <br/><br/>
+    </td>
   </tr>
 </table>
 
@@ -210,6 +219,7 @@ graph TD
         N["📡 News API\n/api/v1/news"]
         CT["🎫 Contact API\n/api/v1/contact"]
         WS["🔌 WebSocket\n/ws/scan"]
+        CHAT["🤖 AI Chat API\n/api/v1/chat"]
     end
 
     subgraph INTELLIGENCE["🤖  ML INTELLIGENCE LAYER  ·  Python"]
@@ -225,7 +235,7 @@ graph TD
         L["📜 Alembic\nMigrations"]
     end
 
-    A -- "HTTPS REST" --> C & D & E & F
+    A -- "HTTPS REST" --> C & D & E & F & CHAT
     A -- "WebSocket" --> WS
     B -- "HTTPS REST" --> D
     D --> W --> H --> I --> J
@@ -413,6 +423,7 @@ PhishX is engineered with a **security-first** philosophy at every layer of the 
 | 🔒 **Password Security** | `bcrypt` adaptive hashing with configurable work factors — future-proof against brute force |
 | 🚦 **API Rate Limiting** | Per-endpoint rate limiting middleware blocks credential stuffing and scan abuse |
 | 🗄️ **Schema Integrity** | All database changes managed through Alembic migration scripts — no ad-hoc mutations |
+| 🤖 **AI Prompt Guardrails** | Strict regex filters neutralize jailbreak attempts, paired with airtight Pydantic payload boundaries |
 | 🔍 **Static Analysis Ready** | Codebase structured for seamless integration with GitHub Advanced Security and CodeQL |
 
 ---
