@@ -35,7 +35,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       // Inject sleek DOM overlay
       chrome.scripting.executeScript({
         target: { tabId: tab.id },
-        func: (isPhish, url, risk, dur) => {
+        func: (isPhish, url, risk, dur, enableLiveAI, explanation) => {
           const div = document.createElement('div');
           div.style.position = 'fixed';
           div.style.bottom = '20px';
@@ -49,21 +49,82 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
           div.style.background = isPhish ? 'rgba(244, 63, 94, 0.95)' : 'rgba(16, 185, 129, 0.95)';
           div.style.border = isPhish ? '1px solid #ef4444' : '1px solid #4ade80';
           div.style.backdropFilter = 'blur(10px)';
-          div.style.maxWidth = '300px';
+          div.style.maxWidth = '350px';
           
+          let aiSection = '';
+          if (isPhish && enableLiveAI) {
+            aiSection = `
+              <div style="margin-top:15px; border-top: 1px solid rgba(255,255,255,0.2); padding-top:10px;">
+                <p style="font-size:13px; font-style:italic; margin:0 0 10px 0;">✨ <strong>AI Analysis:</strong> ${explanation || 'Analyzing...'}</p>
+                <div id="px-chat-history" style="max-height:100px; overflow-y:auto; font-size:12px; margin-bottom:10px; background:rgba(0,0,0,0.2); padding:8px; border-radius:6px; display:none;"></div>
+                <div style="display:flex; gap:8px;">
+                  <input type="text" id="px-chat-input" placeholder="Ask AI about this threat..." style="flex:1; padding:6px; border-radius:4px; border:none; outline:none; font-size:12px;">
+                  <button id="px-chat-send" style="padding:6px 10px; background:#3b82f6; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:12px;">Ask</button>
+                </div>
+              </div>
+            `;
+          }
+
           div.innerHTML = `
             <h3 style="margin:0 0 10px 0; font-size:16px;">PhishX Scan Result</h3>
             <p style="margin:0; font-size:14px; line-height:1.4;">
               ${isPhish ? `<strong>⚠️ PHISHING DETECTED</strong><br>Risk Score: ${risk}%<br>Do not click or enter credentials on this link!` : `<strong>✅ SAFE LINK</strong><br>This URL appears to be safe.`}
             </p>
+            ${aiSection}
             <button style="margin-top:15px; padding:8px 16px; border:none; border-radius:6px; background:rgba(0,0,0,0.2); color:#fff; cursor:pointer;" onclick="this.parentElement.remove()">Dismiss</button>
           `;
           document.body.appendChild(div);
-          if (dur > 0) {
+
+          if (isPhish && enableLiveAI) {
+            let chatHistory = [];
+            const sendBtn = div.querySelector('#px-chat-send');
+            const inputEl = div.querySelector('#px-chat-input');
+            const historyEl = div.querySelector('#px-chat-history');
+
+            const sendMessage = () => {
+              const msg = inputEl.value.trim();
+              if (!msg) return;
+              
+              historyEl.style.display = 'block';
+              historyEl.innerHTML += `<div style="margin-bottom:4px;"><strong>You:</strong> ${msg}</div>`;
+              inputEl.value = '';
+              sendBtn.innerText = '...';
+              sendBtn.disabled = true;
+
+              chrome.runtime.sendMessage({
+                action: "sendChatMessage",
+                payload: {
+                  url: url,
+                  risk_score: risk,
+                  features: {},
+                  history: chatHistory,
+                  message: msg
+                }
+              }, (response) => {
+                sendBtn.innerText = 'Ask';
+                sendBtn.disabled = false;
+                
+                if (response && response.reply) {
+                  historyEl.innerHTML += `<div style="margin-bottom:4px; color:#a7f3d0;"><strong>AI:</strong> ${response.reply}</div>`;
+                  chatHistory.push({ role: 'user', content: msg });
+                  chatHistory.push({ role: 'model', content: response.reply });
+                } else {
+                  historyEl.innerHTML += `<div style="margin-bottom:4px; color:#fca5a5;"><strong>Error:</strong> Failed to connect to AI.</div>`;
+                }
+                historyEl.scrollTop = historyEl.scrollHeight;
+              });
+            };
+
+            sendBtn.onclick = sendMessage;
+            inputEl.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
+          }
+
+          if (dur > 0 && (!isPhish || !enableLiveAI)) {
+            // Only auto-dismiss if AI chat is NOT active
             setTimeout(() => { if(div.parentElement) div.remove(); }, dur);
           }
         },
-        args: [isPhishing, info.linkUrl, riskScore, durationMs]
+        args: [isPhishing, info.linkUrl, riskScore, durationMs, result.enableLiveAI || false, result.features?.ai_explanation || ""]
       });
       
     } catch (e) {
@@ -117,14 +178,53 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "scanCurrentUrl" && request.url) {
     scanUrl(request.url)
-      .then(result => sendResponse(result))
+      .then(result => {
+        chrome.storage.local.get(['enableLiveAI'], (items) => {
+          result.enableLiveAI = !!items.enableLiveAI;
+          sendResponse(result);
+        });
+      })
       .catch(err => {
         console.error('Background scan error:', err);
         sendResponse({ error: 'API Error' });
       });
     return true; // Keep channel open
   }
+
+  if (request.action === "sendChatMessage") {
+    sendChatMessage(request.payload)
+      .then(reply => sendResponse(reply))
+      .catch(err => {
+        console.error('Chat proxy error:', err);
+        sendResponse({ error: 'Chat API Error' });
+      });
+    return true; // Keep channel open
+  }
 });
+
+async function sendChatMessage(payload) {
+  const { apiUrl = 'http://127.0.0.1:8000', apiToken = '', trialToken = '', deviceUuid = '' } = await chrome.storage.local.get(['apiUrl', 'apiToken', 'trialToken', 'deviceUuid']);
+  
+  const headers = {
+    'Content-Type': 'application/json'
+  };
+
+  if (apiToken) headers['Authorization'] = `Bearer ${apiToken}`;
+  if (trialToken) headers['X-Trial-Token'] = trialToken;
+  if (deviceUuid) headers['X-Device-UUID'] = deviceUuid;
+
+  const response = await fetch(`${apiUrl.replace(/\/$/, '')}/api/v1/chat/message`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw new Error('Chat API Error');
+  }
+
+  return await response.json();
+}
 
 // Core Scanning Logic with Whitelist/Blacklist/Sensitivity Checks
 async function scanUrl(urlToScan) {
