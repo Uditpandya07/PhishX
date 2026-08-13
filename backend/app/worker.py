@@ -83,11 +83,22 @@ def process_url_scan(url: str, user_id: Optional[str] = None):
         result = analyze_url(url, ml_model)
         
         # XAI Generation
-        explanation = generate_xai_report(
-            url=result["url"],
-            risk_score=result["risk_score"],
-            features=result["features"]
-        )
+        use_live_ai = os.getenv("ENABLE_LIVE_AI", "false").lower() == "true"
+        
+        if use_live_ai:
+            from app.services.live_ai import generate_live_threat_explanation
+            explanation = generate_live_threat_explanation(
+                url=result["url"],
+                risk_score=result["risk_score"],
+                features=result["features"]
+            )
+        else:
+            explanation = generate_xai_report(
+                url=result["url"],
+                risk_score=result["risk_score"],
+                features=result["features"]
+            )
+            
         result["features"]["ai_explanation"] = explanation
         
         # Save to DB
