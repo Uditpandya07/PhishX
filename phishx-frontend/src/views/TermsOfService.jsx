@@ -62,12 +62,22 @@ export default function TermsOfService({ onContactSupport }) {
             By utilizing the SecOps Webhook feature to integrate with third-party services (e.g., Slack, Microsoft Teams), 
             you represent that you have the lawful right and authorization to transmit data to the designated endpoints. 
             PhishX is not liable for data breaches, data loss, or unauthorized access occurring on third-party platforms, 
-            nor for any misconfiguration of webhook URLs by the user.
           </p>
         </section>
 
         <section>
-          <h3><FaFileContract /> 6. Governing Law and Jurisdiction</h3>
+          <h3><FaRobot /> 6. Acceptable Use of AI Services</h3>
+          <p>
+            The Live AI Threat Analyst feature is provided strictly for educational and defensive cybersecurity analysis. 
+            You expressly agree not to attempt to bypass, exploit, or "jailbreak" the AI's prompt guardrails. Any attempt 
+            to use the AI chat to generate malicious payloads, social engineering templates, or reverse-engineer the 
+            underlying system prompt constitutes a material breach of these Terms and will result in immediate, permanent 
+            account termination without notice.
+          </p>
+        </section>
+
+        <section>
+          <h3><FaFileContract /> 7. Governing Law and Jurisdiction</h3>
           <p>
             These Terms of Service and any separate agreements whereby we provide you Services shall be governed by 
             and construed in accordance with the laws of India. Any disputes arising under or in connection with these 
@@ -76,7 +86,7 @@ export default function TermsOfService({ onContactSupport }) {
         </section>
 
         <section>
-          <h3><FaFileContract /> 7. Severability & Modifications</h3>
+          <h3><FaFileContract /> 8. Severability & Modifications</h3>
           <p>
             If any provision of these Terms is deemed unlawful or unenforceable, that provision shall be severed, 
             and the remaining provisions will remain in full force and effect. We reserve the right to modify these 

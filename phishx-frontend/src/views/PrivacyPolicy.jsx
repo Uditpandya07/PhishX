@@ -68,12 +68,15 @@ export default function PrivacyPolicy() {
         </section>
 
         <section>
-          <h3><FaGlobe /> 6. Third-Party Integrations & Webhooks</h3>
+          <h3><FaGlobe /> 6. Third-Party Integrations, Webhooks & AI Services</h3>
           <p>
             If you optionally configure SecOps Webhooks (e.g., Slack, Microsoft Teams), you expressly consent to 
             the transmission of scan results, including submitted URLs and generated risk scores, to the configured 
             third-party endpoints. PhishX is not responsible for the data privacy practices of these third-party platforms 
             once the payload is successfully transmitted.
+          </p>
+          <p style={{ marginTop: '10px' }}>
+            <strong>Live AI Threat Analyst:</strong> When interacting with the AI Chatbox, chat context and scan metadata are securely transmitted to our third-party LLM provider (Google Gemini) strictly for the purpose of generating real-time threat intelligence. We do not transmit your personally identifiable information (PII) to these AI models. By using the AI chat, you consent to this data processing. If you have opted-out via the <code>ai_training_enabled</code> setting in your dashboard, your data is strictly excluded from any future model-training pipelines.
           </p>
         </section>
 
