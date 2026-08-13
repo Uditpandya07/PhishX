@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { FaGavel, FaBan, FaHandshake, FaGlobe, FaBalanceScale, FaFileContract, FaEnvelope } from "react-icons/fa";
+import { FaGavel, FaBan, FaHandshake, FaGlobe, FaBalanceScale, FaFileContract, FaEnvelope, FaRobot } from "react-icons/fa";
 import "./Legal.css";
 
 export default function TermsOfService({ onContactSupport }) {
