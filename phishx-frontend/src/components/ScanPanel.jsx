@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import { FaTimesCircle, FaSearch, FaCode, FaBrain, FaShieldAlt, FaCheckCircle, FaSpinner, FaRobot } from "react-icons/fa";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { FaTimesCircle, FaSearch, FaCode, FaBrain, FaShieldAlt, FaCheckCircle, FaSpinner, FaRobot, FaCopy, FaCheck, FaChevronDown, FaChevronUp, FaTrash } from "react-icons/fa";
 import { FiAlertTriangle, FiCheckCircle as FiCheckCircleIcon, FiShield, FiAlertCircle } from "react-icons/fi";
 import axios from "axios";
 import { API_URL, isConfigured } from "../config";
@@ -91,6 +91,71 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
   const [showFeedbackInput, setShowFeedbackInput] = useState(false);
   const [feedbackComment, setFeedbackComment] = useState("");
   const [activeFeedbackType, setActiveFeedbackType] = useState(null);
+  
+  // LIVE AI CHAT STATES
+  const [chatHistory, setChatHistory] = useState([]);
+  const [chatInput, setChatInput] = useState("");
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const [chatExpanded, setChatExpanded] = useState(true);
+  const [copiedIdx, setCopiedIdx] = useState(null);
+  const chatContainerRef = useRef(null);
+  const MAX_CHAT_CHARS = 500;
+
+  const QUICK_CHIPS = [
+    "Why is this flagged?",
+    "What's the risk?",
+    "Am I safe to ignore this?",
+  ];
+
+  // Auto-scroll only the chat container, NOT the whole page
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatHistory, isChatLoading]);
+
+  const formatTimestamp = () => {
+    const now = new Date();
+    return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const sendChatMessage = useCallback(async (overrideMsg) => {
+    const msg = (overrideMsg || chatInput).trim();
+    if (!msg || isChatLoading) return;
+    if (!overrideMsg) setChatInput("");
+    const ts = formatTimestamp();
+    setChatHistory(prev => [...prev, { role: 'user', content: msg, ts }]);
+    setIsChatLoading(true);
+    try {
+      const token = sessionStorage.getItem("token");
+      const riskScore = result ? Math.round(result.risk_score) : 0;
+      const res = await axios.post(`${API_URL}/api/v1/chat/message`, {
+        message: msg,
+        url: url.trim(),
+        risk_score: riskScore,
+        features: result?.features || result?.features_json || {},
+        history: chatHistory
+      }, {
+        withCredentials: true,
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      const replyTs = formatTimestamp();
+      setChatHistory(prev => [...prev, { role: 'model', content: res.data.reply, ts: replyTs }]);
+    } catch (err) {
+      console.error("Chat error:", err);
+      const replyTs = formatTimestamp();
+      setChatHistory(prev => [...prev, { role: 'model', content: "Failed to connect to AI.", ts: replyTs }]);
+    } finally {
+      setIsChatLoading(false);
+    }
+  }, [chatInput, isChatLoading, result, url, chatHistory]);
+
+  const copyMessage = (content, idx) => {
+    navigator.clipboard.writeText(content).then(() => {
+      setCopiedIdx(idx);
+      setTimeout(() => setCopiedIdx(null), 2000);
+    });
+  };
 
   const wsRef = useRef(null);
   const shouldReduceMotion = useReducedMotion();
@@ -130,6 +195,7 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
     setFeedbackSent(false);
     setShowFeedbackInput(false);
     setFeedbackComment("");
+    setChatHistory([]);
 
     const progressInterval = setInterval(() => {
       setScanProgress(prev => {
@@ -475,6 +541,207 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
                   <p style={{ color: '#e2e8f0', fontSize: '0.95rem', lineHeight: '1.5', minHeight: '60px' }}>
                     <TypewriterText text={result.features?.ai_explanation || result.features_json?.ai_explanation} speed={12} onNavigate={onNavigate} />
                   </p>
+                  
+                  {/* LIVE AI CHAT INTEGRATION */}
+                  <div style={{
+                    marginTop: '1.2rem',
+                    background: 'linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(23,37,84,0.75) 100%)',
+                    border: '1px solid rgba(99, 102, 241, 0.35)',
+                    borderRadius: '16px',
+                    overflow: 'hidden',
+                    boxShadow: '0 4px 24px rgba(99,102,241,0.15), inset 0 1px 0 rgba(255,255,255,0.05)'
+                  }}>
+
+                    {/* ── Chat Header ── */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', background: 'rgba(99,102,241,0.12)', borderBottom: '1px solid rgba(99,102,241,0.2)' }}>
+                      <div style={{ width: '30px', height: '30px', borderRadius: '50%', overflow: 'hidden', boxShadow: '0 0 14px rgba(99,102,241,0.5)', border: '1px solid rgba(99,102,241,0.4)', flexShrink: 0 }}>
+                        <img src="/ai-avatar.jpg" alt="AI" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                      <div>
+                        <div style={{ color: '#a5b4fc', fontSize: '0.8rem', fontWeight: '700', letterSpacing: '0.05em', textTransform: 'uppercase' }}>PhishX AI</div>
+                        <div style={{ color: '#64748b', fontSize: '0.68rem' }}>Threat Intelligence Chat</div>
+                      </div>
+                      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem', color: '#4ade80' }}>
+                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#4ade80', display: 'inline-block', boxShadow: '0 0 6px #4ade80', animation: 'pulse 2s infinite' }} />
+                          Live
+                        </div>
+                        {chatHistory.length > 0 && (
+                          <button onClick={() => setChatHistory([])} title="Clear chat" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: '2px 4px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.7rem' }}>
+                            <FaTrash style={{ fontSize: '0.65rem' }} /> Clear
+                          </button>
+                        )}
+                        <button onClick={() => setChatExpanded(v => !v)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6366f1', padding: '2px' }}>
+                          {chatExpanded ? <FaChevronUp style={{ fontSize: '0.75rem' }} /> : <FaChevronDown style={{ fontSize: '0.75rem' }} />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <AnimatePresence initial={false}>
+                      {chatExpanded && (
+                        <motion.div
+                          key="chat-body"
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.25 }}
+                          style={{ overflow: 'hidden' }}
+                        >
+                          {/* ── Quick chips (empty state) ── */}
+                          {chatHistory.length === 0 && (
+                            <div style={{ padding: '14px 16px 0', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                              <div style={{ width: '100%', fontSize: '0.72rem', color: '#475569', marginBottom: '2px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Suggested</div>
+                              {QUICK_CHIPS.map(chip => (
+                                <button key={chip} onClick={() => sendChatMessage(chip)} style={{
+                                  padding: '5px 12px',
+                                  borderRadius: '20px',
+                                  border: '1px solid rgba(99,102,241,0.4)',
+                                  background: 'rgba(99,102,241,0.08)',
+                                  color: '#a5b4fc',
+                                  fontSize: '0.78rem',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.15s'
+                                }}>
+                                  {chip}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* ── Messages ── */}
+                          {chatHistory.length > 0 && (
+                            <div className="px-chat-history" ref={chatContainerRef} style={{
+                              maxHeight: '220px',
+                              overflowY: 'auto',
+                              padding: '14px 16px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '12px',
+                              scrollbarWidth: 'thin',
+                              scrollbarColor: 'rgba(99,102,241,0.3) transparent'
+                            }}>
+                              <AnimatePresence initial={false}>
+                                {chatHistory.map((msg, idx) => (
+                                  <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, y: 10, scale: 0.97 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    transition={{ duration: 0.2 }}
+                                    style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start', alignItems: 'flex-end', gap: '8px' }}
+                                  >
+                                    {/* AI avatar */}
+                                    {msg.role === 'model' && (
+                                      <div style={{ width: '22px', height: '22px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, marginBottom: '18px', border: '1px solid rgba(99,102,241,0.4)' }}>
+                                        <img src="/ai-avatar.jpg" alt="AI" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                      </div>
+                                    )}
+                                    <div style={{ maxWidth: '85%' }}>
+                                      <div style={{
+                                        padding: '9px 14px',
+                                        borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '4px 16px 16px 16px',
+                                        background: msg.role === 'user' ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : 'rgba(255,255,255,0.07)',
+                                        border: msg.role === 'user' ? 'none' : '1px solid rgba(255,255,255,0.1)',
+                                        color: '#f1f5f9',
+                                        fontSize: '0.875rem',
+                                        lineHeight: '1.55',
+                                        boxShadow: msg.role === 'user' ? '0 2px 12px rgba(99,102,241,0.35)' : 'none',
+                                        whiteSpace: 'pre-wrap'
+                                      }}>
+                                        {msg.content}
+                                      </div>
+                                      {/* Timestamp + copy */}
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '3px', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start', paddingLeft: msg.role === 'user' ? 0 : '4px' }}>
+                                        {msg.ts && <span style={{ fontSize: '0.65rem', color: '#334155' }}>{msg.ts}</span>}
+                                        {msg.role === 'model' && (
+                                          <button onClick={() => copyMessage(msg.content, idx)} title="Copy" style={{ background: 'none', border: 'none', cursor: 'pointer', color: copiedIdx === idx ? '#4ade80' : '#475569', padding: 0, display: 'flex', alignItems: 'center', transition: 'color 0.15s' }}>
+                                            {copiedIdx === idx ? <FaCheck style={{ fontSize: '0.6rem' }} /> : <FaCopy style={{ fontSize: '0.6rem' }} />}
+                                          </button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </motion.div>
+                                ))}
+                              </AnimatePresence>
+
+                              {/* Typing indicator */}
+                              {isChatLoading && (
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-end', gap: '8px' }}>
+                                  <div style={{ width: '22px', height: '22px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: '1px solid rgba(99,102,241,0.4)' }}>
+                                    <img src="/ai-avatar.jpg" alt="AI" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                  </div>
+                                  <div style={{ padding: '9px 14px', borderRadius: '4px 16px 16px 16px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', gap: '5px', alignItems: 'center' }}>
+                                    {[0,1,2].map(i => (
+                                      <span key={i} style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#a5b4fc', display: 'inline-block', animation: `bounce 1.2s ${i * 0.2}s infinite` }} />
+                                    ))}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* ── Input ── */}
+                          <div style={{ padding: '12px', borderTop: chatHistory.length > 0 ? '1px solid rgba(99,102,241,0.15)' : 'none' }}>
+                            <div style={{ display: 'flex', gap: '0' }}>
+                              <div style={{ flex: 1, position: 'relative' }}>
+                                <input
+                                  type="text"
+                                  placeholder="Ask about this threat..."
+                                  value={chatInput}
+                                  maxLength={MAX_CHAT_CHARS}
+                                  onChange={(e) => setChatInput(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      sendChatMessage();
+                                    }
+                                  }}
+                                  disabled={isChatLoading}
+                                  style={{
+                                    width: '100%',
+                                    padding: '10px 50px 10px 16px',
+                                    borderRadius: '12px 0 0 12px',
+                                    border: '1px solid rgba(99,102,241,0.3)',
+                                    borderRight: 'none',
+                                    background: 'rgba(0,0,0,0.4)',
+                                    color: '#f1f5f9',
+                                    outline: 'none',
+                                    fontSize: '0.9rem',
+                                    boxSizing: 'border-box'
+                                  }}
+                                />
+                                {chatInput.length > 0 && (
+                                  <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.65rem', color: chatInput.length > MAX_CHAT_CHARS * 0.9 ? '#f87171' : '#475569', pointerEvents: 'none' }}>
+                                    {chatInput.length}/{MAX_CHAT_CHARS}
+                                  </span>
+                                )}
+                              </div>
+                              <button
+                                onClick={() => sendChatMessage()}
+                                disabled={isChatLoading || !chatInput.trim()}
+                                style={{
+                                  padding: '10px 20px',
+                                  background: (isChatLoading || !chatInput.trim()) ? 'rgba(99,102,241,0.25)' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                                  color: '#fff',
+                                  border: '1px solid rgba(99,102,241,0.3)',
+                                  borderLeft: 'none',
+                                  borderRadius: '0 12px 12px 0',
+                                  cursor: (isChatLoading || !chatInput.trim()) ? 'not-allowed' : 'pointer',
+                                  fontWeight: '600',
+                                  fontSize: '0.9rem',
+                                  transition: 'all 0.2s',
+                                  whiteSpace: 'nowrap',
+                                  boxShadow: (!isChatLoading && chatInput.trim()) ? '0 0 16px rgba(99,102,241,0.4)' : 'none'
+                                }}
+                              >
+                                Send ↑
+                              </button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
               )}
 
