@@ -819,12 +819,12 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                 </div>
 
                 <div className="feature-card-premium">
-                  <div className="feature-icon-wrapper">
-                    <FiLock />
+                  <div className="feature-icon-wrapper" style={{ border: '1px solid rgba(139,92,246,0.3)', background: 'rgba(139,92,246,0.1)', boxShadow: '0 0 20px rgba(139,92,246,0.2)' }}>
+                    <FaCommentDots style={{ color: '#8b5cf6' }} />
                   </div>
-                  <h3 style={{ fontSize: '1.2rem', marginBottom: '10px' }}>Secure Endpoint</h3>
+                  <h3 style={{ fontSize: '1.2rem', marginBottom: '10px' }}>Live AI Analyst</h3>
                   <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                    All data processing happens in isolated environments, ensuring your browsing intent remains private.
+                    Powered by Gemini, our interactive AI chat helps you understand scan results instantly with context-aware insights.
                   </p>
                 </div>
 
