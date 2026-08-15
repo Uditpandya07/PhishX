@@ -123,7 +123,7 @@ def generate_live_threat_explanation(url: str, risk_score: float, features: Dict
 
     try:
         response = client.models.generate_content(
-            model='models/gemini-3.5-flash',
+            model='gemini-flash-latest',
             contents=prompt,
         )
         return response.text.strip()
@@ -206,7 +206,7 @@ def handle_chat_message(
         )
 
         response = client.models.generate_content(
-            model='models/gemini-3.5-flash',
+            model='gemini-flash-latest',
             contents=contents,
             config=config,
         )
