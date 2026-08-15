@@ -152,8 +152,11 @@ const ElectricBorder = ({
     const amplitude = chaos;
     const frequency = 10;
     const baseFlatness = 0;
-    const displacement = 60;
-    const borderOffset = 60;
+    
+    // Dynamically adjust padding/bounds for mobile so content isn't squeezed
+    let isMobile = window.innerWidth <= 768;
+    let displacement = isMobile ? 12 : 60;
+    let borderOffset = isMobile ? 10 : 60;
 
     const updateSize = () => {
       const rect = container.getBoundingClientRect();
@@ -251,6 +254,9 @@ const ElectricBorder = ({
 
     // Handle resize
     const resizeObserver = new ResizeObserver(() => {
+      isMobile = window.innerWidth <= 768;
+      displacement = isMobile ? 12 : 60;
+      borderOffset = isMobile ? 10 : 60;
       const newSize = updateSize();
       width = newSize.width;
       height = newSize.height;

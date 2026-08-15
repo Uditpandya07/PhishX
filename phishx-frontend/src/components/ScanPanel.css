@@ -367,7 +367,7 @@
 
 @media (max-width: 768px) {
   .scan-card {
-    padding: 30px 15px;
+    padding: 15px 5px;
   }
   .scan-card h2 {
     font-size: 1.3rem;
