@@ -527,14 +527,15 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
               </div>
 
               {(result.features?.ai_explanation || result.features_json?.ai_explanation) && (
-                <div className="ai-explanation-box" style={{
-                  background: 'rgba(59, 130, 246, 0.1)',
-                  border: '1px solid rgba(59, 130, 246, 0.3)',
-                  padding: '1rem',
-                  borderRadius: '12px',
-                  marginTop: '1rem',
-                  textAlign: 'left'
-                }}>
+                <>
+                  <div className="ai-explanation-box" style={{
+                    background: 'rgba(59, 130, 246, 0.1)',
+                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    padding: '1rem',
+                    borderRadius: '12px',
+                    marginTop: '1rem',
+                    textAlign: 'left'
+                  }}>
                   <h4 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#60a5fa', marginBottom: '8px', fontSize: '0.9rem', textTransform: 'uppercase' }}>
                     <FaRobot /> AI Threat Intelligence
                   </h4>
@@ -542,9 +543,14 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
                     <TypewriterText text={result.features?.ai_explanation || result.features_json?.ai_explanation} speed={12} onNavigate={onNavigate} />
                   </p>
                   
+                  </div>
+                  
                   {/* LIVE AI CHAT INTEGRATION */}
                   <div style={{
                     marginTop: '1.2rem',
+                    marginLeft: '-8px', // negative margin on mobile to expand beyond result padding
+                    marginRight: '-8px',
+                    width: 'calc(100% + 16px)',
                     background: 'linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(23,37,84,0.75) 100%)',
                     border: '1px solid rgba(99, 102, 241, 0.35)',
                     borderRadius: '16px',
@@ -720,9 +726,12 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
                                 onClick={() => sendChatMessage()}
                                 disabled={isChatLoading || !chatInput.trim()}
                                 style={{
-                                  padding: '10px 20px',
-                                  background: (isChatLoading || !chatInput.trim()) ? 'rgba(99,102,241,0.25)' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                                  color: '#fff',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  padding: '10px 16px',
+                                  background: (isChatLoading || !chatInput.trim()) ? 'rgba(99,102,241,0.15)' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                                  color: (isChatLoading || !chatInput.trim()) ? 'rgba(255,255,255,0.4)' : '#fff',
                                   border: '1px solid rgba(99,102,241,0.3)',
                                   borderLeft: 'none',
                                   borderRadius: '0 12px 12px 0',
@@ -742,7 +751,7 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
                       )}
                     </AnimatePresence>
                   </div>
-                </div>
+                </>
               )}
 
               {/* RISK INSIGHTS (PRO FEATURE) */}
