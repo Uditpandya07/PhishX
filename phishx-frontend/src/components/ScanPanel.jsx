@@ -553,7 +553,7 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
                   }}>
 
                     {/* ── Chat Header ── */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', background: 'rgba(99,102,241,0.12)', borderBottom: '1px solid rgba(99,102,241,0.2)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', background: 'rgba(99,102,241,0.12)', borderBottom: '1px solid rgba(99,102,241,0.2)' }}>
                       <div style={{ width: '30px', height: '30px', borderRadius: '50%', overflow: 'hidden', boxShadow: '0 0 14px rgba(99,102,241,0.5)', border: '1px solid rgba(99,102,241,0.4)', flexShrink: 0 }}>
                         <img src="/ai-avatar.jpg" alt="AI" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       </div>
@@ -613,7 +613,7 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
                             <div className="px-chat-history" ref={chatContainerRef} style={{
                               maxHeight: '220px',
                               overflowY: 'auto',
-                              padding: '14px 16px',
+                              padding: '10px 8px',
                               display: 'flex',
                               flexDirection: 'column',
                               gap: '12px',
@@ -635,9 +635,9 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
                                         <img src="/ai-avatar.jpg" alt="AI" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                       </div>
                                     )}
-                                    <div style={{ maxWidth: '85%' }}>
+                                    <div style={{ maxWidth: '95%' }}>
                                       <div style={{
-                                        padding: '9px 14px',
+                                        padding: '8px 12px',
                                         borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '4px 16px 16px 16px',
                                         background: msg.role === 'user' ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : 'rgba(255,255,255,0.07)',
                                         border: msg.role === 'user' ? 'none' : '1px solid rgba(255,255,255,0.1)',
@@ -680,7 +680,7 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
                           )}
 
                           {/* ── Input ── */}
-                          <div style={{ padding: '12px', borderTop: chatHistory.length > 0 ? '1px solid rgba(99,102,241,0.15)' : 'none' }}>
+                          <div style={{ padding: '8px', borderTop: chatHistory.length > 0 ? '1px solid rgba(99,102,241,0.15)' : 'none' }}>
                             <div style={{ display: 'flex', gap: '0' }}>
                               <div style={{ flex: 1, position: 'relative' }}>
                                 <input
