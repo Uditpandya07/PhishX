@@ -12,6 +12,23 @@ export const metadata = {
     url: "https://phishx.com",
     siteName: "PhishX",
     type: "website",
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'PhishX Threat Intelligence',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'PhishX | Advanced Enterprise Cybersecurity',
+    description: 'Next-Generation AI-powered Phishing Analysis Engine.',
+    images: ['/og-image.png'],
+  },
+  alternates: {
+    canonical: 'https://phishx.com',
   },
   icons: {
     icon: '/logo-icon.png',
@@ -51,6 +68,24 @@ export default function RootLayout({ children }) {
                 page_path: window.location.pathname,
               });
             `,
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "SoftwareApplication",
+              "name": "PhishX",
+              "operatingSystem": "Web",
+              "applicationCategory": "SecurityApplication",
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+              },
+              "description": "Next-Generation AI-powered Phishing Analysis Engine and live threat intelligence platform."
+            })
           }}
         />
       </head>

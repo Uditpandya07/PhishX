@@ -676,7 +676,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
               {/* Active Cyber Laser Scan Sweep Line */}
               <div className="cyber-laser-sweep"></div>
 
-              <motion.div
+              <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -763,20 +763,24 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                     Modern phishing attacks evolve every hour. Our engine analyzes 15+ lexical features—including entropy,
                     suspicious keywords, and redirection patterns—to identify the DNA of a threat before it reaches your inbox.
                   </p>
-                  <div className="about-stats" style={{ marginTop: '40px', display: 'flex', gap: '40px' }}>
-                    <div>
-                      <strong style={{ display: 'block', fontSize: '2rem', color: '#3b82f6' }}>15+</strong>
-                      <span style={{ color: '#64748b', fontSize: '1rem', fontWeight: 600 }}>Feature Indicators</span>
+                  <div className="about-stats-container">
+                    <div className="stat-card">
+                      <strong className="stat-value">15+</strong>
+                      <span className="stat-label">Feature Indicators</span>
                     </div>
-                    <div>
-                      <strong style={{ display: 'block', fontSize: '2rem', color: '#4ade80' }}>99.4%</strong>
-                      <span style={{ color: '#64748b', fontSize: '1rem', fontWeight: 600 }}>Detection Accuracy</span>
+                    <div className="stat-card">
+                      <strong className="stat-value success">99.4%</strong>
+                      <span className="stat-label">Detection Accuracy</span>
                     </div>
                   </div>
                 </div>
-                <div className="about-visual" style={{ background: 'radial-gradient(circle at center, rgba(59, 130, 246, 0.15) 0%, transparent 70%)' }}>
-                  <div className="pulse-circle" style={{ background: 'rgba(59, 130, 246, 0.2)' }}></div>
-                  <FaShieldAlt style={{ fontSize: '7rem', color: '#3b82f6', zIndex: 1, filter: 'drop-shadow(0 0 40px rgba(59, 130, 246, 0.4))' }} />
+                <div className="about-visual advanced-visual">
+                  <div className="cyber-ring outer-ring"></div>
+                  <div className="cyber-ring inner-ring"></div>
+                  
+                  <div className="shield-container">
+                    <FaShieldAlt className="base-shield" />
+                  </div>
                 </div>
               </div>
             </section>

@@ -367,27 +367,27 @@
 
 @media (max-width: 768px) {
   .scan-card {
-    padding: 15px 5px;
+    padding: 10px 0px;
   }
   .scan-card h2 {
     font-size: 1.3rem;
     padding: 8px 20px;
-    margin-bottom: 30px !important;
+    margin-bottom: 20px !important;
     letter-spacing: 2px;
   }
   .scan-input-wrapper {
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     background: transparent;
     border: none;
     padding: 0;
   }
   
   .large-input {
-    padding: 16px 20px;
-    padding-right: 50px;
+    padding: 16px 15px;
+    padding-right: 45px;
     font-size: 1.05rem;
-    border-radius: 16px;
+    border-radius: 12px;
     background: rgba(15, 23, 42, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.1);
     width: 100%;
@@ -402,14 +402,14 @@
 
   .large-button {
     margin-top: 0px !important;
-    padding: 18px;
-    font-size: 1.15rem;
+    padding: 16px;
+    font-size: 1.1rem;
     width: 100%;
-    border-radius: 16px;
+    border-radius: 12px;
   }
 
   .result {
-    padding: 20px 15px;
+    padding: 20px 12px;
     border-radius: 16px;
     width: 100%;
     box-sizing: border-box;

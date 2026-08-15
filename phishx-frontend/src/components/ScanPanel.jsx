@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { FaTimesCircle, FaSearch, FaCode, FaBrain, FaShieldAlt, FaCheckCircle, FaSpinner, FaRobot, FaCopy, FaCheck, FaChevronDown, FaChevronUp, FaTrash } from "react-icons/fa";
+import { FaTimesCircle, FaSearch, FaCode, FaBrain, FaShieldAlt, FaCheckCircle, FaSpinner, FaRobot, FaCopy, FaCheck, FaChevronDown, FaChevronUp, FaTrash, FaShareAlt } from "react-icons/fa";
 import { FiAlertTriangle, FiCheckCircle as FiCheckCircleIcon, FiShield, FiAlertCircle } from "react-icons/fi";
 import axios from "axios";
 import { API_URL, isConfigured } from "../config";
@@ -98,6 +98,24 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [chatExpanded, setChatExpanded] = useState(true);
   const [copiedIdx, setCopiedIdx] = useState(null);
+  const [recentScans, setRecentScans] = useState([]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('phishx_recent_scans');
+      if (stored) setRecentScans(JSON.parse(stored));
+    } catch (e) {}
+  }, []);
+
+  useEffect(() => {
+    if (result && result.url) {
+      setRecentScans(prev => {
+        const updated = [result.url, ...prev.filter(u => u !== result.url)].slice(0, 5);
+        localStorage.setItem('phishx_recent_scans', JSON.stringify(updated));
+        return updated;
+      });
+    }
+  }, [result]);
   const chatContainerRef = useRef(null);
   const MAX_CHAT_CHARS = 500;
 
@@ -434,6 +452,20 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
             </button>
           </div>
 
+          {/* RECENT SCANS UI */}
+          {!loading && !result && recentScans.length > 0 && (
+            <div style={{ marginTop: '1.2rem', textAlign: 'left' }}>
+              <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px', fontWeight: 600 }}>Recent Scans</div>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {recentScans.map((r, i) => (
+                  <button key={i} onClick={() => setUrl(r)} style={{ background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', padding: '6px 12px', fontSize: '0.8rem', color: '#cbd5e1', cursor: 'pointer', transition: 'all 0.2s' }}>
+                    {r.replace(/^https?:\/\//, '')}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {loading && (
             <motion.div 
               className="loading-progress-container"
@@ -527,14 +559,15 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
               </div>
 
               {(result.features?.ai_explanation || result.features_json?.ai_explanation) && (
-                <div className="ai-explanation-box" style={{
-                  background: 'rgba(59, 130, 246, 0.1)',
-                  border: '1px solid rgba(59, 130, 246, 0.3)',
-                  padding: '1rem',
-                  borderRadius: '12px',
-                  marginTop: '1rem',
-                  textAlign: 'left'
-                }}>
+                <>
+                  <div className="ai-explanation-box" style={{
+                    background: 'rgba(59, 130, 246, 0.1)',
+                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                    padding: '1rem',
+                    borderRadius: '12px',
+                    marginTop: '1rem',
+                    textAlign: 'left'
+                  }}>
                   <h4 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#60a5fa', marginBottom: '8px', fontSize: '0.9rem', textTransform: 'uppercase' }}>
                     <FaRobot /> AI Threat Intelligence
                   </h4>
@@ -542,23 +575,28 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
                     <TypewriterText text={result.features?.ai_explanation || result.features_json?.ai_explanation} speed={12} onNavigate={onNavigate} />
                   </p>
                   
+                  </div>
+                  
                   {/* LIVE AI CHAT INTEGRATION */}
                   <div style={{
                     marginTop: '1.2rem',
+                    marginLeft: '-8px', // negative margin on mobile to expand beyond result padding
+                    marginRight: '-8px',
+                    width: 'calc(100% + 16px)',
                     background: 'linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(23,37,84,0.75) 100%)',
-                    border: '1px solid rgba(99, 102, 241, 0.35)',
+                    border: '1px solid rgba(6, 182, 212, 0.35)',
                     borderRadius: '16px',
                     overflow: 'hidden',
-                    boxShadow: '0 4px 24px rgba(99,102,241,0.15), inset 0 1px 0 rgba(255,255,255,0.05)'
+                    boxShadow: '0 4px 24px rgba(6,182,212,0.15), inset 0 1px 0 rgba(255,255,255,0.05)'
                   }}>
 
                     {/* ── Chat Header ── */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', background: 'rgba(99,102,241,0.12)', borderBottom: '1px solid rgba(99,102,241,0.2)' }}>
-                      <div style={{ width: '30px', height: '30px', borderRadius: '50%', overflow: 'hidden', boxShadow: '0 0 14px rgba(99,102,241,0.5)', border: '1px solid rgba(99,102,241,0.4)', flexShrink: 0 }}>
-                        <img src="/ai-avatar.jpg" alt="AI" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', background: 'rgba(6,182,212,0.12)', borderBottom: '1px solid rgba(6,182,212,0.2)' }}>
+                      <div style={{ width: '30px', height: '30px', borderRadius: '50%', overflow: 'hidden', boxShadow: '0 0 14px rgba(6,182,212,0.5)', border: '1px solid rgba(6,182,212,0.4)', flexShrink: 0, background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <img src="/logo-icon.png" alt="PhishX AI" style={{ width: '70%', height: '70%', objectFit: 'contain' }} />
                       </div>
                       <div>
-                        <div style={{ color: '#a5b4fc', fontSize: '0.8rem', fontWeight: '700', letterSpacing: '0.05em', textTransform: 'uppercase' }}>PhishX AI</div>
+                        <div style={{ color: '#67e8f9', fontSize: '0.8rem', fontWeight: '700', letterSpacing: '0.05em', textTransform: 'uppercase' }}>PhishX AI</div>
                         <div style={{ color: '#64748b', fontSize: '0.68rem' }}>Threat Intelligence Chat</div>
                       </div>
                       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -571,7 +609,7 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
                             <FaTrash style={{ fontSize: '0.65rem' }} /> Clear
                           </button>
                         )}
-                        <button onClick={() => setChatExpanded(v => !v)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6366f1', padding: '2px' }}>
+                        <button onClick={() => setChatExpanded(v => !v)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#06b6d4', padding: '2px' }}>
                           {chatExpanded ? <FaChevronUp style={{ fontSize: '0.75rem' }} /> : <FaChevronDown style={{ fontSize: '0.75rem' }} />}
                         </button>
                       </div>
@@ -595,9 +633,9 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
                                 <button key={chip} onClick={() => sendChatMessage(chip)} style={{
                                   padding: '5px 12px',
                                   borderRadius: '20px',
-                                  border: '1px solid rgba(99,102,241,0.4)',
-                                  background: 'rgba(99,102,241,0.08)',
-                                  color: '#a5b4fc',
+                                  border: '1px solid rgba(6,182,212,0.4)',
+                                  background: 'rgba(6,182,212,0.08)',
+                                  color: '#67e8f9',
                                   fontSize: '0.78rem',
                                   cursor: 'pointer',
                                   transition: 'all 0.15s'
@@ -613,12 +651,12 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
                             <div className="px-chat-history" ref={chatContainerRef} style={{
                               maxHeight: '220px',
                               overflowY: 'auto',
-                              padding: '14px 16px',
+                              padding: '10px 8px',
                               display: 'flex',
                               flexDirection: 'column',
                               gap: '12px',
                               scrollbarWidth: 'thin',
-                              scrollbarColor: 'rgba(99,102,241,0.3) transparent'
+                              scrollbarColor: 'rgba(6,182,212,0.3) transparent'
                             }}>
                               <AnimatePresence initial={false}>
                                 {chatHistory.map((msg, idx) => (
@@ -631,20 +669,20 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
                                   >
                                     {/* AI avatar */}
                                     {msg.role === 'model' && (
-                                      <div style={{ width: '22px', height: '22px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, marginBottom: '18px', border: '1px solid rgba(99,102,241,0.4)' }}>
-                                        <img src="/ai-avatar.jpg" alt="AI" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                      <div style={{ width: '22px', height: '22px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, marginBottom: '18px', border: '1px solid rgba(6,182,212,0.4)', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <img src="/logo-icon.png" alt="PhishX AI" style={{ width: '70%', height: '70%', objectFit: 'contain' }} />
                                       </div>
                                     )}
-                                    <div style={{ maxWidth: '85%' }}>
+                                    <div style={{ maxWidth: '95%' }}>
                                       <div style={{
-                                        padding: '9px 14px',
+                                        padding: '8px 12px',
                                         borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '4px 16px 16px 16px',
-                                        background: msg.role === 'user' ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : 'rgba(255,255,255,0.07)',
+                                        background: msg.role === 'user' ? 'linear-gradient(135deg, #06b6d4, #0ea5e9)' : 'rgba(255,255,255,0.07)',
                                         border: msg.role === 'user' ? 'none' : '1px solid rgba(255,255,255,0.1)',
                                         color: '#f1f5f9',
                                         fontSize: '0.875rem',
                                         lineHeight: '1.55',
-                                        boxShadow: msg.role === 'user' ? '0 2px 12px rgba(99,102,241,0.35)' : 'none',
+                                        boxShadow: msg.role === 'user' ? '0 2px 12px rgba(6,182,212,0.35)' : 'none',
                                         whiteSpace: 'pre-wrap'
                                       }}>
                                         {msg.content}
@@ -666,12 +704,12 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
                               {/* Typing indicator */}
                               {isChatLoading && (
                                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-end', gap: '8px' }}>
-                                  <div style={{ width: '22px', height: '22px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: '1px solid rgba(99,102,241,0.4)' }}>
-                                    <img src="/ai-avatar.jpg" alt="AI" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                  <div style={{ width: '22px', height: '22px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: '1px solid rgba(6,182,212,0.4)', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <img src="/logo-icon.png" alt="PhishX AI" style={{ width: '70%', height: '70%', objectFit: 'contain' }} />
                                   </div>
                                   <div style={{ padding: '9px 14px', borderRadius: '4px 16px 16px 16px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', gap: '5px', alignItems: 'center' }}>
                                     {[0,1,2].map(i => (
-                                      <span key={i} style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#a5b4fc', display: 'inline-block', animation: `bounce 1.2s ${i * 0.2}s infinite` }} />
+                                      <span key={i} style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#67e8f9', display: 'inline-block', animation: `bounce 1.2s ${i * 0.2}s infinite` }} />
                                     ))}
                                   </div>
                                 </motion.div>
@@ -680,7 +718,7 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
                           )}
 
                           {/* ── Input ── */}
-                          <div style={{ padding: '12px', borderTop: chatHistory.length > 0 ? '1px solid rgba(99,102,241,0.15)' : 'none' }}>
+                          <div style={{ padding: '8px', borderTop: chatHistory.length > 0 ? '1px solid rgba(6,182,212,0.15)' : 'none' }}>
                             <div style={{ display: 'flex', gap: '0' }}>
                               <div style={{ flex: 1, position: 'relative' }}>
                                 <input
@@ -701,7 +739,7 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
                                     width: '100%',
                                     padding: '10px 50px 10px 16px',
                                     borderRadius: '12px 0 0 12px',
-                                    border: '1px solid rgba(99,102,241,0.3)',
+                                    border: '1px solid rgba(6,182,212,0.3)',
                                     borderRight: 'none',
                                     background: 'rgba(0,0,0,0.4)',
                                     color: '#f1f5f9',
@@ -720,10 +758,13 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
                                 onClick={() => sendChatMessage()}
                                 disabled={isChatLoading || !chatInput.trim()}
                                 style={{
-                                  padding: '10px 20px',
-                                  background: (isChatLoading || !chatInput.trim()) ? 'rgba(99,102,241,0.25)' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                                  color: '#fff',
-                                  border: '1px solid rgba(99,102,241,0.3)',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  padding: '10px 16px',
+                                  background: (isChatLoading || !chatInput.trim()) ? 'rgba(6,182,212,0.15)' : 'linear-gradient(135deg, #06b6d4, #0ea5e9)',
+                                  color: (isChatLoading || !chatInput.trim()) ? 'rgba(255,255,255,0.4)' : '#fff',
+                                  border: '1px solid rgba(6,182,212,0.3)',
                                   borderLeft: 'none',
                                   borderRadius: '0 12px 12px 0',
                                   cursor: (isChatLoading || !chatInput.trim()) ? 'not-allowed' : 'pointer',
@@ -731,7 +772,7 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
                                   fontSize: '0.9rem',
                                   transition: 'all 0.2s',
                                   whiteSpace: 'nowrap',
-                                  boxShadow: (!isChatLoading && chatInput.trim()) ? '0 0 16px rgba(99,102,241,0.4)' : 'none'
+                                  boxShadow: (!isChatLoading && chatInput.trim()) ? '0 0 16px rgba(6,182,212,0.4)' : 'none'
                                 }}
                               >
                                 Send ↑
@@ -742,8 +783,25 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
                       )}
                     </AnimatePresence>
                   </div>
-                </div>
+                </>
               )}
+
+              {/* ACTION BUTTONS (Share & Defang) */}
+              <div style={{ display: 'flex', gap: '10px', marginTop: '1.5rem', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => {
+                    let defanged = result.url.replace(/http/gi, 'hxxp').replace(/\./g, '[.]');
+                    navigator.clipboard.writeText(defanged);
+                    const btn = document.getElementById('defang-btn');
+                    if (btn) { btn.innerHTML = 'Defanged & Copied!'; setTimeout(() => btn.innerHTML = '<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 448 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M433.941 65.941l-51.882-51.882A48 48 0 0 0 348.118 0H176c-26.51 0-48 21.49-48 48v48H48c-26.51 0-48 21.49-48 48v320c0 26.51 21.49 48 48 48h224c26.51 0 48-21.49 48-48v-48h80c26.51 0 48-21.49 48-48V99.882a48 48 0 0 0-14.059-33.941zM266 464H54a6 6 0 0 1-6-6V150a6 6 0 0 1 6-6h74v224c0 26.51 21.49 48 48 48h96v42a6 6 0 0 1-6 6zm128-96H182a6 6 0 0 1-6-6V54a6 6 0 0 1 6-6h106v88c0 13.255 10.745 24 24 24h88v202a6 6 0 0 1-6 6zm6-256h-64V48h9.373c1.591 0 3.119.632 4.243 1.757l51.882 51.882a6 6 0 0 1 1.758 4.243z"></path></svg> Copy Safe Link', 2000); }
+                  }}
+                  id="defang-btn"
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.4)', padding: '12px 16px', borderRadius: '12px', color: '#67e8f9', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600, flex: 1, justifyContent: 'center' }}
+                >
+                  <FaCopy /> Copy Safe Link
+                </button>
+              </div>
+
 
               {/* RISK INSIGHTS (PRO FEATURE) */}
               <RiskInsights user={user} scanData={result} />
