@@ -76,7 +76,10 @@ export default function PrivacyPolicy() {
             once the payload is successfully transmitted.
           </p>
           <p style={{ marginTop: '10px' }}>
-            <strong>Live AI Threat Analyst:</strong> When interacting with the AI Chatbox, chat context and scan metadata are securely transmitted to our third-party LLM provider (Google Gemini) strictly for the purpose of generating real-time threat intelligence. We do not transmit your personally identifiable information (PII) to these AI models. By using the AI chat, you consent to this data processing. If you have opted-out via the <code>ai_training_enabled</code> setting in your dashboard, your data is strictly excluded from any future model-training pipelines.
+            <strong>Live AI Threat Analyst & Observability:</strong> When interacting with the AI Chatbox, chat context and scan metadata are securely transmitted to our third-party LLM provider (Google Gemini) for real-time threat intelligence. Additionally, interactions are securely logged via LangSmith for diagnostic observability. We do not transmit your personally identifiable information (PII) to these AI models or observability platforms. By using the AI chat, you consent to this data processing. If you have opted-out via the <code>ai_training_enabled</code> setting in your dashboard, your data is strictly excluded from any future model-training pipelines.
+          </p>
+          <p style={{ marginTop: '10px' }}>
+            <strong>Global Threat Intelligence (VirusTotal):</strong> For deterministic threat verification, the URLs you submit may be securely cross-referenced against the VirusTotal API. Only the URL string itself is transmitted; no account metadata, IP addresses, or user identities are shared with this third-party provider.
           </p>
         </section>
 

@@ -6,6 +6,15 @@ This release includes a complete architectural overhaul to Next.js, asynchronous
 
 ---
 
+## 🌟 PhishX v2.3.0 - Threat Intel & Observability Overhaul
+- **AI Architecture Migration:** Migrated from the direct Google GenAI SDK to LangChain with LangGraph state graphs for robust, multi-step AI reasoning.
+- **VirusTotal Integration:** Integrated the VirusTotal API into the threat detection pipeline for deterministic global threat verification, adding defense-in-depth alongside our local ML models.
+- **LangSmith Tracing:** Added comprehensive LangSmith observability for trace-level AI debugging, monitoring token usage, latency, and prompt execution.
+- **Next.js Security Upgrade:** Bumped the frontend framework to Next.js 15.5.21 to resolve critical CVEs in dependencies.
+- **HTTP Security Headers:** Implemented strict Content Security Policy (CSP), Referrer-Policy, and X-Content-Type-Options headers in `next.config.mjs`.
+- **Vulnerability Disclosure:** Deployed a standard RFC 9116 `public/.well-known/security.txt` file.
+- **Admin Panel Polish:** Fixed CSS jumping animations in the diagnostic pulse loaders by removing duplicate keyframes.
+
 ## 🌟 PhishX v2.2.0 - AI Threat Intelligence & Security Upgrades
 - **Live AI Chat Widget:** Integrated a contextual Gemini-powered AI threat analyst directly into the scan interface, featuring custom UI avatars, bouncing animations, and quick-action prompt chips.
 - **AI Prompt Guardrails:** Built a robust regex engine and Pydantic boundary payload validation to intercept jailbreaks, system-prompt leakage, and payload bloat attempts.

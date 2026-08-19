@@ -17,6 +17,15 @@ from app.services.whitelist import TRUSTED_DOMAINS
 
 logger = logging.getLogger(__name__)
 
+# LangGraph threat pipeline (Phase 2 upgrade)
+try:
+    from app.services.threat_graph import analyze_url_with_graph as _graph_analyze
+    _USE_THREAT_GRAPH = True
+except ImportError:
+    _USE_THREAT_GRAPH = False
+    logger.warning("LangGraph not available — using legacy analyze_url() fallback.")
+
+
 router = APIRouter()
 
 # Global model cache
@@ -56,6 +65,23 @@ def get_model():
 SAFE_WHITELIST = TRUSTED_DOMAINS
 
 def analyze_url(url: str, model_instance) -> dict:
+    """
+    Main URL analysis entrypoint.
+    Delegates to the LangGraph multi-node pipeline when available,
+    falling back to the legacy sequential implementation otherwise.
+    """
+    if _USE_THREAT_GRAPH:
+        try:
+            return _graph_analyze(url)
+        except Exception as e:
+            logger.warning(f"Threat graph failed for {url}, falling back to legacy: {e}")
+
+    # ── Legacy fallback implementation ───────────────────────────────────────
+    return _analyze_url_legacy(url, model_instance)
+
+
+def _analyze_url_legacy(url: str, model_instance) -> dict:
+    """Original sequential analyze_url logic — kept as a reliable fallback."""
     raw_url = url.strip().lower()
 
     # 0. Internal System Pages Whitelist (chrome://, chrome-extension://, edge://, file://, etc.)
