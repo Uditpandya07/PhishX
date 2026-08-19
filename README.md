@@ -82,7 +82,7 @@ Fsa<div align="center">
       <br/><br/>
       <strong>🧠 AI-Driven Threat Detection</strong>
       <br/><br/>
-      <sub>Custom ML model combined with a <strong>Zero-Latency Offline Top 10k Whitelist</strong> and a <strong>Dynamic Community Feedback loop</strong>. Identifies zero-day phishing attempts while organically adapting to prevent false positives — completely free of charge.</sub>
+      <sub>Custom ML model combined with a <strong>Zero-Latency Offline Top 10k Whitelist</strong>, a <strong>Dynamic Community Feedback loop</strong>, and deterministic cross-referencing against <strong>VirusTotal's Global Threat Intel API</strong>. Identifies zero-day phishing attempts with absolute confidence.</sub>
       <br/><br/>
     </td>
     <td align="center" width="33%">
@@ -187,7 +187,7 @@ Fsa<div align="center">
       <br/><br/>
       <strong>💬 Live AI Threat Analyst</strong>
       <br/><br/>
-      <sub>Powered by Gemini, ask context-aware questions about scan results. Fortified with strict Pydantic payload limits and robust prompt-injection guardrails.</sub>
+      <sub>Powered by a stateful <strong>LangGraph & Gemini</strong> agent, ask context-aware questions about scan results. Fully traceable via <strong>LangSmith</strong> observability and fortified against prompt-injection.</sub>
       <br/><br/>
     </td>
   </tr>
@@ -228,6 +228,12 @@ graph TD
         J["📁 Dataset\nphishing_site_urls.csv"]
         W["⚡ Zero-Latency\nTop 10k & Feedback Whitelist"]
         XAI["🔬 xAI Heuristics\n(Zero-Day Detection)"]
+        VT["🦠 VirusTotal\nGlobal Intel API"]
+        LC["🔗 LangChain & LangGraph\n(AI State Machine)"]
+    end
+
+    subgraph OBSERVABILITY["🔍  OBSERVABILITY"]
+        LS["👁️ LangSmith\nTrace Logging"]
     end
 
     subgraph DATA["🗄️  DATA LAYER"]
@@ -240,6 +246,9 @@ graph TD
     B -- "HTTPS REST" --> D
     D --> W --> H --> I --> J
     D --> XAI
+    D --> VT
+    CHAT --> LC
+    LC --> LS
     C & D & E & F & G & N & CT --> K
     L --> K
 
@@ -349,6 +358,7 @@ cd PhishX
 # 2. Configure environment variables
 cp .env.example .env
 # → Open .env and fill in: DB credentials, JWT secret, SMTP config
+# → (Optional) Add your LangSmith and VirusTotal API keys for full functionality
 
 # 3. Launch the full stack
 docker-compose up -d --build
