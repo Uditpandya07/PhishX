@@ -39,7 +39,7 @@ export default function TermsOfService({ onContactSupport }) {
         <section>
           <h3><FaHandshake /> 3. Limitation of Liability & "As-Is" Disclaimer</h3>
           <p>
-            The Service is provided on an "AS IS" and "AS AVAILABLE" basis. While our AI aims for high accuracy, 
+            The Service is provided on an "AS IS" and "AS AVAILABLE" basis. While our AI and integrated third-party threat intelligence APIs aim for high accuracy, 
             we do not warrant that the Service is error-free (i.e., immune to false positives or false negatives). 
             <strong>To the maximum extent permitted by law, PhishX and its Creator shall not be liable for any direct, 
             indirect, incidental, or consequential damages resulting from your reliance on the scan results.</strong> 
