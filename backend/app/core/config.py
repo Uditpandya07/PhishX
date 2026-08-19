@@ -66,6 +66,15 @@ class Settings(BaseSettings):
     # Gemini API Key
     GEMINI_API_KEY: Optional[str] = None
 
+    # ─── LangSmith Observability (free at smith.langchain.com) ───────────────
+    LANGCHAIN_API_KEY: Optional[str] = None
+    LANGCHAIN_PROJECT: str = "phishx"
+    LANGCHAIN_TRACING_V2: bool = False
+    LANGCHAIN_ENDPOINT: Optional[str] = None
+
+    # ─── Optional External Threat Intel APIs ─────────────────────────────────
+    VIRUSTOTAL_API_KEY: Optional[str] = None
+
     class Config:
         case_sensitive = True
         env_file = "../.env"
