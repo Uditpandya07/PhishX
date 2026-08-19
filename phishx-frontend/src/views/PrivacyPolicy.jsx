@@ -80,6 +80,7 @@ export default function PrivacyPolicy() {
           </p>
           <p style={{ marginTop: '10px' }}>
             <strong>Global Threat Intelligence (VirusTotal):</strong> For deterministic threat verification, the URLs you submit may be securely cross-referenced against the VirusTotal API. Only the URL string itself is transmitted; no account metadata, IP addresses, or user identities are shared with this third-party provider.
+          </p>
         </section>
 
         <section>
