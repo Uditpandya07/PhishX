@@ -34,3 +34,6 @@ As of v2.1.0, PhishX completely removed local storage (`localStorage`, `sessionS
 
 ### 2. Webhook Payloads
 The DevSecOps Slack Webhook integration is strictly constrained to transmit URL observables, ML risk scores, and AI reasoning. Absolutely **no Personally Identifiable Information (PII)** or user tracking strings are appended to outbound webhook `POST` requests, preventing accidental data leaks to external Slack/Teams environments.
+
+### 3. Vulnerability Disclosure & HTTP Security
+A standard RFC 9116 `security.txt` is available at `/.well-known/security.txt` for security researchers to report vulnerabilities. Additionally, the Next.js frontend strictly enforces Content Security Policy (CSP), X-Content-Type-Options, and Referrer-Policy headers to mitigate XSS and MIME-sniffing vulnerabilities.
