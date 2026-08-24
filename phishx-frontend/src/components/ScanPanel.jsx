@@ -452,20 +452,6 @@ export default function ScanPanel({ isLoggedIn, user, onAuthRequired, onScanComp
             </button>
           </div>
 
-          {/* RECENT SCANS UI */}
-          {!loading && !result && recentScans.length > 0 && (
-            <div style={{ marginTop: '1.2rem', textAlign: 'left' }}>
-              <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px', fontWeight: 600 }}>Recent Scans</div>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {recentScans.map((r, i) => (
-                  <button key={i} onClick={() => setUrl(r)} style={{ background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', padding: '6px 12px', fontSize: '0.8rem', color: '#cbd5e1', cursor: 'pointer', transition: 'all 0.2s' }}>
-                    {r.replace(/^https?:\/\//, '')}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
           {loading && (
             <motion.div 
               className="loading-progress-container"
