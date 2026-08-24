@@ -11,7 +11,7 @@ export default function Landing({ onEnter }) {
         width: "100vw",
         position: "relative",
         overflow: "hidden",
-        cursor: "pointer",
+        cursor: "crosshair",
         backgroundColor: "#000000"
       }}
     >
