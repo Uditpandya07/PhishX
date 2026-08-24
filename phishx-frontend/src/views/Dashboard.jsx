@@ -27,6 +27,7 @@ import Documentation from "./Documentation";
 import VisionPage from "./VisionPage";
 import NewsPage from "./NewsPage";
 import AnalyticsPage from "./AnalyticsPage";
+import DevJourney from "./DevJourney";
 
 import "./Dashboard.css";
 
@@ -651,6 +652,8 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
         return <NewsPage />;
       case 'intel':
         return <AnalyticsPage />;
+      case 'journey':
+        return <DevJourney />;
       default:
         return (
           <>
@@ -1063,7 +1066,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
 
       <nav className={`navbar ${isMobileMenuOpen ? "mobile-menu-active" : ""}`}>
         <div className="nav-brand" onClick={() => { setView('main'); setIsMobileMenuOpen(false); }} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <img src="/logo-icon.png" alt="PhishX Icon" className="brand-icon" style={{ height: '40px' }} />
+          <img src="/logo-icon.png" alt="PhishX Icon" className="brand-icon glitch-logo" style={{ height: '40px' }} />
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center', marginRight: user?.subscription_tier && user.subscription_tier !== 'free' ? '30px' : '0px' }}>
             <img src="/brand-text.png" alt="PhishX" className="brand-text-img" style={{ height: '40px' }} />
             {user?.subscription_tier && user.subscription_tier !== 'free' && (
@@ -1244,6 +1247,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                 <a href="#" onClick={() => setView('creator')} style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>Meet the Creator</a>
                 <a href="#" onClick={() => setView('docs')} style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>Documentation</a>
                 <a href="#" onClick={() => setView('vision')} style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>Vision</a>
+                <a href="#" onClick={() => setView('journey')} style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>Development Journey</a>
               </div>
               <div className="footer-col">
                 <h4 style={{ color: '#fff', marginBottom: '20px', fontSize: '1.1rem' }}>Legal</h4>
