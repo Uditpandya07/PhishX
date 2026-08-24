@@ -1,0 +1,74 @@
+[
+  {
+    "id": "nov-2025",
+    "month": "November",
+    "year": "2025",
+    "dateString": "November 2025",
+    "title": "The Spark of an Idea",
+    "content": "Every great project starts with a simple question. For PhishX, it was: 'How can we stop phishing attacks before they reach the everyday user?' We spent this month analyzing existing cybersecurity tools and realizing that most were too complex or too expensive for the average person. We started drafting the initial architecture for a fast, accessible, AI-driven phishing detection platform. The blueprint for PhishX was officially born."
+  },
+  {
+    "id": "dec-2025",
+    "month": "December",
+    "year": "2025",
+    "dateString": "December 2025",
+    "title": "Prototyping the Brain",
+    "content": "With the architecture planned, we dove deep into machine learning. We started gathering massive datasets of both benign and malicious URLs. The focus was on identifying the core 'DNA' of a phishing link. We mapped out the initial lexical features—like entropy, character distribution, and domain reputation—that our future neural engine would need to analyze in milliseconds."
+  },
+  {
+    "id": "jan-2026",
+    "month": "January",
+    "year": "2026",
+    "dateString": "January 2026",
+    "title": "Designing the Experience",
+    "content": "Technology is only useful if people can actually use it. We spent January focusing on UI/UX design. We wanted a premium, modern, 'cyber-terminal' aesthetic that felt powerful but intuitive. We chose our tech stack—React for a snappy frontend and FastAPI for a blazing-fast backend—and prepared our development environment for the heavy lifting to come."
+  },
+  {
+    "id": "feb-2026",
+    "month": "February",
+    "year": "2026",
+    "dateString": "February 2026",
+    "title": "Hello World, Meet PhishX",
+    "content": "Our first official lines of code hit the repository! We set up the core backend structure and successfully connected it to our early ML model. We also rolled out the initial version of our glassmorphism dashboard and the beautiful animated landing page. Seeing the prediction flow work end-to-end for the first time was an incredible milestone."
+  },
+  {
+    "id": "mar-2026",
+    "month": "March",
+    "year": "2026",
+    "dateString": "March 2026",
+    "title": "Securing the Gates",
+    "content": "With the core scanner working, we needed to build a platform around it. We implemented user authentication, robust URL validation, and dynamic scan histories so users could track their past analyses. We overhauled the App routing and refined the UI layout, ensuring everything felt seamless and responsive."
+  },
+  {
+    "id": "apr-2026",
+    "month": "April",
+    "year": "2026",
+    "dateString": "April 2026",
+    "title": "The Massive Overhaul",
+    "content": "April was our biggest month yet. We completely upgraded our ML feature extractor to analyze 15 advanced heuristics, achieving a 99.4% detection accuracy. We deployed a massive 500+ trusted domain whitelist, hardened our security with HTTPOnly cookies, and containerized the entire application with Docker. We also launched the professional admin dashboards, legal pages, and finalized the dynamic threat categorization system. PhishX transformed from a prototype into a production-grade SaaS."
+  },
+  {
+    "id": "may-2026",
+    "month": "May",
+    "year": "2026",
+    "dateString": "May 2026",
+    "title": "Optimizations & Stability",
+    "content": "After the massive architecture upgrades in April, May was dedicated to stability. We refined the Threat Radar logic, squashed edge-case bugs in the URL parsing engine, and tightened our frontend styling. We made sure that even under heavy load, the scanning animation remained perfectly synced with our sub-100ms prediction engine."
+  },
+  {
+    "id": "jun-2026",
+    "month": "June",
+    "year": "2026",
+    "dateString": "June 2026",
+    "title": "Polishing the Armor",
+    "content": "We focused heavily on the user experience and visual polish. This included synchronizing the platform branding, upgrading dependency versions for security compliance, and refining the glassmorphic tokens across all dashboard panels. The goal was to make the app feel incredibly premium while remaining lightweight."
+  },
+  {
+    "id": "jul-2026",
+    "month": "July",
+    "year": "2026",
+    "dateString": "July 2026",
+    "title": "Ready for the World",
+    "content": "Final preparations for a wider release. We conducted final security hardening checks, ensured our database schema evolution was bulletproof using Alembic, and verified that our API endpoints were securely mapped. We also began prototyping new cinematic animations to give the PhishX brand an even more striking visual identity."
+  }
+]
