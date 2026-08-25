@@ -16,6 +16,7 @@ import PricingCards from "../components/PricingCards.jsx";
 import TechStack from "../components/TechStack.jsx";
 import ContactModal from "../components/ContactModal.jsx";
 import CookieBanner from "../components/CookieBanner.jsx";
+import PhylocLogo from "../components/phyloc/PhylocLogo.jsx";
 import { showErrorPopup } from "../utils/errorHandler";
 // import ThreatTicker from "../components/ThreatTicker.jsx";
 // New Pages
@@ -532,7 +533,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
         <div class="details-grid">
           <div><span class="label">Audit Reference ID:</span> <span class="val">${escapeHtml(auditId)}</span></div>
           <div><span class="label">Monitoring Period:</span> <span class="val">${escapeHtml(dateRangeStr)}</span></div>
-          <div><span class="label">Detection Engine:</span> <span class="val" style="color: #38bdf8;">PhishX V2 ML Classifier (Random Forest)</span></div>
+          <div><span class="label">Detection Engine:</span> <span class="val" style="color: #38bdf8;">PhishX V3 Elite Classifier (Random Forest)</span></div>
         </div>
       </div>
     </div>
@@ -558,7 +559,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
 
     <div class="exec-summary">
       <strong style="color: #4ade80; display: block; margin-bottom: 8px; font-size: 14px; letter-spacing: 0.5px; text-transform: uppercase;">📋 Executive Threat Analysis & Methodology</strong>
-      This security audit report covers the monitoring period of <strong>${escapeHtml(dateRangeStr)}</strong> for authorized SOC operator <strong>${escapeHtml(operatorName)}</strong>. During this timeframe, the <strong>PhishX Deep Lexical & Neural Engine (v2.0)</strong> evaluated <strong>${totalScans} URLs</strong>.<br/><br/>
+      This security audit report covers the monitoring period of <strong>${escapeHtml(dateRangeStr)}</strong> for authorized SOC operator <strong>${escapeHtml(operatorName)}</strong>. During this timeframe, the <strong>PhishX Deep Lexical & Neural Engine (v3.0)</strong> evaluated <strong>${totalScans} URLs</strong>.<br/><br/>
       <strong style="color: #38bdf8; font-size: 13px;">3-Layer Hierarchical Precedence Evaluation:</strong>
       <ul style="margin: 6px 0 10px 18px; padding: 0; color: #cbd5e1; font-size: 13px; line-height: 1.5;">
         <li><strong>Layer 1 (Enterprise Whitelist):</strong> Direct string matching against 500+ curated trusted domains with 0.0% false-positive guarantee.</li>
@@ -590,7 +591,7 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
     <div class="footer">
       <div>
         <div style="font-size: 11px; color: #4ade80; font-weight: 700; margin-bottom: 4px;">AUTHORIZED BY:</div>
-        <div style="font-size: 13px; font-weight: 800; color: #f1f5f9; letter-spacing: 0.5px;">PhishX Autonomous Threat Engine (V2 ML Classifier • Alembic Verified)</div>
+        <div style="font-size: 13px; font-weight: 800; color: #f1f5f9; letter-spacing: 0.5px;">PhishX Autonomous Threat Engine (V3 Elite Classifier • Alembic Verified)</div>
         <div style="font-size: 11px; color: #64748b;">End-to-End JWT Session Security • SHA-256 Telemetry Lock • DPDP & GDPR Compliant</div>
       </div>
       <div style="text-align: right;">
@@ -701,14 +702,96 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                 </p>
 
                 {/* Cyber Action Buttons */}
-                <div className="hero-btn-group cyber-btn-group">
-                  <a href="#scan" className="primary-btn-nav hero-primary-btn cyber-primary-btn">
-                    <span>Start Scanning ⚡</span>
-                  </a>
-                  <a href="#about" className="login-btn hero-secondary-btn cyber-secondary-btn">
-                    <span>Learn More</span>
-                    <span className="cyber-arrow">&rarr;</span>
-                  </a>
+                <div className="hero-btn-group" style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '40px' }}>
+                  <motion.a 
+                    href="#scan" 
+                    whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(74, 222, 128, 0.4)' }}
+                    whileTap={{ scale: 0.95 }}
+                    style={{
+                      height: '80px',
+                      minWidth: '280px',
+                      justifyContent: 'center',
+                      background: 'linear-gradient(135deg, #16a34a, #4ade80)',
+                      color: '#000',
+                      fontWeight: 800,
+                      padding: '0 36px',
+                      borderRadius: '16px',
+                      textDecoration: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      fontSize: '1.2rem',
+                      border: '1px solid rgba(74, 222, 128, 0.5)',
+                      boxShadow: '0 10px 25px rgba(22, 163, 74, 0.3)'
+                    }}
+                  >
+                    <span>Start Scanning</span>
+                    <FaBolt style={{ fontSize: '1.4rem' }} />
+                  </motion.a>
+                  
+                  <motion.a 
+                    href={isLoggedIn ? "/phyloc" : "#"} 
+                    onClick={(e) => {
+                      if (!isLoggedIn) {
+                        e.preventDefault();
+                        openModal("login", e);
+                      }
+                    }}
+                    whileHover={{ 
+                      scale: 1.05, 
+                      background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(8, 47, 73, 0.9))',
+                      boxShadow: '0 0 40px rgba(6, 182, 212, 0.4), inset 0 0 20px rgba(6, 182, 212, 0.4)',
+                      borderColor: 'rgba(6, 182, 212, 0.8)'
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                    style={{
+                      height: '80px',
+                      minWidth: '280px',
+                      justifyContent: 'center',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      background: 'linear-gradient(135deg, rgba(2, 6, 23, 0.8), rgba(15, 23, 42, 0.8))',
+                      backdropFilter: 'blur(12px)',
+                      padding: '0 24px',
+                      borderRadius: '16px',
+                      textDecoration: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '18px',
+                      border: '1px solid rgba(6, 182, 212, 0.4)',
+                      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(6, 182, 212, 0.1)'
+                    }}
+                  >
+                    {/* Sweeping Light Animation Overlay */}
+                    <motion.div
+                      animate={{ x: ['-100%', '250%'] }}
+                      transition={{ repeat: Infinity, duration: 2.5, ease: 'linear', repeatDelay: 1.5 }}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: '-20%',
+                        width: '40%',
+                        height: '100%',
+                        background: 'linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.3), transparent)',
+                        transform: 'skewX(-25deg)',
+                        zIndex: 0
+                      }}
+                    />
+                    
+                    <div style={{ zIndex: 1, filter: 'drop-shadow(0 0 8px rgba(6,182,212,0.4))' }}>
+                      <PhylocLogo size={42} showText={false} />
+                    </div>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', zIndex: 1 }}>
+                      <span style={{ fontSize: '1.15rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.2px', textShadow: '0 0 15px rgba(255,255,255,0.4)' }}>
+                        Phyloc Scanner
+                      </span>
+                      <span style={{ fontSize: '0.75rem', color: '#0ea5e9', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px' }}>
+                        Email Intelligence
+                      </span>
+                    </div>
+                    <span style={{ color: '#38bdf8', marginLeft: '16px', fontSize: '1.5rem', zIndex: 1, textShadow: '0 0 10px rgba(56,189,248,0.8)' }}>&rarr;</span>
+                  </motion.a>
                 </div>
               </motion.div>
             </section>
@@ -805,13 +888,19 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                   </p>
                 </div>
 
-                <div className="feature-card-premium">
-                  <div className="feature-icon-wrapper">
-                    <FiZap />
+                <div className="feature-card-premium" onClick={(e) => {
+                  if (isLoggedIn) {
+                    window.location.href = '/phyloc';
+                  } else {
+                    openModal("login", e);
+                  }
+                }} style={{ cursor: 'pointer' }}>
+                  <div className="feature-icon-wrapper" style={{ border: '1px solid rgba(14, 165, 233, 0.3)', background: 'rgba(14, 165, 233, 0.1)', boxShadow: '0 0 20px rgba(14, 165, 233, 0.2)' }}>
+                    <FaEnvelopeOpenText style={{ color: '#0ea5e9' }} />
                   </div>
-                  <h3 style={{ fontSize: '1.2rem', marginBottom: '10px' }}>Millisecond Analysis</h3>
+                  <h3 style={{ fontSize: '1.2rem', marginBottom: '10px' }}>Phyloc Email Intelligence</h3>
                   <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                    State-of-the-art backend infrastructure ensures that your threat intelligence is delivered in real-time.
+                    Deep structural analysis of raw .eml files and headers to intercept zero-day phishing payloads.
                   </p>
                 </div>
 
@@ -1228,38 +1317,44 @@ export default function Dashboard({ onLogout, isLoggedIn, setIsLoggedIn, setEnte
                 Next-generation AI phishing detection. A non-commercial project dedicated to securing individuals and communities from digital threats.
               </p>
               <div style={{ display: 'flex', gap: '20px', marginTop: '30px' }}>
-                <a href="https://github.com/Uditpandya07" target="_blank" rel="noopener noreferrer" style={{ color: '#94a3b8', fontSize: '1.5rem' }}><FaGithub /></a>
-                <a href="https://www.linkedin.com/in/uditpandya07/" target="_blank" rel="noopener noreferrer" style={{ color: '#94a3b8', fontSize: '1.5rem' }}><FaLinkedin /></a>
-                <a href="https://www.producthunt.com/products/phishx?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-phishx" target="_blank" rel="noopener noreferrer" style={{ color: '#94a3b8', fontSize: '1.5rem' }}><FaProductHunt /></a>
+                <a href="https://github.com/Uditpandya07" target="_blank" rel="noopener noreferrer" className="social-link"><FaGithub /></a>
+                <a href="https://www.linkedin.com/in/uditpandya07/" target="_blank" rel="noopener noreferrer" className="social-link"><FaLinkedin /></a>
+                <a href="https://www.producthunt.com/products/phishx?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-phishx" target="_blank" rel="noopener noreferrer" className="social-link"><FaProductHunt /></a>
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '40px', flexWrap: 'wrap', flex: '1', justifyContent: 'space-around' }}>
+            <div className="footer-nav">
               <div className="footer-col">
                 <h4 style={{ color: '#fff', marginBottom: '20px', fontSize: '1.1rem' }}>Product</h4>
-                <a href="#scan" onClick={() => setView('main')} style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>Scanner</a>
-                <a href="#features" onClick={() => setView('main')} style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>Capabilities</a>
-                <a href="#api" onClick={() => setView('api')} style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>API (Soon)</a>
-                <a href="#extension" onClick={(e) => handleNavClick(e, 'extension', null)} style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>Extension</a>
+                <a href="#scan" onClick={() => setView('main')} className="footer-link">Scanner</a>
+                <a href={isLoggedIn ? "/phyloc" : "#"} onClick={(e) => {
+                  if (!isLoggedIn) {
+                    e.preventDefault();
+                    openModal("login", e);
+                  }
+                }} className="footer-link">Phyloc Email Scanner</a>
+                <a href="#features" onClick={() => setView('main')} className="footer-link">Capabilities</a>
+                <a href="#api" onClick={() => setView('api')} className="footer-link">API (Soon)</a>
+                <a href="#extension" onClick={(e) => handleNavClick(e, 'extension', null)} className="footer-link">Extension</a>
               </div>
               <div className="footer-col">
                 <h4 style={{ color: '#fff', marginBottom: '20px', fontSize: '1.1rem' }}>Resources</h4>
-                <a href="#" onClick={() => setView('creator')} style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>Meet the Creator</a>
-                <a href="#" onClick={() => setView('docs')} style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>Documentation</a>
-                <a href="#" onClick={() => setView('vision')} style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>Vision</a>
-                <a href="#" onClick={() => setView('journey')} style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>Development Journey</a>
+                <a href="#" onClick={() => setView('creator')} className="footer-link">Meet the Creator</a>
+                <a href="#" onClick={() => setView('docs')} className="footer-link">Documentation</a>
+                <a href="#" onClick={() => setView('vision')} className="footer-link">Vision</a>
+                <a href="#" onClick={() => setView('journey')} className="footer-link">Development Journey</a>
               </div>
               <div className="footer-col">
                 <h4 style={{ color: '#fff', marginBottom: '20px', fontSize: '1.1rem' }}>Legal</h4>
-                <a href="#" onClick={() => setView('privacy')} style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>Privacy Policy</a>
-                <a href="#" onClick={() => setView('terms')} style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>Terms of Service</a>
+                <a href="#" onClick={() => setView('privacy')} className="footer-link">Privacy Policy</a>
+                <a href="#" onClick={() => setView('terms')} className="footer-link">Terms of Service</a>
               </div>
               <div className="footer-col">
                 <h4 style={{ color: '#fff', marginBottom: '20px', fontSize: '1.1rem' }}>Support</h4>
                 {isLoggedIn ? (
-                  <a href="#" onClick={(e) => { e.preventDefault(); setIsContactOpen(true); }} style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>Contact Support</a>
+                  <a href="#" onClick={(e) => { e.preventDefault(); setIsContactOpen(true); }} className="footer-link">Contact Support</a>
                 ) : (
-                  <a href="#" onClick={(e) => openModal("login", e)} style={{ color: '#64748b', textDecoration: 'none', display: 'block', marginBottom: '10px' }}>Contact Support</a>
+                  <a href="#" onClick={(e) => openModal("login", e)} className="footer-link">Contact Support</a>
                 )}
               </div>
             </div>
