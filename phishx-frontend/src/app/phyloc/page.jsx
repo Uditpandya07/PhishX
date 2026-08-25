@@ -44,38 +44,30 @@ export default function PhylocPage() {
   }, []);
 
   useEffect(() => {
-    // Try to load dashboard. If it returns data with lookups, the user might be logged in.
-    // However, we changed dashboard to return 200 even for unauthenticated users, 
-    // but without user info. 
-    // To check real auth, we could ping a protected endpoint or just rely on localStorage 
-    // from the main PhishX app. The main PhishX app stores "phishx_token" if we want to use it.
-    const token = (typeof window !== 'undefined' ? sessionStorage.getItem("token") : null) || 
-                  (typeof window !== 'undefined' ? localStorage.getItem("phishx_token") : null);
-    if (!token) {
-      setSession(null);
-      setDashboard(null);
-      setLoading(false);
-      return;
-    }
-
-    // Load dashboard
-    axios.get(`${API_URL}/api/v1/phyloc/dashboard`)
-      .then(res => {
-        setSession({ user: { name: "PhishX User" } }); // Mock session for UI
-        setProfileName("PhishX User");
-        setDashboard(res.data);
-        if (res.data.latestLookup) {
-          setLookupResult(res.data.latestLookup);
+    // We should rely on the HttpOnly cookie by pinging /users/me, just like the main app does!
+    axios.get(`${API_URL}/api/v1/users/me`)
+      .then(userRes => {
+        // User is authenticated!
+        setSession(userRes.data);
+        setProfileName(userRes.data.name || "PhishX User");
+        
+        // Now load their dashboard data
+        return axios.get(`${API_URL}/api/v1/phyloc/dashboard`);
+      })
+      .then(dashboardRes => {
+        setDashboard(dashboardRes.data);
+        if (dashboardRes.data.latestLookup) {
+          setLookupResult(dashboardRes.data.latestLookup);
         }
       })
       .catch(err => {
-        if (err.response && err.response.status === 401) {
-          localStorage.removeItem("phishx_token");
-          setSession(null);
-          setToast("Session expired. Please sign in again.");
-        }
+        // If /users/me fails, they are not authenticated.
+        setSession(null);
+        setDashboard(null);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   useEffect(() => {
