@@ -27,7 +27,8 @@ export default function AdminPanel() {
     { id: 'contact', name: 'Support Tickets', status: 'pending', message: 'Idle' },
     { id: 'news', name: 'CyberPulse Feed', status: 'pending', message: 'Idle' },
     { id: 'razorpay', name: 'Razorpay Gateway', status: 'pending', message: 'Idle' },
-    { id: 'ai', name: 'Gemini AI Core', status: 'pending', message: 'Idle' }
+    { id: 'ai', name: 'Gemini AI Core', status: 'pending', message: 'Idle' },
+    { id: 'phyloc_engine', name: 'Phyloc Intelligence', status: 'pending', message: 'Idle' }
   ]);
 
   const fetchData = async () => {
@@ -80,7 +81,7 @@ export default function AdminPanel() {
 
     // 1. API Gateway Test
     try {
-      await axios.get(`${baseUrl}/`);
+      await axios.get(`${baseUrl}/`, { timeout: 5000 });
       updateTest('api', 'success', 'Live');
     } catch (err) { 
       updateTest('api', 'error', 'Offline'); 
@@ -90,7 +91,7 @@ export default function AdminPanel() {
     // 2. Database Test
     try {
       const start = performance.now();
-      await axios.get(`${baseUrl}/api/v1/admin/stats`);
+      await axios.get(`${baseUrl}/api/v1/admin/stats`, { timeout: 5000 });
       const end = performance.now();
       updateTest('db', 'success', 'Connected');
       updateTest('latency', 'success', `${Math.round(end - start)}ms`);
@@ -102,7 +103,7 @@ export default function AdminPanel() {
 
     // 3. Scanner Test
     try {
-      await axios.get(`${baseUrl}/api/v1/scans/history`);
+      await axios.get(`${baseUrl}/api/v1/scans/history`, { timeout: 5000 });
       updateTest('scanner', 'success', 'Ready');
     } catch (err) { 
       updateTest('scanner', 'error', 'Fault'); 
@@ -111,7 +112,7 @@ export default function AdminPanel() {
 
     // 4. Auth Test
     try {
-      await axios.get(`${baseUrl}/api/v1/users/me`);
+      await axios.get(`${baseUrl}/api/v1/users/me`, { timeout: 5000 });
       updateTest('auth', 'success', 'Secured');
     } catch (err) { 
       updateTest('auth', 'error', 'Expired'); 
@@ -160,7 +161,7 @@ export default function AdminPanel() {
     // 7. Logic Core (Minute Function Test)
     try {
       const headers = { Authorization: `Bearer ${sessionStorage.getItem("token") || ""}` };
-      const res = await axios.get(`${baseUrl}/api/v1/users/me`, { headers });
+      const res = await axios.get(`${baseUrl}/api/v1/users/me`, { headers, timeout: 5000 });
       const userData = res.data;
       
       if (typeof userData.ai_training_enabled === 'boolean') {
@@ -175,7 +176,7 @@ export default function AdminPanel() {
 
     // 8. DB Deep Ping
     try {
-      const res = await axios.get(`${baseUrl}/api/v1/admin/health`);
+      const res = await axios.get(`${baseUrl}/api/v1/admin/health`, { timeout: 5000 });
       if (res.data.database === 'connected') {
         updateTest('db', 'success', 'Optimized');
       } else {
@@ -189,7 +190,7 @@ export default function AdminPanel() {
 
     // 9. Contact Support Ticket Test
     try {
-      await axios.get(`${baseUrl}/api/v1/contact/admin/queries`);
+      await axios.get(`${baseUrl}/api/v1/contact/admin/queries`, { timeout: 5000 });
       updateTest('contact', 'success', 'Tracking');
     } catch (err) {
       updateTest('contact', 'error', 'Failure');
@@ -198,7 +199,7 @@ export default function AdminPanel() {
 
     // 10. CyberPulse News Test
     try {
-      await axios.get(`${baseUrl}/api/v1/news/`);
+      await axios.get(`${baseUrl}/api/v1/news/`, { timeout: 5000 });
       updateTest('news', 'success', 'Syncing');
     } catch (err) {
       updateTest('news', 'error', 'Offline');
@@ -208,7 +209,7 @@ export default function AdminPanel() {
     // 11. Razorpay Payment Gateway Test (Real live connection check)
     try {
       const headers = { Authorization: `Bearer ${sessionStorage.getItem("token") || ""}` };
-      const res = await axios.get(`${baseUrl}/api/v1/admin/razorpay-health`, { headers });
+      const res = await axios.get(`${baseUrl}/api/v1/admin/razorpay-health`, { headers, timeout: 5000 });
       
       if (res.data.status === 'healthy') {
         updateTest('razorpay', 'success', `Connected (${res.data.latency_ms}ms)`);
@@ -223,7 +224,7 @@ export default function AdminPanel() {
     // 12. Gemini AI Core Test (Real live connection check)
     try {
       const headers = { Authorization: `Bearer ${sessionStorage.getItem("token") || ""}` };
-      const res = await axios.get(`${baseUrl}/api/v1/admin/ai-health`, { headers });
+      const res = await axios.get(`${baseUrl}/api/v1/admin/ai-health`, { headers, timeout: 15000 });
       
       if (res.data.status === 'healthy') {
         updateTest('ai', 'success', `Connected (${res.data.latency_ms}ms)`);
@@ -233,6 +234,16 @@ export default function AdminPanel() {
     } catch (err) {
       updateTest('ai', 'error', 'Failed');
       addLog('Gemini AI Core', err.response?.data?.detail || err.message);
+    }
+
+    // 13. Phyloc Engine Test
+    try {
+      const headers = { Authorization: `Bearer ${sessionStorage.getItem("token") || ""}` };
+      await axios.get(`${baseUrl}/api/v1/phyloc/health`, { headers, timeout: 5000 });
+      updateTest('phyloc_engine', 'success', 'Active');
+    } catch (err) {
+      updateTest('phyloc_engine', 'error', 'Offline');
+      addLog('Phyloc Engine', err.response?.data?.detail || err.message);
     }
 
     setIsPulseRunning(false);

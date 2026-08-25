@@ -1180,23 +1180,23 @@
   height: 320px;
   border: 2px solid rgba(14, 165, 233, 0.1);
   border-top-color: rgba(14, 165, 233, 0.8);
-  animation: spin 12s linear infinite;
+  animation: spin-centered 12s linear infinite;
 }
 .inner-ring {
   width: 240px;
   height: 240px;
   border: 1px dashed rgba(74, 222, 128, 0.4);
-  animation: spin-reverse 8s linear infinite;
+  animation: spin-centered-reverse 8s linear infinite;
 }
 
 @keyframes float-shield {
   0%, 100% { transform: translateY(0) scale(1); }
   50% { transform: translateY(-10px) scale(1.02); filter: drop-shadow(0 0 45px rgba(6, 182, 212, 0.8)); }
 }
-@keyframes spin {
+@keyframes spin-centered {
   to { transform: translate(-50%, -50%) rotate(360deg); }
 }
-@keyframes spin-reverse {
+@keyframes spin-centered-reverse {
   to { transform: translate(-50%, -50%) rotate(-360deg); }
 }
 
@@ -1374,23 +1374,23 @@
   height: 320px;
   border: 2px solid rgba(14, 165, 233, 0.1);
   border-top-color: rgba(14, 165, 233, 0.8);
-  animation: spin 12s linear infinite;
+  animation: spin-centered 12s linear infinite;
 }
 .inner-ring {
   width: 240px;
   height: 240px;
   border: 1px dashed rgba(74, 222, 128, 0.4);
-  animation: spin-reverse 8s linear infinite;
+  animation: spin-centered-reverse 8s linear infinite;
 }
 
 @keyframes float-shield {
   0%, 100% { transform: translateY(0) scale(1); }
   50% { transform: translateY(-10px) scale(1.02); filter: drop-shadow(0 0 45px rgba(6, 182, 212, 0.8)); }
 }
-@keyframes spin {
+@keyframes spin-centered {
   to { transform: translate(-50%, -50%) rotate(360deg); }
 }
-@keyframes spin-reverse {
+@keyframes spin-centered-reverse {
   to { transform: translate(-50%, -50%) rotate(-360deg); }
 }
 

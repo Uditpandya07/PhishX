@@ -47,6 +47,7 @@
   border-top-color: #a855f7;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
+  box-sizing: border-box;
 }
 
 .pulse-card.success {

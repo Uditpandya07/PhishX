@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import auth, users, scans, payments, feedback, admin, ws, news, contact, trial, chat
+from app.api.v1.endpoints import auth, users, scans, payments, feedback, admin, ws, news, contact, trial, chat, phyloc
 
 api_router = APIRouter()
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
@@ -14,3 +14,4 @@ api_router.include_router(news.router, prefix="/news", tags=["news"])
 api_router.include_router(contact.router, prefix="/contact", tags=["contact"])
 api_router.include_router(trial.router, prefix="/trial", tags=["trial"])
 api_router.include_router(chat.router, prefix="/chat", tags=["chat"])
+api_router.include_router(phyloc.router, prefix="/phyloc", tags=["phyloc"])

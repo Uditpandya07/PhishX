@@ -60,8 +60,8 @@ Fsa<div align="center">
 
 <br/><br/>
 
-> **PhishX v2.0** is a sophisticated, full-stack cybersecurity platform engineered to neutralize phishing threats in real-time.
-> Now powered by **Next.js 15**, a real-time **WebSocket** scanning engine, **xAI** heuristic analysis, **Celery** distributed task queues, and a GDPR/DPDP compliant legal framework —
+> **PhishX v3.0** is a sophisticated, full-stack cybersecurity platform engineered to neutralize phishing threats in real-time.
+> Now powered by **Next.js 15**, a real-time **WebSocket** scanning engine, **Gemini AI Core (Phyloc Intelligence)** heuristic analysis, **Celery** distributed task queues, and a GDPR/DPDP compliant legal framework —
 > PhishX delivers enterprise-grade URL threat intelligence wrapped in a stunning, fully-responsive production-ready interface optimized for mobile and desktop.
 
 </div>
@@ -80,9 +80,9 @@ Fsa<div align="center">
       <br/>
       <img src="https://img.icons8.com/fluency/64/000000/artificial-intelligence.png" width="52" alt="AI"/>
       <br/><br/>
-      <strong>🧠 AI-Driven Threat Detection</strong>
+      <strong>🧠 AI-Driven Threat Detection (V3)</strong>
       <br/><br/>
-      <sub>Custom ML model combined with a <strong>Zero-Latency Offline Top 10k Whitelist</strong>, a <strong>Dynamic Community Feedback loop</strong>, and deterministic cross-referencing against <strong>VirusTotal's Global Threat Intel API</strong>. Identifies zero-day phishing attempts with absolute confidence.</sub>
+      <sub>Custom Random Forest model utilizing <strong>20 Elite Features</strong> combined with a <strong>Zero-Latency Offline Top 10k Whitelist</strong>, a <strong>Dynamic Community Feedback loop</strong>, and deterministic cross-referencing against <strong>VirusTotal's Global Threat Intel API</strong>. Identifies zero-day phishing attempts with absolute confidence. Includes <strong>Phyloc Intelligence</strong> for deep heuristic insights via Gemini AI.</sub>
       <br/><br/>
     </td>
     <td align="center" width="33%">
@@ -227,7 +227,7 @@ graph TD
         I["🧠 Phishing Classifier\n(Trained ML Model)"]
         J["📁 Dataset\nphishing_site_urls.csv"]
         W["⚡ Zero-Latency\nTop 10k & Feedback Whitelist"]
-        XAI["🔬 xAI Heuristics\n(Zero-Day Detection)"]
+        XAI["🤖 Phyloc Intelligence\n(Gemini AI Core)"]
         VT["🦠 VirusTotal\nGlobal Intel API"]
         LC["🔗 LangChain & LangGraph\n(AI State Machine)"]
     end
@@ -283,9 +283,9 @@ PhishX/
 │   │   │   ├── users.py                 #   → User Profile & Settings
 │   │   │   ├── payments.py              #   → Subscription & Billing
 │   │   │   ├── admin.py                 #   → Admin Operations & Safety Locks
-│   │   │   ├── contact.py               #   → In-App Support Ticketing (NEW v2)
-│   │   │   ├── news.py                  #   → CyberPulse News Proxy (NEW v2)
-│   │   │   └── ws.py                    #   → WebSocket Telemetry (NEW v2)
+│   │   │   ├── contact.py               #   → In-App Support Ticketing (NEW v3)
+│   │   │   ├── news.py                  #   → CyberPulse News Proxy (NEW v3)
+│   │   │   └── ws.py                    #   → WebSocket Telemetry (NEW v3)
 │   │   ├── 📁 core/
 │   │   │   ├── config.py                #   → Pydantic Settings & Env Vars
 │   │   │   ├── security.py              #   → JWT, bcrypt, HttpOnly Cookies
@@ -298,7 +298,7 @@ PhishX/
 │   │   └── 📁 services/
 │   │       ├── feature_extractor.py     #   → ML Lexical Feature Pipeline
 │   │       ├── top_10k.py               #   → Trusted Domain Whitelist
-│   │       └── xai.py                   #   → Zero-Day Heuristic Analysis (NEW v2)
+│   │       └── phyloc.py                #   → Phyloc Engine (NEW v3)
 │   ├── worker.py                        # Async Celery Worker w/ Slack Webhooks
 │   └── Dockerfile                       # Backend Container Image
 │
@@ -322,7 +322,7 @@ PhishX/
 │   └── cd-pipeline.yml
 │
 ├── docker-compose.yml                   # Development Environment
-├── CHANGELOG_v2.md                      # v2.0.0 Full Release Notes
+├── CHANGELOG_v3.md                      # v3.0.0 Full Release Notes
 └── README.md
 ```
 

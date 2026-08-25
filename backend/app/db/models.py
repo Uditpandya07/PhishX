@@ -32,6 +32,7 @@ class User(Base):
     payments = relationship("Payment", back_populates="user")
     audit_logs = relationship("AuditLog", back_populates="user")
     feedbacks = relationship("Feedback", back_populates="user")
+    phyloc_lookups = relationship("PhylocLookup", back_populates="user", cascade="all, delete-orphan")
 
 
 class Scan(Base):
@@ -159,4 +160,19 @@ class TrialRecord(Base):
     trial_token = Column(String, unique=True, index=True, nullable=True)
     ip_address = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class PhylocLookup(Base):
+    __tablename__ = "phyloc_lookups"
+
+    id = Column(Uuid, primary_key=True, default=uuid.uuid4, index=True)
+    user_id = Column(Uuid, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    email = Column(String, index=True, nullable=False)
+    verdict = Column(String, nullable=False)
+    trust_score = Column(Integer, nullable=False)
+    risk_level = Column(String, nullable=False)
+    analysis_data = Column(JSON, nullable=False) # Stores the complete analysis details (signals, details, etc.)
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User", back_populates="phyloc_lookups")
 
