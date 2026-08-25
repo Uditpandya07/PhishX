@@ -43,3 +43,13 @@ One of our biggest challenges was the **False Positive Wall**. Major Indian serv
 PhishX started as a project but evolved into a **Fortress for the Common Person**. By solving these technical hurdles, we ensured that the final tool isn't just "cool"—it's **reliable**. It's built to stand between a user and a malicious link, providing protection that is as fast as it is beautiful.
 
 **Developed with persistence by [Udit Pandya].** 🛡️⚡🔥
+
+### 6. The 5-Second Infinite Hang (Gemini AI API)
+*   **The Problem:** The entire Admin Panel diagnostics scanner was hanging indefinitely. The frontend would spin forever, preventing other module tests from running.
+*   **The Root Cause:** A hardcoded backend dependency on the deprecated 'gemini-flash-latest' model caused the google-genai SDK to hang indefinitely without returning an error. Concurrently, a missing frontend timeout allowed this single failed request to block the entire pulse sequence.
+*   **The Solution:** We implemented a rigorous 5-second default timeout across all Axios diagnostics, isolated the AI Core to a custom 15-second timeout, and updated the backend to use the correct 'gemini-3.6-flash' model. This guaranteed sub-4-second resolutions and a resilient, non-blocking UI.
+
+### 7. The V3 Rollout and Phyloc Engine
+*   **The Problem:** The old V2 heuristics (xAI) were limited, and the Random Forest model was capped at 15 features, failing to capture subtle nuances in modern phishing attacks.
+*   **The Solution:** We architected the **Phyloc Intelligence Engine** for V3. We upgraded the ML model to extract **20 elite features** (achieving 87.17% accuracy) and deeply integrated Gemini AI Core for conversational insights and advanced heuristic analysis. We applied a premium design system refresh across the entire app, effectively completing the V3 evolution.
+
