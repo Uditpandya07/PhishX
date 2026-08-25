@@ -86,7 +86,18 @@ export default function TermsOfService({ onContactSupport }) {
         </section>
 
         <section>
-          <h3><FaFileContract /> 8. Severability & Modifications</h3>
+          <h3><FaEnvelope /> 8. Phyloc Email Scanner & API Usage</h3>
+          <p>
+            The Phyloc Email Scanner feature allows users to parse and analyze email content for malicious intent. 
+            By utilizing this feature (whether via the UI or the backend API), you warrant that you possess the lawful 
+            authorization to upload, parse, and analyze the contents of the submitted emails. You agree not to upload 
+            emails containing sensitive financial data, trade secrets, or unredacted confidential information. PhishX 
+            assumes no liability for the inadvertent exposure of sensitive data submitted through the Phyloc scanner.
+          </p>
+        </section>
+
+        <section>
+          <h3><FaFileContract /> 9. Severability & Modifications</h3>
           <p>
             If any provision of these Terms is deemed unlawful or unenforceable, that provision shall be severed, 
             and the remaining provisions will remain in full force and effect. We reserve the right to modify these 
