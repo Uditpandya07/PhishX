@@ -13,7 +13,7 @@ PhishX is a full-stack, AI-powered cybersecurity platform designed to detect mal
 ---
 
 ## 🔬 Detection Capabilities
-Our V2 Engine extracts **15 distinct mathematical features** from every URL, combined with a **Heuristic Override Layer** to catch highly deceptive attacks. 
+Our V3 Engine extracts **20 distinct elite mathematical features** from every URL, combined with a **Heuristic Override Layer** and **Phyloc Intelligence** to catch highly deceptive attacks. 
 
 The model successfully detects:
 1. **Subdomain Smuggling:** Catching fake roots (e.g., `secure.login.paypal.com.baddomain.net/verify`).
