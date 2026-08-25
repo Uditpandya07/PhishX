@@ -117,22 +117,21 @@ export default function NewsPage() {
               fontFamily: '"Orbitron", "Space Grotesk", sans-serif',
               letterSpacing: '2px',
               textTransform: 'uppercase',
-              textShadow: '0 0 20px rgba(236, 72, 153, 0.4)'
+              textShadow: '0 0 20px rgba(236, 72, 153, 0.4)',
+              lineHeight: 1
             }}>
               CYBER<span style={{ color: '#ec4899', fontWeight: 400 }}>pulse</span>
             </h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '5px' }}>
-              <span style={{ color: '#94a3b8', fontSize: '0.9rem', fontStyle: 'italic' }}>powered by</span>
-              <span style={{ 
-                fontSize: '1rem', 
-                fontWeight: 800, 
-                letterSpacing: '1px',
-                background: 'linear-gradient(90deg, #3b82f6, #4ade80)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent'
-              }}>
-                PhishX
-              </span>
+            <div style={{
+              fontSize: '14px',
+              color: '#94a3b8',
+              fontWeight: 500,
+              textAlign: 'right',
+              marginTop: '4px',
+              fontFamily: "'Inter', sans-serif",
+              letterSpacing: '0.2px'
+            }}>
+              by <span style={{color: '#ffffff', fontWeight: 700}}>Phish</span><span style={{color: '#4ade80', fontWeight: 700}}>X</span>
             </div>
           </div>
         </div>
