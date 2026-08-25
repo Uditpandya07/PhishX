@@ -4,7 +4,7 @@ from app.services.feature_extractor import extract_features
 def test_extract_features_length():
     url = "http://google.com"
     features = extract_features(url)
-    assert len(features) == 15
+    assert len(features) == 20
     # URL Length
     assert features[0] == len(url)
 
