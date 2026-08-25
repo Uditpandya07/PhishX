@@ -73,6 +73,5 @@ def extract_features(url):
     # 20. Tilde Presence (Common in legacy personal sites and phishing kits)
     features.append(1 if '~' in url else 0)
 
-    # The current phishing_model.pkl is trained on V2 (15 features). 
-    # Return only the first 15 features to maintain compatibility.
-    return features[:15]
+    # Return all 20 elite features for V3 classification
+    return features
