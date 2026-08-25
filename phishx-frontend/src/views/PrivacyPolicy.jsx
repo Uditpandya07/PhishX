@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { FaShieldAlt, FaUserShield, FaCookieBite, FaLock, FaGlobe, FaBalanceScale } from "react-icons/fa";
+import { FaShieldAlt, FaUserShield, FaCookieBite, FaLock, FaGlobe, FaBalanceScale, FaEnvelope } from "react-icons/fa";
 import "./Legal.css";
 
 export default function PrivacyPolicy() {
@@ -89,6 +89,18 @@ export default function PrivacyPolicy() {
             Data transit is protected via TLS 1.3 encryption. At-rest data is safeguarded using industry-standard 
             AES-256 encryption. We employ strict Role-Based Access Controls (RBAC) ensuring your scan history 
             remains isolated and inaccessible to unauthorized parties.
+          </p>
+        </section>
+
+        <section>
+          <h3><FaEnvelope /> 8. Phyloc Email Analysis Data Processing</h3>
+          <p>
+            When utilizing the Phyloc Email Scanner, users upload raw `.eml` files or paste email contents (headers, bodies). 
+            PhishX acts strictly as a transient processor for this data. The email content is parsed in-memory strictly for 
+            extracting observables (URLs, sender reputation, language models). <strong>We do not permanently store the body 
+            content of your emails.</strong> Only the extracted malicious indicators and calculated risk scores are retained 
+            in your dashboard history. You are solely responsible for ensuring you have consent to process the PII of the 
+            senders/recipients contained within the emails you submit.
           </p>
         </section>
 
