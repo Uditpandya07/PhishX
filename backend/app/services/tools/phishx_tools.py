@@ -1,4 +1,4 @@
-﻿"""
+"""
 PhishX LangChain Agent Tools
 =============================
 Decorated @tool functions that give the PhishX AI the ability to
@@ -33,16 +33,11 @@ def scan_url_ml(url: str) -> dict:
     Use this to get an objective ML-based threat score for any URL.
     """
     try:
-        import joblib
+        from app.core.ml_cache import get_ml_model
         import os
         from app.services.feature_extractor import extract_features
-        from app.core.config import settings
 
-        model_path = settings.MODEL_PATH
-        if not os.path.isabs(model_path):
-            model_path = os.path.join(os.getcwd(), model_path)
-
-        model = joblib.load(model_path)
+        model = get_ml_model()
         features = extract_features(url)
 
         classes = list(model.classes_)

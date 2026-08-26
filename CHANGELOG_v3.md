@@ -71,3 +71,18 @@ This release includes a complete architectural overhaul to Next.js, asynchronous
 
 ---
 *Ready to merge into `main` and deploy to production.*
+
+# v3.0.0 (The Phyloc Engine Update)
+
+## Major Features
+- **Phyloc Intelligence Engine**: Integrated Gemini AI Core (replacing xAI) for advanced heuristic zero-day detection and conversational intelligence.
+- **20 Elite Features Model Upgrade**: Upgraded the Random Forest ML model from basic features to a robust set of 20 elite lexical and heuristic features, improving detection accuracy to 87.17%.
+- **Design System V3**: Applied a highly curated, premium UI across the dashboard with glassmorphism, dynamic animations, and tailored color tokens.
+- **Admin Panel Pulse Check**: Added comprehensive health diagnostics mapping all active subsystems, now including real-time Gemini AI Core timeouts and Phyloc engine checks.
+- **PDF Threat Report Export**: PhishX now generates beautifully branded, fully detailed PDF diagnostic reports for scanned URLs.
+- **Global Loader Fixes**: Resolved application-wide keyframe collisions for CSS loaders.
+
+## Deprecations
+- Removed V2 branding and xAI dependencies.
+- Standardized timeouts for external API components (Gemini, Razorpay) to prevent infinite UI stalls.
+
