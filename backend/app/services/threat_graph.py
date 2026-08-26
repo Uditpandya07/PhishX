@@ -1,4 +1,4 @@
-﻿"""
+"""
 PhishX Threat Analysis Graph — LangGraph Edition
 ================================================
 A stateful multi-node threat analysis pipeline that replaces the monolithic
@@ -250,15 +250,10 @@ def ml_classifier_node(state: ThreatState) -> ThreatState:
     """
     normalized_url = state["normalized_url"]
     try:
-        import joblib
+        from app.core.ml_cache import get_ml_model
         from app.services.feature_extractor import extract_features
-        from app.core.config import settings
 
-        model_path = settings.MODEL_PATH
-        if not os.path.isabs(model_path):
-            model_path = os.path.join(os.getcwd(), model_path)
-
-        model = joblib.load(model_path)
+        model = get_ml_model()
         features = extract_features(normalized_url)
 
         classes = list(model.classes_)
