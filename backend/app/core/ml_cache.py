@@ -44,8 +44,8 @@ def get_ml_model():
                 raise HTTPException(status_code=500, detail="Security violation: ML model tampered.")
 
         try:
-            _cached_model = joblib.load(model_path)
-            logger.info("ML model successfully loaded and cached in memory.")
+            _cached_model = joblib.load(model_path, mmap_mode='r')
+            logger.info("ML model successfully loaded and cached in memory using mmap_mode='r'.")
         except Exception as e:
             logger.error(f"Failed to load ML model: {e}")
             raise HTTPException(status_code=500, detail="Failed to load ML model.")
