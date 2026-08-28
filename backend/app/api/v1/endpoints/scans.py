@@ -247,6 +247,30 @@ def _analyze_url_legacy(url: str, model_instance) -> dict:
 
 from app.api.limiter import scan_limiter
 
+import asyncio
+from app.core.task_store import TASK_STORE
+
+async def _run_scan_task(task_id: str, url: str, user_id: Optional[str]):
+    try:
+        from app.worker import process_url_scan
+        TASK_STORE[task_id] = {"status": "PROCESSING", "progress": 50}
+        
+        # Run CPU-bound ML task in a thread pool
+        result = await asyncio.to_thread(process_url_scan, url, user_id)
+        
+        TASK_STORE[task_id] = {
+            "status": "COMPLETED",
+            "progress": 100,
+            "result": result
+        }
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        TASK_STORE[task_id] = {
+            "status": "FAILED",
+            "error": str(e)
+        }
+
 @router.post("/predict", response_model=TaskResponse, dependencies=[Depends(scan_limiter)])
 async def predict_url(
     *,
@@ -263,29 +287,17 @@ async def predict_url(
         import uuid
         
         user_id = current_user.id if current_user else None
-        is_local = os.getenv("PHISHX_ENV", "development") == "development"
-        has_redis = "redis" in str(settings.REDIS_URL)
-        use_eager = True if has_redis and is_local else False
+        task_id = str(uuid.uuid4())
+        TASK_STORE[task_id] = {"status": "PENDING", "progress": 10}
         
-        print(f"DEBUG: is_local={is_local}, has_redis={has_redis}, REDIS_URL={settings.REDIS_URL}")
+        # Dispatch to native background thread instead of Celery
+        asyncio.create_task(_run_scan_task(task_id, scan_in.url, user_id))
         
-        if use_eager:
-            # Bypass Celery entirely if we are falling back to local sync mode
-            result = process_url_scan(scan_in.url, user_id)
-            return {
-                "task_id": str(uuid.uuid4()),
-                "status": "COMPLETED",
-                "message": "Scan completed immediately",
-                "result": result
-            }
-        else:
-            # Dispatch to celery queue
-            task = process_url_scan.delay(scan_in.url, user_id)
-            return {
-                "task_id": task.id,
-                "status": "QUEUED",
-                "message": "Scan dispatched to background worker"
-            }
+        return {
+            "task_id": task_id,
+            "status": "QUEUED",
+            "message": "Scan dispatched to background worker"
+        }
     except Exception as e:
         logger.error(f"Prediction Dispatch Error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal analysis engine error. Please try again later.")
@@ -305,11 +317,14 @@ async def advanced_predict_url(
         from app.worker import process_url_scan
         import uuid
         
-        # Dispatch to celery queue (advanced features handled by worker if Pro user)
-        # We pass user_id so worker can apply advanced logic
-        task = process_url_scan.delay(scan_in.url, current_user.id)
+        task_id = str(uuid.uuid4())
+        TASK_STORE[task_id] = {"status": "PENDING", "progress": 10}
+        
+        # Dispatch to native background thread instead of Celery
+        asyncio.create_task(_run_scan_task(task_id, scan_in.url, str(current_user.id)))
+        
         return {
-            "task_id": task.id,
+            "task_id": task_id,
             "status": "QUEUED",
             "message": "Advanced scan dispatched to background worker"
         }
