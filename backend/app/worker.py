@@ -1,26 +1,11 @@
 import asyncio
 import os
-from celery import Celery
 from app.core.config import settings
 import logging
 
 logger = logging.getLogger(__name__)
 
-# Initialize Celery app
-celery_app = Celery(
-    "worker",
-    broker=settings.REDIS_URL,
-    backend=settings.REDIS_URL
-)
-
-celery_app.conf.update(
-    task_serializer="json",
-    accept_content=["json"],
-    result_serializer="json",
-    timezone="UTC",
-    enable_utc=True,
-    task_always_eager=True if "redis" in settings.REDIS_URL and os.getenv("PHISHX_ENV", "development") == "development" else False
-)
+# The application now uses native FastAPI background tasks
 
 # Background task for ML prediction & XAI processing
 from typing import Optional
@@ -60,7 +45,6 @@ def get_domain_age_from_rdap(domain: str) -> str:
         logger.warning(f"RDAP lookup failed for {base_domain}: {e}")
     return "Unknown"
 
-@celery_app.task(name="process_url_scan")
 def process_url_scan(url: str, user_id: Optional[str] = None):
     """
     Perform deep ML and XAI analysis in the background.

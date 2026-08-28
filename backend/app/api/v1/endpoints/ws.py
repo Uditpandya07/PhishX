@@ -1,7 +1,5 @@
 import asyncio
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from celery.result import AsyncResult
-from app.worker import celery_app
 import logging
 import json
 
@@ -18,17 +16,24 @@ async def websocket_scan_endpoint(websocket: WebSocket, task_id: str):
         # Loop to check celery task status
         # In a massive production env, you'd use Redis Pub/Sub instead of polling, 
         # but this is perfect for the current scale and avoids extra overhead.
-        task_result = AsyncResult(task_id, app=celery_app)
+        from app.core.task_store import TASK_STORE
         while True:
-            if task_result.state == 'PENDING':
+            task_data = TASK_STORE.get(task_id)
+            if not task_data:
+                await asyncio.sleep(0.5)
+                continue
+                
+            state = task_data.get("status")
+            
+            if state == 'PENDING':
                 await websocket.send_json({"status": "PENDING", "progress": 10})
                 
-            elif task_result.state == 'STARTED':
+            elif state == 'PROCESSING':
                 await websocket.send_json({"status": "PROCESSING", "progress": 50})
                 
-            elif task_result.state == 'SUCCESS':
+            elif state == 'COMPLETED':
                 # Task finished successfully
-                result = task_result.result
+                result = task_data.get("result")
                 await websocket.send_json({
                     "status": "COMPLETED",
                     "progress": 100,
@@ -36,11 +41,11 @@ async def websocket_scan_endpoint(websocket: WebSocket, task_id: str):
                 })
                 break
                 
-            elif task_result.state == 'FAILURE':
+            elif state == 'FAILED':
                 # Task failed
                 await websocket.send_json({
                     "status": "FAILED",
-                    "error": str(task_result.info)
+                    "error": task_data.get("error", "Unknown error")
                 })
                 break
                 
