@@ -497,7 +497,7 @@ def get_threat_graph():
 # Public API — used by scans.py
 # ---------------------------------------------------------------------------
 
-def analyze_url_with_graph(url: str) -> dict:
+def analyze_url_with_graph(url: str, *args, **kwargs) -> dict:
     """
     Runs the full LangGraph threat pipeline and returns a result dict compatible
     with the existing analyze_url() return format used by scans.py.
