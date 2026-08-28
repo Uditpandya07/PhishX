@@ -155,7 +155,7 @@ def check_ai_health(
         start_time = time.time()
         # A simple lightweight call to verify auth and responsiveness
         response = client.models.generate_content(
-            model='gemini-1.5-flash',
+            model='gemini-3.6-flash',
             contents='Return the word OK',
         )
         latency = round((time.time() - start_time) * 1000)
