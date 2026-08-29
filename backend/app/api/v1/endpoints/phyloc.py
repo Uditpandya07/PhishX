@@ -16,7 +16,7 @@ phyloc_limiter = RateLimiter(requests_limit=20, window_seconds=60, resource_name
 router = APIRouter()
 
 # Basic email regex for early rejection of garbage input
-_EMAIL_RE = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+_EMAIL_RE = re.compile(r'^[^@\s]+@[^@\.\s]+(?:\.[^@\.\s]+)+$')
 
 class LookupRequest(BaseModel):
     email: str
