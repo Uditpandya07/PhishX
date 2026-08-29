@@ -35,9 +35,20 @@ export default function BulkView({ dashboard, token, fetchJson, refreshDashboard
     setBulkLoading(true);
 
     try {
-      // Bulk scanning is not yet implemented in PhishX backend.
-      // Show a friendly message instead of a silent 404.
-      setToast(`Bulk scan coming soon! For now, please scan emails individually using the search bar.`);
+      await fetchJson(`/api/v1/phyloc/bulk-jobs`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        data: { emails }
+      });
+      
+      setBulkInput("");
+      setToast(`Started bulk scan for ${emails.length} emails.`);
+      if (refreshDashboard) {
+        refreshDashboard();
+      }
     } catch (error) {
       setToast(error.message);
     } finally {

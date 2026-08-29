@@ -271,7 +271,7 @@ export default function PhylocPage() {
 
           {activeView === "bulk" && (
             <BulkView dashboard={dashboard} token={localStorage.getItem("phishx_token")} fetchJson={async (url, opts) => {
-              const res = await axios(url, opts);
+              const res = await axios(`${API_URL}${url}`, opts);
               return res.data;
             }} refreshDashboard={() => {
               axios.get(`${API_URL}/api/v1/phyloc/dashboard`)
