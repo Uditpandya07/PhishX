@@ -418,3 +418,56 @@ async def analyze_email_service(email: str):
     result["executionTimeMs"] = int((datetime.now() - start_time).total_seconds() * 1000)
     
     return result
+
+import logging
+logger = logging.getLogger(__name__)
+
+async def process_bulk_job(job_id: str, emails: list):
+    from app.db.session import SessionLocal
+    from app.db.models import PhylocBulkJob
+    import uuid
+    
+    db = SessionLocal()
+    try:
+        results = []
+        total = len(emails)
+        job_uuid = uuid.UUID(job_id)
+        
+        for i, email in enumerate(emails):
+            # Arbitrary short delay to not overwhelm external APIs
+            await asyncio.sleep(0.2)
+            
+            res = await analyze_email_service(email)
+            results.append(res)
+            
+            # Update job progress periodically
+            job = db.query(PhylocBulkJob).filter(PhylocBulkJob.id == job_uuid).first()
+            if job:
+                job.results = results
+                job.progress = int(((i + 1) / total) * 100)
+                job.summary = f"Processing {i + 1} of {total} addresses..."
+                db.commit()
+                
+        # Finalize job
+        final_job = db.query(PhylocBulkJob).filter(PhylocBulkJob.id == job_uuid).first()
+        if final_job:
+            high_risk = sum(1 for r in results if r["verdict"] in ["High Risk", "Critical Risk"])
+            caution = sum(1 for r in results if r["verdict"] == "Caution")
+            
+            final_job.status = "completed"
+            final_job.progress = 100
+            final_job.summary = f"{total} scanned, {high_risk} high/critical risk, {caution} caution."
+            db.commit()
+    except Exception as e:
+        logger.error(f"Background bulk job failed: {e}", exc_info=True)
+        try:
+            job_uuid = uuid.UUID(job_id)
+            job = db.query(PhylocBulkJob).filter(PhylocBulkJob.id == job_uuid).first()
+            if job:
+                job.status = "failed"
+                job.summary = "Scan failed due to an internal error."
+                db.commit()
+        except Exception:
+            pass
+    finally:
+        db.close()
