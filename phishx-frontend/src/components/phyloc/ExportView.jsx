@@ -44,7 +44,7 @@ export default function ExportView({ dashboard }) {
         <tr style="background-color: ${rowBg}; border-bottom: 1px solid #1e293b;">
           <td style="padding: 14px 16px; color: #f8fafc; font-family: monospace; font-size: 13px; word-break: break-all;">${escapeHtml(s.email)}</td>
           <td style="padding: 14px 16px; color: #94a3b8; font-size: 13px; white-space: nowrap;">${escapeHtml(s.createdAt)}</td>
-          <td style="padding: 14px 16px; font-weight: bold; color: ${isDanger ? '#ef4444' : isWarn ? '#eab308' : '#06b6d4'}; font-size: 14px; text-align: center;">${s.score !== undefined ? s.score : 'N/A'}</td>
+          <td style="padding: 14px 16px; font-weight: bold; color: ${isDanger ? '#ef4444' : isWarn ? '#eab308' : '#06b6d4'}; font-size: 14px; text-align: center;">${s.trustScore !== undefined ? s.trustScore : 'N/A'}</td>
           <td style="padding: 14px 16px; text-align: center;">
             <span style="background-color: ${statusBg}; color: #ffffff; padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; display: inline-block;">${escapeHtml(s.verdict)}</span>
           </td>
@@ -301,7 +301,7 @@ export default function ExportView({ dashboard }) {
       if (type === 'csv') {
         const headers = ['ID', 'Email', 'Score', 'Verdict', 'Summary', 'Timestamp'];
         const rows = lookups.map(l => 
-          `"${l.id}","${l.email}",${l.score},"${l.verdict}","${l.summary}","${l.createdAt}"`
+          `"${l.id}","${l.email}",${l.trustScore !== undefined ? l.trustScore : 'N/A'},"${l.verdict}","${l.summary || ''}","${l.createdAt}"`
         );
         content = [headers.join(','), ...rows].join('\n');
         filename += '.csv';
