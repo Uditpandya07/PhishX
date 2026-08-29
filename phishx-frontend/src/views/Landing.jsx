@@ -1,8 +1,16 @@
 "use client";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import Orb from "../components/Orb";
 
 export default function Landing({ onEnter }) {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onEnter();
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [onEnter]);
+
   return (
     <div
       onClick={onEnter}

@@ -1,14 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, field_validator
 from datetime import datetime
 import re
 
 from app.api.deps import get_db, get_optional_user
-from app.db.models import User, PhylocLookup
-from app.services.phyloc_service import analyze_email_service
+from app.db.models import User, PhylocLookup, PhylocBulkJob
+from app.services.phyloc_service import analyze_email_service, process_bulk_job
 from app.api.limiter import RateLimiter
-from typing import Optional
+from typing import Optional, List
 
 # 20 email lookups per minute per IP — prevents abuse without blocking legitimate use
 phyloc_limiter = RateLimiter(requests_limit=20, window_seconds=60, resource_name="phyloc_lookups")
@@ -16,7 +16,7 @@ phyloc_limiter = RateLimiter(requests_limit=20, window_seconds=60, resource_name
 router = APIRouter()
 
 # Basic email regex for early rejection of garbage input
-_EMAIL_RE = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+_EMAIL_RE = re.compile(r'^[^@\s]+@[^@\.\s]+(?:\.[^@\.\s]+)+$')
 
 class LookupRequest(BaseModel):
     email: str
@@ -32,6 +32,9 @@ class LookupRequest(BaseModel):
         if not _EMAIL_RE.match(v):
             raise ValueError('Invalid email address format')
         return v
+
+class BulkLookupRequest(BaseModel):
+    emails: List[str]
 
 @router.post("/lookups", dependencies=[Depends(phyloc_limiter)])
 async def create_lookup(
@@ -57,6 +60,37 @@ async def create_lookup(
     
     return {"lookup": analysis}
 
+@router.post("/bulk-jobs")
+async def create_bulk_job(
+    request: BulkLookupRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_user)
+):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Authentication required for bulk scanning")
+        
+    filtered_emails = [e.strip().lower() for e in request.emails if e and _EMAIL_RE.match(e.strip().lower())][:250]
+    if not filtered_emails:
+        raise HTTPException(status_code=400, detail="Provide at least one valid email address.")
+        
+    job = PhylocBulkJob(
+        user_id=current_user.id,
+        name=f"Bulk Scan {datetime.now().strftime('%Y-%m-%d')}",
+        status="processing",
+        progress=0,
+        summary=f"Initializing scan for {len(filtered_emails)} addresses...",
+        emails=filtered_emails,
+        results=[]
+    )
+    db.add(job)
+    db.commit()
+    db.refresh(job)
+    
+    background_tasks.add_task(process_bulk_job, str(job.id), filtered_emails)
+    
+    return {"job": {"id": str(job.id), "status": job.status, "summary": job.summary}}
+
 @router.get("/dashboard")
 def get_dashboard(
     db: Session = Depends(get_db),
@@ -64,8 +98,11 @@ def get_dashboard(
 ):
     if not current_user:
         lookups = []
+        bulk_jobs = []
     else:
         lookups = db.query(PhylocLookup).filter(PhylocLookup.user_id == current_user.id).order_by(PhylocLookup.timestamp.desc()).all()
+        bulk_jobs = db.query(PhylocBulkJob).filter(PhylocBulkJob.user_id == current_user.id).order_by(PhylocBulkJob.timestamp.desc()).all()
+
     
     formatted_lookups = []
     for l in lookups:
@@ -74,6 +111,19 @@ def get_dashboard(
         data["id"] = str(l.id)
         data["createdAt"] = l.timestamp.isoformat()
         formatted_lookups.append(data)
+        
+    formatted_bulk = []
+    for b in bulk_jobs:
+        formatted_bulk.append({
+            "id": str(b.id),
+            "name": b.name,
+            "status": b.status,
+            "progress": b.progress,
+            "summary": b.summary,
+            "emails": b.emails,
+            "results": b.results,
+            "createdAt": b.timestamp.isoformat()
+        })
         
     latest_lookup = formatted_lookups[0] if formatted_lookups else None
     
@@ -132,6 +182,7 @@ def get_dashboard(
     
     return {
         "lookups": formatted_lookups,
+        "bulkJobs": formatted_bulk,
         "latestLookup": latest_lookup,
         "metrics": metrics
     }

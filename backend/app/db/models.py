@@ -33,6 +33,7 @@ class User(Base):
     audit_logs = relationship("AuditLog", back_populates="user")
     feedbacks = relationship("Feedback", back_populates="user")
     phyloc_lookups = relationship("PhylocLookup", back_populates="user", cascade="all, delete-orphan")
+    phyloc_bulk_jobs = relationship("PhylocBulkJob", back_populates="user", cascade="all, delete-orphan")
 
 
 class Scan(Base):
@@ -175,4 +176,19 @@ class PhylocLookup(Base):
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User", back_populates="phyloc_lookups")
+
+class PhylocBulkJob(Base):
+    __tablename__ = "phyloc_bulk_jobs"
+
+    id = Column(Uuid, primary_key=True, default=uuid.uuid4, index=True)
+    user_id = Column(Uuid, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    name = Column(String, nullable=False)
+    status = Column(String, default="processing") # processing, completed, failed
+    progress = Column(Integer, default=0)
+    summary = Column(String, nullable=True)
+    emails = Column(JSON, nullable=False)
+    results = Column(JSON, default=list)
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User", back_populates="phyloc_bulk_jobs")
 
