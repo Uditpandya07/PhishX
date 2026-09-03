@@ -152,17 +152,33 @@ def check_ai_health(
         from google import genai
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
         
-        start_time = time.time()
-        # A simple lightweight call to verify auth and responsiveness
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents='Return the word OK',
-        )
-        latency = round((time.time() - start_time) * 1000)
-        
+        candidate_models = [
+            getattr(settings, "GEMINI_MODEL", "gemini-3.5-flash-lite"),
+            getattr(settings, "GEMINI_FALLBACK_MODEL", "gemini-3.7-flash"),
+            "gemini-flash-latest",
+        ]
+        candidate_models = list(dict.fromkeys(candidate_models))
+
+        for model_name in candidate_models:
+            try:
+                start_time = time.time()
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents='Return the word OK',
+                )
+                latency = round((time.time() - start_time) * 1000)
+                return {
+                    "status": "healthy",
+                    "latency_ms": latency,
+                    "model": model_name,
+                }
+            except Exception as model_err:
+                logger.warning(f"AI diagnostic pulse failed for model {model_name}: {model_err}")
+                continue
+
         return {
-            "status": "healthy",
-            "latency_ms": latency,
+            "status": "unhealthy",
+            "message": "All Gemini AI candidate models failed during pulse check."
         }
     except Exception as e:
         logger.error(f"AI health check failed: {e}", exc_info=True)

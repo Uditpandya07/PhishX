@@ -70,5 +70,13 @@
     "dateString": "July 2026",
     "title": "Ready for the World",
     "content": "Final preparations for a wider release. We conducted final security hardening checks, ensured our database schema evolution was bulletproof using Alembic, and verified that our API endpoints were securely mapped. We also began prototyping new cinematic animations to give the PhishX brand an even more striking visual identity."
+  },
+  {
+    "id": "aug-2026",
+    "month": "August",
+    "year": "2026",
+    "dateString": "August 2026",
+    "title": "The V3 Evolution & Phyloc Intelligence",
+    "content": "August marked a monumental shift into our V3 enterprise architecture. We architected the Phyloc Intelligence Engine with 20 elite ML features and bulk email scanning capabilities. We also introduced a LangGraph-powered Live AI Chat Analyst, completely redesigned the browser extension for Manifest V3 with real-time DOM link defanging, and achieved true SaaS readiness by integrating Razorpay subscriptions and a strict 15-day free trial engine."
   }
 ]

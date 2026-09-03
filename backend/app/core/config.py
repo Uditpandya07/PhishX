@@ -63,8 +63,10 @@ class Settings(BaseSettings):
     # OpenAI API Key
     OPENAI_API_KEY: Optional[str] = None
 
-    # Gemini API Key
+    # Gemini API Configuration
     GEMINI_API_KEY: Optional[str] = None
+    GEMINI_MODEL: str = "gemini-3.5-flash-lite"
+    GEMINI_FALLBACK_MODEL: str = "gemini-3.7-flash"
 
     # ─── LangSmith Observability (free at smith.langchain.com) ───────────────
     LANGCHAIN_API_KEY: Optional[str] = None

@@ -39,17 +39,36 @@ One of our biggest challenges was the **False Positive Wall**. Major Indian serv
 
 ---
 
+### 6. The 5-Second Infinite Hang (Gemini AI API)
+*   **The Problem:** The entire Admin Panel diagnostics scanner was hanging indefinitely. The frontend would spin forever, preventing other module tests from running.
+*   **The Root Cause:** A hardcoded backend dependency on a deprecated Gemini model caused the google-genai SDK to hang indefinitely. A missing frontend timeout allowed this single failed request to block the entire pulse sequence.
+*   **The Solution:** We implemented a rigorous 5-second default timeout across all Axios diagnostics, isolated the AI Core to a custom 15-second timeout, and dynamically resolved the model fallbacks. This guaranteed a resilient, non-blocking UI.
+
+---
+
+## 🚀 August Milestone: The V3 Evolution & Phyloc Intelligence
+
+August marked a monumental shift for PhishX as we transitioned into a true enterprise-grade V3 architecture, deploying massive new feature sets and integrating the **Phyloc** ecosystem.
+
+### 1. The Phyloc Engine & Bulk Scanning
+*   **The Problem:** Enterprise users needed to scan hundreds of URLs and emails at once, but processing them sequentially timed out HTTP requests. Furthermore, our V2 heuristics were limited.
+*   **The Solution:** We architected the **Phyloc Intelligence Engine**. We upgraded the ML model to extract **20 elite features** (achieving 87.17% accuracy) and integrated Gemini AI Core for deep conversational insights. To solve the timeout issue, we built an asynchronous `PhylocBulkJob` pipeline using PostgreSQL and FastAPI background tasks, allowing users to scan up to 250 emails at zero-latency while tracking progress in real-time.
+
+### 2. LangGraph-Powered Live AI Analyst
+*   **The Challenge:** Users wanted to understand *why* a URL was flagged without reading raw JSON metadata.
+*   **The Solution:** We built a fully-featured **Live AI Chat** widget directly into the Scan Panel. Powered by LangChain, LangGraph, and Gemini 2.5 Flash, the bot orchestrates stateful threat reasoning and can query VirusTotal or analyze DOM structures on the fly, acting as a real-time cybersecurity analyst.
+
+### 3. MV3 Browser Extension Redesign
+*   **The Evolution:** We entirely rewrote the browser extension to comply with Manifest V3. We introduced real-time DOM link defanging (mutating malicious links before the user can click them), a persistent background service worker, and a polished Options UI allowing users to configure custom risk sensitivity thresholds.
+
+### 4. SaaS Readiness & Security Hardening
+*   **The Foundation:** Transitioning from a free tool to a SaaS required airtight security and billing.
+*   **The Execution:** We fully integrated Razorpay for live plan subscriptions and built a strict 15-day free trial engine verified via device UUIDs and OTPs. On the security front, we adopted GitHub Advanced Security, resolved CodeQL alerts for insecure OTP randomness, deployed an RFC 9116 compliant `security.txt`, and patched critical ReDoS (Regular Expression Denial of Service) vulnerabilities in our email parsing pipelines.
+
+---
+
 ## 🚀 Vision: Why This Matters
 PhishX started as a project but evolved into a **Fortress for the Common Person**. By solving these technical hurdles, we ensured that the final tool isn't just "cool"—it's **reliable**. It's built to stand between a user and a malicious link, providing protection that is as fast as it is beautiful.
 
 **Developed with persistence by [Udit Pandya].** 🛡️⚡🔥
-
-### 6. The 5-Second Infinite Hang (Gemini AI API)
-*   **The Problem:** The entire Admin Panel diagnostics scanner was hanging indefinitely. The frontend would spin forever, preventing other module tests from running.
-*   **The Root Cause:** A hardcoded backend dependency on the deprecated 'gemini-flash-latest' model caused the google-genai SDK to hang indefinitely without returning an error. Concurrently, a missing frontend timeout allowed this single failed request to block the entire pulse sequence.
-*   **The Solution:** We implemented a rigorous 5-second default timeout across all Axios diagnostics, isolated the AI Core to a custom 15-second timeout, and updated the backend to use the correct 'gemini-3.6-flash' model. This guaranteed sub-4-second resolutions and a resilient, non-blocking UI.
-
-### 7. The V3 Rollout and Phyloc Engine
-*   **The Problem:** The old V2 heuristics (xAI) were limited, and the Random Forest model was capped at 15 features, failing to capture subtle nuances in modern phishing attacks.
-*   **The Solution:** We architected the **Phyloc Intelligence Engine** for V3. We upgraded the ML model to extract **20 elite features** (achieving 87.17% accuracy) and deeply integrated Gemini AI Core for conversational insights and advanced heuristic analysis. We applied a premium design system refresh across the entire app, effectively completing the V3 evolution.
 
