@@ -311,4 +311,4 @@ def handle_chat_message(
             continue
 
     logger.error("All Gemini AI candidate models failed to handle chat message.")
-    return "I'm having trouble analyzing the threat right now. Please try again later."
+    return "I'm having trouble analyzing the threat right now. Please try again later."

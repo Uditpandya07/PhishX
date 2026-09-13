@@ -153,8 +153,9 @@ def check_ai_health(
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
         
         candidate_models = [
-            getattr(settings, "GEMINI_MODEL", "gemini-3.5-flash-lite"),
-            getattr(settings, "GEMINI_FALLBACK_MODEL", "gemini-3.7-flash"),
+            "gemini-3.6-flash",
+            getattr(settings, "GEMINI_MODEL", "gemini-3.6-flash"),
+            getattr(settings, "GEMINI_FALLBACK_MODEL", "gemini-1.5-flash"),
             "gemini-flash-latest",
         ]
         candidate_models = list(dict.fromkeys(candidate_models))
@@ -175,7 +176,6 @@ def check_ai_health(
             except Exception as model_err:
                 logger.warning(f"AI diagnostic pulse failed for model {model_name}: {model_err}")
                 continue
-
         return {
             "status": "unhealthy",
             "message": "All Gemini AI candidate models failed during pulse check."
